@@ -15,6 +15,9 @@ homeassistant:
 
 Then copy either bin/eesolar_monitor_only.yaml -or- bin/eesolar.yaml into mypackages/
 
+Edit the yaml file to apply your Envoy's IP local address in the various rest commands.
+(-Or-, you can use https://envoy.local/ but that provides an opportunity for DNS errors, so I use the direct IP address.)
+
 For
 
   * monitor only: 
@@ -27,6 +30,10 @@ For
     * copy www/halelm.html file to your /config/www folder, and 
     * copy the .storage/lovelace.dashboard_solar to your /config/.storage folder
     * copy the .storage/local_calendar.utility_tou_holidays.ics to .storage
+
+Two secrets are needed:
+  * one for the Envoy, which you obtain using your Enlighten logon at https://entrez.enphaseenergy.com/
+  * one for Home Assistant itself, so that the monitor web page (www/halelm.html) can call back into HA for monitoring data.
 
 
 
