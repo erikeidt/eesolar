@@ -2,15 +2,17 @@
 # Build from the git repository
 #
 
-TARG=../bin/eesolar.yaml
-echo the targ is $TARG 
+MONITOR_ONLY_TARGET=../bin/eesolar_monitor_only.yaml
+FULL_TARGET=../bin/eesolar.yaml
 
-cat yaml/helpers/* > $TARG
-echo >> $TARG
-echo "automation:" >> $TARG
-cat yaml/tracking/* >> $TARG
-echo >> $TARG
-cat yaml/rules/* >> $TARG 
+#echo the targ is $MONITOR_ONLY_TARGET 
 
-cp ../bin/eesolar.yaml /config/mypackages/
+cat yaml/helpers/* > $MONITOR_ONLY_TARGET
+echo >> $MONITOR_ONLY_TARGET
+
+echo "automation:" >> $MONITOR_ONLY_TARGET
+cat yaml/tracking/* >> $MONITOR_ONLY_TARGET
+
+cp $MONITOR_ONLY_TARGET $FULL_TARGET
+cat yaml/rules/* >> $FULL_TARGET
 

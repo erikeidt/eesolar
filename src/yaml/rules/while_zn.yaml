@@ -130,6 +130,8 @@
         metadata: {}
         data: "{{ tariff }}"
         response_variable: response
+      - variables:
+          attempts: "{{ attempts + 1 }}"
       while:
       - condition: template
         value_template: "{{ \n  attempts == 0 or \n  response.status | int(0) != 200
