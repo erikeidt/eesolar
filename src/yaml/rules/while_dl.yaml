@@ -1,0 +1,20 @@
+- alias: EE While DL
+  id: ee_while_dl
+  description: ""
+  triggers:
+  - trigger: time
+    at: "20:02:00"
+  conditions: []
+  actions:
+  - action: automation.turn_off
+    metadata: {}
+    data:
+      stop_actions: false
+    target:
+      entity_id: "{{ this.entity_id }}"
+  - action: automation.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: automation.ee_while_cp
+  mode: single

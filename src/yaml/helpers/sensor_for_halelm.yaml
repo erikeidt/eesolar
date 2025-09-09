@@ -1,0 +1,22 @@
+template:
+  - sensor:
+    - name: "EE Envoy Observed Large"
+      unique_id: "ee_envoy_observed_large"
+      state: "on"
+      attributes:
+        pc: "{{ states('input_datetime.ee_envoy_pc_reporting_time') }}"
+        sp: "{{ states('input_number.ee_observed_solar_production') | float }}"
+        hl: "{{ states('input_number.ee_observed_home_load') | float }}"
+        tc: "{{ states('input_number.ee_observed_total_consumption') | float }}"
+        nc: "{{ states('input_number.ee_observed_net_consumption') | float }}"
+        bt: "{{ states('input_datetime.ee_envoy_battery_reporting_time') }}"
+        bf: "{{ states('input_number.ee_observed_battery_flow') | float }}"
+        bc: "{{ states('input_number.ee_observed_charge') | float | round(2) }}"
+        ba: "{{ states('input_text.ee_observed_batteries') }}"
+        sc: "{{ states('input_text.ee_observed_tariff_schedule') }}"
+        gs: "{{ states('input_text.ee_observed_grid_status') }}"
+        vs: "{{ states('input_text.ee_observed_vers') }}"
+    - name: "EE HAJT"
+      unique_id: "ee_hajt"
+      state: !secret hajt 
+

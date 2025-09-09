@@ -1,0 +1,17 @@
+- alias: EE Read Envoy Tariff
+  id: ee_read_envoy_tariff
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  conditions: []
+  actions:
+  - action: rest_command.read_envoy_tariff
+    metadata: {}
+    data: {}
+    response_variable: response
+  - action: script.ee_decode_tariff
+    metadata: {}
+    data:
+      response: '{{ response }}'
+  mode: single

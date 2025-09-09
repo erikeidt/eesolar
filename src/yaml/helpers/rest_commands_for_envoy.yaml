@@ -1,0 +1,107 @@
+rest_command:
+  read_pa_sensor:
+    url: "http://192.168.68.107/json?live=true"
+  read_envoy_xml_info:
+#   url: "https://envoy.local/info.xml"
+    url: "https://192.168.68.102/info.xml"
+    method: get
+    verify_ssl: false
+    timeout: 60 
+    headers:
+      Authorization: !secret enjt
+      Accept: "application/xml"
+  read_envoy_relay:
+#   url: "https://envoy.local/ivp/ensemble/relay"
+    url: "https://192.168.68.102/ivp/ensemble/relay"
+    method: get
+    verify_ssl: false
+    timeout: 45 
+    headers:
+      Authorization: !secret enjt
+  read_enovy_basic:
+#   url: "https://envoy.local/production.json"
+    url: "https://192.168.68.102/production.json"
+    method: get
+    verify_ssl: false
+    timeout: 45
+    headers:
+      Authorization: !secret enjt
+  read_envoy_batteries:
+#   url: "https://envoy.local/ivp/ensemble/power"
+    url: "https://192.168.68.102/ivp/ensemble/power"
+    method: get
+    verify_ssl: false
+    timeout: 45
+    headers:
+      Authorization: !secret enjt
+  envoy_enable_livedata_stream:
+#   url: "https://envoy.local/ivp/livedata/stream"
+    url: "https://192.168.68.102/ivp/livedata/stream"
+    method: post 
+    verify_ssl: false
+    timeout: 45
+    headers:
+      Authorization: !secret enjt
+    payload: '{"enable":1}'
+  envoy_disable_livedata_stream:
+#   url: "https://envoy.local/ivp/livedata/stream"
+    url: "https://192.168.68.102/ivp/livedata/stream"
+    method: post 
+    verify_ssl: false
+    timeout: 45
+    headers:
+      Authorization: !secret enjt
+    payload: '{"enable":0}'
+  read_envoy_livedata_status:
+#   url: "https://envoy.local/ivp/livedata/status"
+    url: "https://192.168.68.102/ivp/livedata/status"
+    method: get
+    verify_ssl: false
+    timeout: 45
+    headers:
+      Authorization: !secret enjt
+  read_envoy_stream:
+#   url: "https://envoy.local/stream/meter"
+    url: "https://192.168.68.102/stream/meter"
+    method: get
+    verify_ssl: false
+    timeout: 6 
+    headers:
+      Authorization: !secret enjt
+  read_envoy_tariff:
+#   url: "https://envoy.local/admin/lib/tariff.json"
+    url: "https://192.168.68.102/admin/lib/tariff.json"
+    method: get
+    verify_ssl: false
+    timeout: 45 
+    headers:
+      Authorization: !secret enjt
+  send_envoy_param_tariff:
+#   url: "https://envoy.local/admin/lib/tariff.json"
+    url: "https://192.168.68.102/admin/lib/tariff.json"
+    method: post
+    verify_ssl: false
+    timeout: 60 
+    content_type: "application/json"
+    headers:
+      Authorization: !secret enjt
+    payload: >-
+      {{
+        '{"tariff":{"currency":{"code":"USD"},"logger":"mylogger","date":"' +
+        time | string +
+        '","storage_settings":{"mode":"economy","operation_mode_sub_type":"","reserved_soc":' +
+        reserve | round(1) | string +
+        ',"very_low_soc":25,"charge_from_grid":false,"date":"' +
+        time | string +
+        '","opt_schedules":false},"single_rate":{"rate":0.25,"sell":0.25},' +
+        '"seasons":[{"id":"all_year_long","start":"1/1",' +
+        '"days":[{"id":"all_days","days":"Mon,Tue,Wed,Thu,Fri,Sat,Sun",' +
+        '"must_charge_start":0,"must_charge_duration":0,"must_charge_mode":"CP","peak_rule":"' +
+        peak_rule +
+        '","enable_discharge_to_grid":false,"periods":[{"id":"filler","start":0,"rate":0.25},{"id":"peak-1_","start":' +
+        peak_start | int | string +
+        ',"rate":0.5},{"id":"filler","start":' +
+        peak_end | int | string +
+        ',"rate":0.25}]}]}]}}'
+      }}
+
