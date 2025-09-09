@@ -23,17 +23,20 @@ For
   * monitor only: 
     * copy eesolar_monitor_only.yaml to mypackages/
     * copy www/halelm.html file to your /config/www folder, and 
-    * copy the .storage/lovelace.dashboard_solar to your /config/.storage folder
+    * copy the .storage/lovelace.dashboard_solar into a new empty dashboard
 
   * monitor+controller:
     * copy eesolar.yaml to mypackages/
     * copy www/halelm.html file to your /config/www folder, and 
-    * copy the .storage/lovelace.dashboard_solar to your /config/.storage folder
-    * copy the .storage/local_calendar.utility_tou_holidays.ics to .storage
+    * copy the .storage/lovelace.dashboard_solar into a new empty dashboard
+    * copy the .storage/local_calendar.utility_tou_holidays.ics into a new empty calendar
 
-Two secrets are needed:
+Two secret tokens are needed:
   * one for the Envoy, which you obtain using your Enlighten logon at https://entrez.enphaseenergy.com/
   * one for Home Assistant itself, so that the monitor web page (www/halelm.html) can call back into HA for monitoring data.
+
+(Note that the dashboard and calendar are best imported into a new empty dashboard or a new empty calendar (respectively) rather than copied as files,
+since that doesn't seem to create the proper entities.)
 
 
 
