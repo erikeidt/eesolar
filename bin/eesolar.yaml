@@ -546,8 +546,8 @@ automation:
             metadata: {}
             data:
               message: |-
-              {{ now().strftime("%m/%d %H:%M:%S") }}
-              Enabling Stream 
+                {{ now().strftime("%m/%d %H:%M:%S") }}
+                Enabling Stream 
           - delay:
               hours: 0
               minutes: 1
