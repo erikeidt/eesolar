@@ -15,6 +15,8 @@
       hours: 0
       minutes: 0
       seconds: 5
+  - trigger: time
+    at: "16:45:00"
   conditions: []
   actions:
   - variables:
@@ -23,7 +25,7 @@
       dl_time: |-
         {% set yetz = now () %}
         {% set hr = yetz.hour * 100 + yetz.minute %}
-        {{ hr > 1724 }}
+        {{ hr >= 1644 }}
       observed_tariff: "{{ states('input_text.ee_observed_tariff') }}"
       observed_production: "{{ states('input_number.ee_observed_solar_production') }}"
   - if:

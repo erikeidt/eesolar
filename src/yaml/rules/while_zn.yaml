@@ -26,7 +26,8 @@
       hours: 0
       minutes: 0
       seconds: 45
-  - trigger: time
+  - alias: Ready for DL
+    trigger: time
     at: "16:45:00"
   conditions: []
   actions:
@@ -80,7 +81,7 @@
         - condition: template
           value_template: "{{ workday }}"
         - condition: time
-          after: "16:45:00"
+          after: "16:44:00"
       then:
       - action: automation.turn_on
         metadata: {}
