@@ -50,6 +50,7 @@ input_number:
     max: 200.0
     mode: "box"
     step: 1.0
+    unit_of_measurement: "%"
     name: "EE Observed Charge %"
     initial: 0
   ee_observed_tariff_battery_reserve:
@@ -57,6 +58,7 @@ input_number:
     max: 200.0
     mode: "box"
     step: 1.0
+    unit_of_measurement: "%"
     name: "EE Observed Tariff Battery Reserve %"
     initial: 0
   ee_observed_envoy_read_battery_latency:
@@ -109,6 +111,25 @@ input_datetime:
     has_date: false
     name: "EE Envoy Battery Reporting Time"
     initial: 00:00
+
+template:
+  - sensor:
+    - name: "EE Desired Battery Reserve"
+      unique_id: "ee_desired_battery_reserve"
+      unit_of_measurement: "%"
+      state: |-
+        {% set N=states('input_number.ee_observed_charge')|int %}
+        {{
+          (
+            N if N < 50
+            else N-1 if N < 80
+            else N-2 if N < 89
+            else 
+            [87, 87, 88, 89, 90, 91, 92, 93, 94, 95, 95, 95][N-89]
+          )
+          | float
+        }}
+
 rest_command:
   read_pa_sensor:
     url: "http://192.168.68.107/json?live=true"
@@ -346,6 +367,21 @@ template:
     - name: "EE HAJT"
       unique_id: "ee_hajt"
       state: !secret hajt 
+    - name: "EE Desired Battery Reserve"
+      unique_id: "ee_desired_battery_reserve"
+      unit_of_measurement: "%"
+      state: |-
+        {% set N=states('input_number.ee_observed_charge')|int %}
+        {{
+          (
+            N if N < 50
+            else N-1 if N < 80
+            else N-2 if N < 89
+            else 
+            [87, 87, 88, 89, 90, 91, 92, 93, 94, 95, 95, 95][N-89]
+          )
+          | float
+        }}
 
 
 automation:
@@ -806,7 +842,7 @@ automation:
         (states('input_text.ee_observed_tariff') == 'CP' or
           states('input_text.ee_observed_tariff') == 'ZN' or 
           states('input_text.ee_observed_tariff') == 'DL') and 
-        states('input_number.ee_observed_solar_production') | float >= 1400000 and
+        states('input_number.ee_observed_solar_production') | float >= 450000 and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -818,7 +854,8 @@ automation:
   conditions: []
   actions:
   - variables:
-      new_reserve: "{{ (states('input_number.ee_observed_charge') | float - 4) | int }}"
+#     new_reserve: "{{ (states('input_number.ee_observed_charge') | float - 4) | int }}"
+      new_reserve: "{{ states('sensor.ee_desired_battery_reserve') | int }}"
       workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
       dl_time: |-
         {% set yetz = now () %}
@@ -939,7 +976,7 @@ automation:
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and 
-        states('input_number.ee_observed_tariff_battery_reserve') | float <= states('input_number.ee_observed_charge') | float - 5 and
+        states('input_number.ee_observed_tariff_battery_reserve') | float != states('sensor.ee_desired_battery_reserve') | float and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -951,7 +988,7 @@ automation:
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
-        states('input_number.ee_observed_solar_production') | int < 1250000 and
+        states('input_number.ee_observed_solar_production') | int < 250000 and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -981,7 +1018,7 @@ automation:
               "peak_rule": "ZN",
               "peak_start": 480,
               "peak_end": 1202,
-              "reserve": (states('input_number.ee_observed_charge') | float - 4) | int
+              "reserve": states('sensor.ee_desired_battery_reserve') | int
             }
           }}
     else:

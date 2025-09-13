@@ -50,6 +50,7 @@ input_number:
     max: 200.0
     mode: "box"
     step: 1.0
+    unit_of_measurement: "%"
     name: "EE Observed Charge %"
     initial: 0
   ee_observed_tariff_battery_reserve:
@@ -57,6 +58,7 @@ input_number:
     max: 200.0
     mode: "box"
     step: 1.0
+    unit_of_measurement: "%"
     name: "EE Observed Tariff Battery Reserve %"
     initial: 0
   ee_observed_envoy_read_battery_latency:
@@ -109,3 +111,22 @@ input_datetime:
     has_date: false
     name: "EE Envoy Battery Reporting Time"
     initial: 00:00
+
+template:
+  - sensor:
+    - name: "EE Desired Battery Reserve"
+      unique_id: "ee_desired_battery_reserve"
+      unit_of_measurement: "%"
+      state: |-
+        {% set N=states('input_number.ee_observed_charge')|int %}
+        {{
+          (
+            N if N < 50
+            else N-1 if N < 80
+            else N-2 if N < 89
+            else 
+            [87, 87, 88, 89, 90, 91, 92, 93, 94, 95, 95, 95][N-89]
+          )
+          | float
+        }}
+

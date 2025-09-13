@@ -7,7 +7,7 @@
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and 
-        states('input_number.ee_observed_tariff_battery_reserve') | float <= states('input_number.ee_observed_charge') | float - 5 and
+        states('input_number.ee_observed_tariff_battery_reserve') | float != states('sensor.ee_desired_battery_reserve') | float and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -19,7 +19,7 @@
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
-        states('input_number.ee_observed_solar_production') | int < 1250000 and
+        states('input_number.ee_observed_solar_production') | int < 250000 and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -49,7 +49,7 @@
               "peak_rule": "ZN",
               "peak_start": 480,
               "peak_end": 1202,
-              "reserve": (states('input_number.ee_observed_charge') | float - 4) | int
+              "reserve": states('sensor.ee_desired_battery_reserve') | int
             }
           }}
     else:
