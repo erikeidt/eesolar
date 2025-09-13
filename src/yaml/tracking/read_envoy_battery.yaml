@@ -42,9 +42,7 @@
         - action: notify.persistent_notification
           metadata: {}
           data:
-            message: |-
-              {{ now().strftime("%m/%d %H:%M:%S") }}
-              {{ response }}
+            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Read Battery -- {{ response.status | default(response) }}'
         - stop: Rest command failure
           error: true
           enabled: false
