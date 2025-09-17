@@ -19,19 +19,17 @@ template:
     - name: "EE HAJT"
       unique_id: "ee_hajt"
       state: !secret hajt 
+    - name: "EE Desired Battery Reserve - Solar Only"
+      unique_id: "ee_desired_battery_reserve_solar_only"
+      unit_of_measurement: "%"
+      state: |-
+        {% set S=states('input_number.ee_observed_solar_production') | float / 1000 %}
+        {% set SN=max(-2,(S-1300)/600) %}
+        {{ ((98-SN) / 5) | round(1) * 5 }}
     - name: "EE Desired Battery Reserve"
       unique_id: "ee_desired_battery_reserve"
       unit_of_measurement: "%"
       state: |-
-        {% set N=states('input_number.ee_observed_charge')|int %}
-        {{
-          (
-            N if N < 50
-            else N-1 if N < 80
-            else N-2 if N < 89
-            else 
-            [87, 87, 88, 89, 90, 91, 92, 93, 94, 95, 95, 95][N-89]
-          )
-          | float
-        }}
+        {% set B=states('input_number.ee_observed_charge') | float %}
+        {{ (min(B-0.5,states('sensor.ee_desired_battery_reserve_solar_only') | float) / 5) | round(1) * 5 }}
 

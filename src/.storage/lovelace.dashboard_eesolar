@@ -1,7 +1,7 @@
 {
   "version": 1,
   "minor_version": 1,
-  "key": "lovelace.dashboard_solar",
+  "key": "lovelace.ee_solar",
   "data": {
     "config": {
       "views": [
@@ -118,6 +118,40 @@
               "cards": [
                 {
                   "type": "heading",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  },
+                  "heading": "Climbing Reserve"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.ee_desired_battery_reserve",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Desired Reserve",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  },
+                  "state_content": "solar_only"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.ee_desired_battery_reserve_solar_only",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Desired Solar Only"
+                }
+              ],
+              "column_span": 5
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
                   "heading": "Observed Tariff",
                   "heading_style": "title",
                   "grid_options": {
@@ -152,6 +186,13 @@
                   "features_position": "bottom",
                   "vertical": false,
                   "name": "Envoy Firmware"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.ee_solar_is_tou_workday",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Workday"
                 },
                 {
                   "type": "tile",
@@ -241,7 +282,7 @@
               "cards": [
                 {
                   "type": "markdown",
-                  "content": "<a href=\"http://ehadev.local:8123/local/halelm.html?{{states('sensor.ee_hajt')|urlencode}}\" target=\"_blank\">Open Solar Monitor</a>",
+                  "content": "<a href=\"http://eha5.local:8123/local/halelm.html?{{states('sensor.ee_hajt')|urlencode}}\" target=\"_blank\">Open Solar Monitor</a>",
                   "title": "Monitor",
                   "text_only": true
                 }

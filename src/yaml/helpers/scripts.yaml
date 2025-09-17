@@ -12,7 +12,7 @@ script:
               tariff: "{{ content.tariff }}"
               storage_settings: "{{ tariff.storage_settings }}"
               mode1: "{{ storage_settings.mode }}"
-              reserved_soc: "{{ storage_settings.reserved_soc }}"
+              reserved_soc: "{{ storage_settings.reserved_soc | round(1) }}"
               shutoff: "{{ storage_settings.very_low_soc }}"
               seasons: "{{ tariff.seasons }}"
               days: "{{ seasons[0].days }}"
@@ -21,8 +21,7 @@ script:
               gent: "{{ gen_tariff[0] }}"
               oned: "{{ gent[now().strftime('%a')] }}"
               sck: >-
-                {{ { 'mode': mode1, 'reserve': reserved_soc, 'shutoff': shutoff,
-                'schedule': oned } }}
+                {{ { 'mode': mode1, 'reserve': reserved_soc, 'shutoff': shutoff, 'schedule': oned } }}
           - action: input_number.set_value
             metadata: {}
             data:

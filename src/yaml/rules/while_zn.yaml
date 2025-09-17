@@ -13,13 +13,13 @@
     for:
       hours: 0
       minutes: 0
-      seconds: 5
+      seconds: 20
   - alias: Drop out of ZN
     trigger: template
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
-        states('input_number.ee_observed_solar_production') | int < 250000 and
+        states('input_number.ee_observed_solar_production') | int < 50000 and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -47,9 +47,9 @@
             { 
               "time" : now().timestamp() | int,
               "peak_rule": "ZN",
-              "peak_start": 480,
-              "peak_end": 1202,
-              "reserve": states('sensor.ee_desired_battery_reserve') | int
+              "peak_start": 420,
+              "peak_end": 1141,
+              "reserve": states('sensor.ee_desired_battery_reserve') | float 
             }
           }}
     else:

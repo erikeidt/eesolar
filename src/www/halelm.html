@@ -288,9 +288,9 @@
                 else mode = "Unknown(" + mode + ")";
 
                 modeElem.innerHTML = mode;
-                var reserveLevel = schedule.reserve + "%";
+                var reserveLevel = schedule.reserve.toFixed(1) + "%";
                 reserveElem.innerHTML = reserveLevel;
-                shutoffElem.innerHTML = schedule.shutoff + "%";
+                shutoffElem.innerHTML = schedule.shutoff.toFixed(1) + "%";
 
                 // Envoy Generated Schedule
                 var nowItem = new Date();

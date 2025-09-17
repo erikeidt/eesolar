@@ -8,13 +8,13 @@
         (states('input_text.ee_observed_tariff') == 'CP' or
           states('input_text.ee_observed_tariff') == 'ZN' or 
           states('input_text.ee_observed_tariff') == 'DL') and 
-        states('input_number.ee_observed_solar_production') | float >= 450000 and
+        states('input_number.ee_observed_solar_production') | float >= 100000 and
         states(this.entity_id) == 'on'
       }}
     for:
       hours: 0
       minutes: 0
-      seconds: 5
+      seconds: 20
   - trigger: time
     at: "16:45:00"
   conditions: []
@@ -82,8 +82,8 @@
           metadata: {}
           data:
             peak_rule: ZN
-            peak_start: 480
-            peak_end: 1202
+            peak_start: 420
+            peak_end: 1141
             reserve: "{{ new_reserve }}"
           response_variable: response
         - variables:
