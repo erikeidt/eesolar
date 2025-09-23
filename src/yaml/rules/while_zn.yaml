@@ -1,0 +1,144 @@
+- alias: EE While ZN
+  id: ee_while_zn
+  description: ""
+  triggers:
+  - alias: Climb Reserve in ZN
+    trigger: template
+    value_template: |-
+      {{
+        states('input_text.ee_observed_tariff') == 'ZN' and 
+        states('input_number.ee_observed_tariff_battery_reserve') | float != states('sensor.ee_desired_battery_reserve') | float and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+  - alias: Drop out of ZN
+    trigger: template
+    value_template: |-
+      {{
+        states('input_text.ee_observed_tariff') == 'ZN' and
+        states('input_number.ee_observed_solar_production') | int < 50000 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 45
+  - alias: Ready for DL
+    trigger: time
+    at: "16:45:00"
+  conditions: []
+  actions:
+  - variables:
+      tidx: "{{ trigger.idx }}"
+      workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
+      observed_tariff: "{{ states('input_text.ee_observed_tariff') }}"
+      observed_production: "{{ states('input_number.ee_observed_solar_production') }}"
+  - if:
+    - alias: Climb Trigger?
+      condition: template
+      value_template: "{{ tidx == 0 }}"
+    then:
+    - variables:
+        tariff: |-
+          {{
+            { 
+              "time" : now().timestamp() | int,
+              "peak_rule": "ZN",
+              "peak_start": 420,
+              "peak_end": 1141,
+              "reserve": states('sensor.ee_desired_battery_reserve') | float 
+            }
+          }}
+    else:
+    - if:
+      - condition: template
+        value_template: "{{ tidx == 2 and not workday }}"
+      then:
+      - stop: It is 4:45pm but not workday
+    - variables:
+        tariff: |-
+          {{
+            { 
+              "time" : now().timestamp() | int,
+              "peak_rule": "DL",
+              "peak_start": 1022 if workday else 780,
+              "peak_end": 1201 if workday else 785,
+              "reserve": min(50, states('input_number.ee_observed_charge') | int)
+            }
+          }}
+    - action: automation.turn_off
+      metadata: {}
+      data:
+        stop_actions: false
+      target:
+        entity_id: "{{ this.entity_id }}"
+    - if:
+      - condition: and
+        conditions:
+        - condition: template
+          value_template: "{{ workday }}"
+        - condition: time
+          after: "16:44:00"
+      then:
+      - action: automation.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: automation.ee_while_dl
+      else:
+      - action: automation.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: automation.ee_while_cp
+  - variables:
+      response:
+        status: timeout
+      attempts: 0
+  - repeat:
+      sequence:
+      - if:
+        - condition: template
+          value_template: "{{ attempts > 0 }}"
+        then:
+        - if:
+          - condition: template
+            value_template: "{{ attempts < 10 }}"
+          then:
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          else:
+          - delay:
+              hours: 0
+              minutes: 30
+              seconds: 0
+              milliseconds: 0
+          - action: notify.persistent_notification
+            metadata: {}
+            data:
+              message: |-
+                Tariff change fails (ZN)
+                {{ attempts }}
+                {{ now().strftime('%m/%d %H:%M:%S') }}
+      - action: rest_command.send_envoy_param_tariff
+        continue_on_error: true
+        metadata: {}
+        data: "{{ tariff }}"
+        response_variable: response
+      - variables:
+          attempts: "{{ attempts + 1 }}"
+      while:
+      - condition: template
+        value_template: "{{ \n  attempts == 0 or \n  response.status | int(0) != 200
+          and attempts < 100\n}}"
+  - action: script.ee_decode_tariff
+    metadata: {}
+    data:
+      response: "{{ response }}"
+  mode: single

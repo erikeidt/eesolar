@@ -1,0 +1,1124 @@
+
+input_boolean:
+  ee_solar_is_tou_workday:
+    name: "EE Solar is TOU Workday"
+    initial: off
+
+input_number:
+  ee_observed_battery_flow:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Battery Flow"
+    initial: 0
+  ee_observed_solar_production:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Solar Production"
+    initial: 0
+  ee_observed_net_consumption:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Net Consumption"
+    initial: 0
+  ee_observed_home_load:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Home Load"
+    initial: 0
+  ee_observed_total_consumption:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Total Consumption"
+    initial: 0
+  ee_observed_charge:
+    min: 0.0
+    max: 200.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "%"
+    name: "EE Observed Charge %"
+    initial: 0
+  ee_observed_tariff_battery_reserve:
+    min: 0.0
+    max: 200.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "%"
+    name: "EE Observed Tariff Battery Reserve %"
+    initial: 0
+  ee_observed_envoy_read_battery_latency:
+    min: 0.0
+    max: 1000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "ms"
+    name: "EE Observed Envoy Read Battery Latency"
+    initial: 0
+  ee_observed_envoy_read_livedata_latency:
+    min: 0.0
+    max: 1000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "ms"
+    name: "EE Observed Envoy Read Livedata Latency"
+    initial: 0
+  ee_hour_of_day:
+    min: 0
+    max: 24
+    mode: "box"
+    step: 1.0
+    name: "EE Hour of Day"
+    initial: 0
+
+input_text:
+  ee_observed_tariff:
+    max: 16
+    name: "EE Observed Tariff"
+    initial: "??"
+  ee_observed_tariff_schedule:
+    max: 255
+    name: "EE Observed Tariff Schedule"
+    initial: "??"
+  ee_observed_batteries:
+    max: 255
+    name: "EE Observed Batteries"
+    initial: "??"
+  ee_observed_vers:
+    max: 16 
+    name: "EE Observed Vers"
+    initial: "??"
+  ee_observed_grid_status:
+    max: 16 
+    name: "EE Observed Grid Status"
+    initial: "??"
+
+input_datetime:
+  ee_envoy_pc_reporting_time:
+    has_time: true
+    has_date: false
+    name: "EE Envoy PC Reporting Time"
+    initial: 00:00
+  ee_envoy_battery_reporting_time:
+    has_time: true
+    has_date: false
+    name: "EE Envoy Battery Reporting Time"
+    initial: 00:00
+
+rest_command:
+  read_pa_sensor:
+    url: "http://192.168.68.107/json?live=true"
+  read_envoy_xml_info:
+#   url: "https://envoy.local/info.xml"
+    url: "https://192.168.68.102/info.xml"
+    method: get
+    verify_ssl: false
+    timeout: 60 
+    headers:
+      Authorization: !secret enjt
+      Accept: "application/xml"
+  read_envoy_relay:
+#   url: "https://envoy.local/ivp/ensemble/relay"
+    url: "https://192.168.68.102/ivp/ensemble/relay"
+    method: get
+    verify_ssl: false
+    timeout: 45 
+    headers:
+      Authorization: !secret enjt
+  read_enovy_basic:
+#   url: "https://envoy.local/production.json"
+    url: "https://192.168.68.102/production.json"
+    method: get
+    verify_ssl: false
+    timeout: 45
+    headers:
+      Authorization: !secret enjt
+  read_envoy_batteries:
+#   url: "https://envoy.local/ivp/ensemble/power"
+    url: "https://192.168.68.102/ivp/ensemble/power"
+    method: get
+    verify_ssl: false
+    timeout: 45
+    headers:
+      Authorization: !secret enjt
+  envoy_enable_livedata_stream:
+#   url: "https://envoy.local/ivp/livedata/stream"
+    url: "https://192.168.68.102/ivp/livedata/stream"
+    method: post 
+    verify_ssl: false
+    timeout: 45
+    headers:
+      Authorization: !secret enjt
+    payload: '{"enable":1}'
+  envoy_disable_livedata_stream:
+#   url: "https://envoy.local/ivp/livedata/stream"
+    url: "https://192.168.68.102/ivp/livedata/stream"
+    method: post 
+    verify_ssl: false
+    timeout: 45
+    headers:
+      Authorization: !secret enjt
+    payload: '{"enable":0}'
+  read_envoy_livedata_status:
+#   url: "https://envoy.local/ivp/livedata/status"
+    url: "https://192.168.68.102/ivp/livedata/status"
+    method: get
+    verify_ssl: false
+    timeout: 45
+    headers:
+      Authorization: !secret enjt
+  read_envoy_stream:
+#   url: "https://envoy.local/stream/meter"
+    url: "https://192.168.68.102/stream/meter"
+    method: get
+    verify_ssl: false
+    timeout: 6 
+    headers:
+      Authorization: !secret enjt
+  read_envoy_tariff:
+#   url: "https://envoy.local/admin/lib/tariff.json"
+    url: "https://192.168.68.102/admin/lib/tariff.json"
+    method: get
+    verify_ssl: false
+    timeout: 45 
+    headers:
+      Authorization: !secret enjt
+  send_envoy_param_tariff:
+#   url: "https://envoy.local/admin/lib/tariff.json"
+    url: "https://192.168.68.102/admin/lib/tariff.json"
+    method: post
+    verify_ssl: false
+    timeout: 60 
+    content_type: "application/json"
+    headers:
+      Authorization: !secret enjt
+    payload: >-
+      {{
+        '{"tariff":{"currency":{"code":"USD"},"logger":"mylogger","date":"' +
+        time | string +
+        '","storage_settings":{"mode":"economy","operation_mode_sub_type":"","reserved_soc":' +
+        reserve | round(1) | string +
+        ',"very_low_soc":25,"charge_from_grid":false,"date":"' +
+        time | string +
+        '","opt_schedules":false},"single_rate":{"rate":0.25,"sell":0.25},' +
+        '"seasons":[{"id":"all_year_long","start":"1/1",' +
+        '"days":[{"id":"all_days","days":"Mon,Tue,Wed,Thu,Fri,Sat,Sun",' +
+        '"must_charge_start":0,"must_charge_duration":0,"must_charge_mode":"CP","peak_rule":"' +
+        peak_rule +
+        '","enable_discharge_to_grid":false,"periods":[{"id":"filler","start":0,"rate":0.25},{"id":"peak-1_","start":' +
+        peak_start | int | string +
+        ',"rate":0.5},{"id":"filler","start":' +
+        peak_end | int | string +
+        ',"rate":0.25}]}]}]}}'
+      }}
+
+script:
+  ee_decode_tariff:
+    alias: EE Decode Tariff
+    sequence:
+      - if:
+          - condition: template
+            value_template: "{{ response.status | int == 200 }}"
+        then:
+          - variables:
+              rawcontent: "{{ response.content }}"
+              content: "{{ rawcontent | from_json }}"
+              tariff: "{{ content.tariff }}"
+              storage_settings: "{{ tariff.storage_settings }}"
+              mode1: "{{ storage_settings.mode }}"
+              reserved_soc: "{{ storage_settings.reserved_soc | round(1) }}"
+              shutoff: "{{ storage_settings.very_low_soc }}"
+              seasons: "{{ tariff.seasons }}"
+              days: "{{ seasons[0].days }}"
+              schedule: "{{ content.schedule }}"
+              gen_tariff: "{{ schedule.schedule.tariff }}"
+              gent: "{{ gen_tariff[0] }}"
+              oned: "{{ gent[now().strftime('%a')] }}"
+              sck: >-
+                {{ { 'mode': mode1, 'reserve': reserved_soc, 'shutoff': shutoff, 'schedule': oned } }}
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: "{{ reserved_soc }}"
+            target:
+              entity_id: input_number.ee_observed_tariff_battery_reserve
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: "{{ sck }}"
+            target:
+              entity_id: input_text.ee_observed_tariff_schedule
+          - if:
+              - condition: template
+                value_template: "\"{{ mode1 == 'self consumption' or mode1 == 'self-consumption' }}"
+            then:
+              - action: input_text.set_value
+                metadata: {}
+                data:
+                  value: SC
+                target:
+                  entity_id: input_text.ee_observed_tariff
+              - stop: Found SC
+          - if:
+              - condition: template
+                value_template: "\"{{ mode1 == 'backup' or mode1 == 'full backup' }}"
+            then:
+              - action: input_text.set_value
+                metadata: {}
+                data:
+                  value: FB
+                target:
+                  entity_id: input_text.ee_observed_tariff
+              - stop: Found FB
+          - if:
+              - condition: template
+                value_template: "{{ seasons | count == 1 and days | count == 1 }}"
+            then:
+              - variables:
+                  day: "{{ days[0] }}"
+                  peak_rule: "{{ day.peak_rule }}"
+                  mode2: "{{ schedule.batt_mode }}"
+                  mode3: "{{ schedule.battery_mode }}"
+              - if:
+                  - condition: template
+                    value_template: "{{ gen_tariff | count == 1 }}"
+                then:
+                  - variables:
+                      gen_peak_rule: "{{ oned[1].setting }}"
+                  - if:
+                      - condition: template
+                        value_template: >-
+                          {{ mode1 == 'economy' and mode2 == 'economy' and mode3 ==
+                          'economy' }}
+                    then:
+                      - if:
+                          - condition: template
+                            value_template: "{{ gen_peak_rule == 'ZN' }}"
+                        then:
+                          - action: input_text.set_value
+                            metadata: {}
+                            data:
+                              value: ZN
+                            target:
+                              entity_id:
+                                - input_text.ee_observed_tariff
+                          - stop: Found ZN
+                      - if:
+                          - condition: template
+                            value_template: "{{ gen_peak_rule == 'DL' }}"
+                        then:
+                          - action: input_text.set_value
+                            metadata: {}
+                            data:
+                              value: DL
+                            target:
+                              entity_id: input_text.ee_observed_tariff
+                          - stop: Found DL
+      - action: input_text.set_value
+        metadata: {}
+        data:
+          value: "??"
+        target:
+          entity_id: input_text.ee_observed_tariff
+template:
+  - sensor:
+    - name: "EE Envoy Observed Large"
+      unique_id: "ee_envoy_observed_large"
+      state: "on"
+      attributes:
+        pc: "{{ states('input_datetime.ee_envoy_pc_reporting_time') }}"
+        sp: "{{ states('input_number.ee_observed_solar_production') | float }}"
+        hl: "{{ states('input_number.ee_observed_home_load') | float }}"
+        tc: "{{ states('input_number.ee_observed_total_consumption') | float }}"
+        nc: "{{ states('input_number.ee_observed_net_consumption') | float }}"
+        bt: "{{ states('input_datetime.ee_envoy_battery_reporting_time') }}"
+        bf: "{{ states('input_number.ee_observed_battery_flow') | float }}"
+        bc: "{{ states('input_number.ee_observed_charge') | float | round(2) }}"
+        ba: "{{ states('input_text.ee_observed_batteries') }}"
+        sc: "{{ states('input_text.ee_observed_tariff_schedule') }}"
+        gs: "{{ states('input_text.ee_observed_grid_status') }}"
+        vs: "{{ states('input_text.ee_observed_vers') }}"
+    - name: "EE HAJT"
+      unique_id: "ee_hajt"
+      state: !secret hajt 
+    - name: "EE Desired Battery Reserve"
+      unique_id: "ee_desired_battery_reserve"
+      unit_of_measurement: "%"
+      state: |-
+        {% set SP=states('input_number.ee_observed_solar_production') | float / 1000 %}
+        {{
+          (
+            min(
+              max(
+                states('input_number.ee_observed_charge') | float - 
+                  (1 if SP > 2000 else 0.5 if SP > 1600 or states('input_number.ee_hour_of_day') | int < 13 else 0 if SP > 1200 else -0.5 if SP > 800 else -1),
+                states('input_number.ee_observed_tariff_battery_reserve') | float,
+              ),
+              98 -
+              (   
+                max(
+                  -2,
+                  (SP - 1600)/400
+                )
+              ),
+              100
+            )
+            / 5
+          ) | round(1) * 5
+        }}
+
+
+automation:
+- alias: EE Read Envoy Battery
+  id: ee_read_envoy_battery
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: template
+    value_template: '{{ states(this.entity_id) == "on" }}'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  conditions: []
+  actions:
+  - repeat:
+      sequence:
+      - variables:
+          request_time: '{{ now() }}'
+          response:
+            status: timeout
+      - action: rest_command.read_envoy_batteries
+        continue_on_error: true
+        metadata: {}
+        data: {}
+        response_variable: response
+      - variables:
+          response_time: '{{ now() }}'
+          latency: '{{ response_time | as_timestamp - request_time | as_timestamp }}'
+      - action: notify.persistent_notification
+        metadata: {}
+        data:
+          message: '{{ response }}'
+        enabled: false
+      - if:
+        - condition: template
+          value_template: |-
+            {{
+              response is not defined or response.status == 'timeout' or
+              response.status | int(0) != 200
+            }}
+        then:
+        - action: notify.persistent_notification
+          metadata: {}
+          data:
+            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Read Battery -- {{ response.status | default(response) }}'
+        - stop: Rest command failure
+          error: true
+          enabled: false
+        - delay:
+            hours: 0
+            minutes: 1
+            seconds: 0
+            milliseconds: 0
+        else:
+        - variables:
+            newline: '
+
+              '
+            content: '{{ response.content | replace(newline, '' '') }}'
+            devices: '{{ content[''devices:''] }}'
+            pwr_soc: |-
+              {% set ns = namespace(pwr=0,soc=0,batts=[]) %}
+              {% for d in devices %}
+                {% set ns.pwr = ns.pwr + d.real_power_mw %}
+                {% set ns.soc = ns.soc + d.soc %}
+                {% set ns.batts = ns.batts + [d.soc] %}
+                {% set ns.batts = ns.batts + [(-d.real_power_mw)] %}
+              {% endfor %}
+              {{
+                { 
+                  "pwr": ns.pwr,
+                  "soc": ns.soc,
+                  "num": devices | count,
+                  "batts": ns.batts
+                }
+              }}
+            flow: '{{ -pwr_soc.pwr }}'
+            soc: '{{ pwr_soc.soc }}'
+            socpct: '{{ soc / pwr_soc.num }}'
+            batts: '{{ pwr_soc.batts }}'
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: '{{ socpct | round(2) }}'
+          target:
+            entity_id: input_number.ee_observed_charge
+        - action: input_text.set_value
+          metadata: {}
+          data:
+            value: '{{ batts }}'
+          target:
+            entity_id: input_text.ee_observed_batteries
+        - action: input_datetime.set_datetime
+          metadata: {}
+          data:
+            time: '{{ now().strftime(''%H:%M:%S'') }}'
+          target:
+            entity_id: input_datetime.ee_envoy_battery_reporting_time
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: '{{ (latency * 1000) | int }}'
+          target:
+            entity_id: input_number.ee_observed_envoy_read_battery_latency
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+      count: 60
+  - action: automation.turn_off
+    metadata: {}
+    data:
+      stop_actions: false
+    target:
+      entity_id: '{{ this.entity_id }}'
+  - action: automation.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: '{{ this.entity_id }}'
+  mode: single
+- alias: EE Read Envoy Livedata
+  id: ee_read_envoy_livedata
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: template
+    value_template: '{{ states(this.entity_id) == "on" }}'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  conditions: []
+  actions:
+  - repeat:
+      sequence:
+      - variables:
+          request_time: '{{ now() }}'
+          response:
+            status: timeout
+      - action: rest_command.read_envoy_livedata_status
+        continue_on_error: true
+        metadata: {}
+        data: {}
+        response_variable: response
+      - variables:
+          response_time: '{{ now() }}'
+          just_now: '{{ (response_time | as_datetime).strftime("%H:%M:%S") }}'
+          latency: '{{ response_time | as_timestamp - request_time | as_timestamp }}'
+      - action: notify.persistent_notification
+        metadata: {}
+        data:
+          message: '{{ response }}'
+        enabled: false
+      - if:
+        - condition: template
+          value_template: |-
+            {{
+              response is not defined or response.status == 'timeout' or
+              response.status | int(0) != 200
+            }}
+        then:
+        - action: notify.persistent_notification
+          metadata: {}
+          data:
+            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Read Livedata -- {{ response.status | default(response) }}'
+        - stop: Rest command failed
+          error: true
+          enabled: false
+        - delay:
+            hours: 0
+            minutes: 1
+            seconds: 0
+            milliseconds: 0
+        else:
+        - variables:
+            content: '{{ response.content }}'
+            connection: '{{ content.connection }}'
+            sc_stream: '{{ connection.sc_stream }}'
+        - if:
+          - condition: template
+            value_template: "{{ sc_stream != 'enabled' }}"
+          then:
+          - action: rest_command.envoy_enable_livedata_stream
+            metadata: {}
+            data: {}
+            response_variable: response
+          - action: notify.persistent_notification
+            metadata: {}
+            data:
+              message: |-
+                {{ now().strftime("%m/%d %H:%M:%S") }}
+                Enabling Stream 
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 0
+              milliseconds: 0
+          else:
+          - variables:
+              meters: '{{ content.meters }}'
+              last_update: '{{ meters.last_update }}'
+              solar_production: '{{ meters.pv.agg_p_mw }}'
+              net_consumption: '{{ meters.grid.agg_p_mw }}'
+              battery_flow: '{{ - meters.storage.agg_p_mw }}'
+              home_load: '{{ meters.load.agg_p_mw }}'
+              total_consumption: '{{ home_load + battery_flow }}'
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ battery_flow }}'
+            target:
+              entity_id: input_number.ee_observed_battery_flow
+            enabled: true
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ solar_production }}'
+            target:
+              entity_id: input_number.ee_observed_solar_production
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ net_consumption }}'
+            target:
+              entity_id: input_number.ee_observed_net_consumption
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ total_consumption }}'
+            target:
+              entity_id: input_number.ee_observed_total_consumption
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ home_load }}'
+            target:
+              entity_id: input_number.ee_observed_home_load
+          - action: input_datetime.set_datetime
+            metadata: {}
+            data:
+              time: '{{ just_now }}'
+            target:
+              entity_id: input_datetime.ee_envoy_pc_reporting_time
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ (latency * 1000) | int }}'
+            target:
+              entity_id: input_number.ee_observed_envoy_read_livedata_latency
+          - action: notify.persistent_notification
+            metadata: {}
+            data:
+              message: '{{ last_update | as_datetime  }}'
+            enabled: false
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+      count: 60
+  - action: automation.turn_off
+    metadata: {}
+    data:
+      stop_actions: false
+    target:
+      entity_id: '{{ this.entity_id }}'
+  - action: automation.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: '{{ this.entity_id }}'
+  mode: single
+- alias: EE Read Envoy Relay
+  id: ee_read_envoy_relay
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  conditions: []
+  actions:
+  - action: rest_command.read_envoy_relay
+    metadata: {}
+    data: {}
+    response_variable: envoy_ivp_ensemble_relay
+  - variables:
+      content: '{{ envoy_ivp_ensemble_relay.content }}'
+      grid: '{{ content.mains_oper_state }}'
+  - action: input_text.set_value
+    metadata: {}
+    data:
+      value: '{{ grid }}'
+    target:
+      entity_id: input_text.ee_observed_grid_status
+  mode: single
+- alias: EE Read Envoy Tariff
+  id: ee_read_envoy_tariff
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  conditions: []
+  actions:
+  - action: rest_command.read_envoy_tariff
+    metadata: {}
+    data: {}
+    response_variable: response
+  - action: script.ee_decode_tariff
+    metadata: {}
+    data:
+      response: '{{ response }}'
+  mode: single
+- alias: EE Read Envoy XML Info
+  id: ee_read_envoy_xml_info
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    hours: /12
+  conditions: []
+  actions:
+  - action: rest_command.read_envoy_relay
+    metadata: {}
+    data: {}
+    response_variable: envoy_ivp_ensemble_relay
+    enabled: false
+  - variables:
+      content: '{{ envoy_ivp_ensemble_relay.content }}'
+      grid: '{{ content.mains_oper_state == "closed" }}'
+    enabled: false
+  - action: rest_command.read_envoy_xml_info
+    metadata: {}
+    data: {}
+    response_variable: envoy_info_xml
+  - variables:
+      xml_text: '{{ envoy_info_xml.content }}'
+      time_tag: '{{ xml_text | regex_findall_index("<time>.*</time>") }}'
+      time: '{{ time_tag[6:-7] }}'
+      software_tag: '{{ xml_text | regex_findall_index("<software>.*</software>")
+        }}'
+      vers: '{{ software_tag[10:-11] }}'
+    enabled: false
+  - variables:
+      xml_text: '{{ envoy_info_xml.content }}'
+      software_tag: '{{ xml_text | regex_findall_index("<software>.*</software>")
+        }}'
+      vers: '{{ software_tag[10:-11] }}'
+  - action: input_text.set_value
+    metadata: {}
+    data:
+      value: '{{ vers }}'
+    target:
+      entity_id: input_text.ee_observed_vers
+  mode: single
+- alias: EE Set Hour of Day
+  description: ""
+  triggers:
+    - trigger: time_pattern
+      hours: /1
+    - trigger: homeassistant
+      event: start
+  conditions: []
+  actions:
+    - action: input_number.set_value
+      metadata: {}
+      data:
+        value: "{{ now().hour }}"
+      target:
+        entity_id: input_number.ee_hour_of_day
+  mode: single
+
+- alias: EE Set is TOU Workday
+  id: ee_set_is_tou_workday
+  description: 'Determine todays rates as to workday or holiday'
+  triggers:
+  - trigger: time
+    at: 00:15:00
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - if:
+    - condition: or
+      conditions:
+      - condition: time
+        weekday:
+        - sun
+        - sat
+      - condition: template
+        value_template: '{{ states("calendar.utility_tou_holidays") == "on" }}'
+    then:
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_tou_workday
+    else:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_tou_workday
+  - variables:
+      tidx: "{{ trigger.idx }}"
+  - if:
+    - condition: template
+      value_template: '{{ tidx != 0 }}'
+    then:
+    - action: automation.turn_off
+      metadata: {}
+      data:
+        stop_actions: true
+      target:
+        entity_id:
+          - automation.ee_while_zn
+          - automation.ee_while_dl
+          - automation.ee_while_cp
+    - action: automation.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: automation.ee_while_cp
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 5
+        milliseconds: 0
+    - action: automation.trigger
+      metadata: {}
+      data:
+        skip_condition: true
+      target:
+        entity_id:
+        - automation.ee_read_envoy_tariff
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 5
+        milliseconds: 0
+    - action: automation.trigger
+      metadata: {}
+      data:
+        skip_condition: true
+      target:
+        entity_id:
+        - automation.ee_read_envoy_relay
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 5
+        milliseconds: 0
+    - action: automation.trigger
+      metadata: {}
+      data:
+        skip_condition: true
+      target:
+        entity_id:
+        - automation.ee_read_envoy_xml_info
+  mode: single
+- alias: EE While CP
+  id: ee_while_cp
+  description: ""
+  triggers:
+  - trigger: template
+    value_template: |-
+      {{
+        (states('input_text.ee_observed_tariff') == 'CP' or
+          states('input_text.ee_observed_tariff') == 'ZN' or 
+          states('input_text.ee_observed_tariff') == 'DL') and 
+        states('input_number.ee_observed_solar_production') | float >= 100000 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+  - trigger: time
+    at: "16:45:00"
+  conditions: []
+  actions:
+  - variables:
+#     new_reserve: "{{ (states('input_number.ee_observed_charge') | float - 4) | int }}"
+      new_reserve: "{{ states('sensor.ee_desired_battery_reserve') | int }}"
+      workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
+      dl_time: |-
+        {% set yetz = now () %}
+        {% set hr = yetz.hour * 100 + yetz.minute %}
+        {{ hr >= 1644 }}
+      observed_tariff: "{{ states('input_text.ee_observed_tariff') }}"
+      observed_production: "{{ states('input_number.ee_observed_solar_production') }}"
+  - if:
+    - condition: template
+      value_template: "{{ workday and dl_time }}"
+    then:
+    - action: automation.turn_off
+      metadata: {}
+      data:
+        stop_actions: false
+      target:
+        entity_id: "{{ this.entity_id }}"
+    - action: automation.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: automation.ee_while_dl
+    else:
+    - variables:
+        response:
+          status: timeout
+        attempts: 0
+    - repeat:
+        sequence:
+        - if:
+          - condition: template
+            value_template: "{{ attempts > 0 }}"
+          then:
+          - if:
+            - condition: template
+              value_template: "{{ attempts < 10 }}"
+            then:
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 2
+                milliseconds: 0
+            else:
+            - delay:
+                hours: 0
+                minutes: 30
+                seconds: 0
+                milliseconds: 0
+            - action: notify.persistent_notification
+              metadata: {}
+              data:
+                message: |-
+                  Tariff change fails (CP)
+                  {{ attempts }}
+                  {{ now().strftime('%m/%d %H:%M:%S') }}
+        - action: rest_command.send_envoy_param_tariff
+          continue_on_error: true
+          metadata: {}
+          data:
+            peak_rule: ZN
+            peak_start: 420
+            peak_end: 1141
+            reserve: "{{ new_reserve }}"
+          response_variable: response
+        - variables:
+            attempts: "{{ attempts + 1 }}"
+        while:
+        - condition: template
+          value_template: |-
+            {{ attempts == 0 or response.status | int(0) != 200 and attempts < 100 }}
+    - action: script.ee_decode_tariff
+      metadata: {}
+      data:
+        response: '{{ response }}'
+    - delay:
+        hours: 0
+        minutes: 1
+        seconds: 0
+        milliseconds: 0
+    - action: automation.turn_off
+      metadata: {}
+      data:
+        stop_actions: false
+      target:
+        entity_id: "{{ this.entity_id }}"
+    - action: automation.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: automation.ee_while_zn
+  mode: single
+- alias: EE While DL
+  id: ee_while_dl
+  description: ""
+  triggers:
+  - trigger: time
+    at: "20:02:00"
+  conditions: []
+  actions:
+  - action: automation.turn_off
+    metadata: {}
+    data:
+      stop_actions: false
+    target:
+      entity_id: "{{ this.entity_id }}"
+  - action: automation.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: automation.ee_while_cp
+  mode: single
+- alias: EE While ZN
+  id: ee_while_zn
+  description: ""
+  triggers:
+  - alias: Climb Reserve in ZN
+    trigger: template
+    value_template: |-
+      {{
+        states('input_text.ee_observed_tariff') == 'ZN' and 
+        states('input_number.ee_observed_tariff_battery_reserve') | float != states('sensor.ee_desired_battery_reserve') | float and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+  - alias: Drop out of ZN
+    trigger: template
+    value_template: |-
+      {{
+        states('input_text.ee_observed_tariff') == 'ZN' and
+        states('input_number.ee_observed_solar_production') | int < 50000 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 45
+  - alias: Ready for DL
+    trigger: time
+    at: "16:45:00"
+  conditions: []
+  actions:
+  - variables:
+      tidx: "{{ trigger.idx }}"
+      workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
+      observed_tariff: "{{ states('input_text.ee_observed_tariff') }}"
+      observed_production: "{{ states('input_number.ee_observed_solar_production') }}"
+  - if:
+    - alias: Climb Trigger?
+      condition: template
+      value_template: "{{ tidx == 0 }}"
+    then:
+    - variables:
+        tariff: |-
+          {{
+            { 
+              "time" : now().timestamp() | int,
+              "peak_rule": "ZN",
+              "peak_start": 420,
+              "peak_end": 1141,
+              "reserve": states('sensor.ee_desired_battery_reserve') | float 
+            }
+          }}
+    else:
+    - if:
+      - condition: template
+        value_template: "{{ tidx == 2 and not workday }}"
+      then:
+      - stop: It is 4:45pm but not workday
+    - variables:
+        tariff: |-
+          {{
+            { 
+              "time" : now().timestamp() | int,
+              "peak_rule": "DL",
+              "peak_start": 1022 if workday else 780,
+              "peak_end": 1201 if workday else 785,
+              "reserve": min(50, states('input_number.ee_observed_charge') | int)
+            }
+          }}
+    - action: automation.turn_off
+      metadata: {}
+      data:
+        stop_actions: false
+      target:
+        entity_id: "{{ this.entity_id }}"
+    - if:
+      - condition: and
+        conditions:
+        - condition: template
+          value_template: "{{ workday }}"
+        - condition: time
+          after: "16:44:00"
+      then:
+      - action: automation.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: automation.ee_while_dl
+      else:
+      - action: automation.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id: automation.ee_while_cp
+  - variables:
+      response:
+        status: timeout
+      attempts: 0
+  - repeat:
+      sequence:
+      - if:
+        - condition: template
+          value_template: "{{ attempts > 0 }}"
+        then:
+        - if:
+          - condition: template
+            value_template: "{{ attempts < 10 }}"
+          then:
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 2
+              milliseconds: 0
+          else:
+          - delay:
+              hours: 0
+              minutes: 30
+              seconds: 0
+              milliseconds: 0
+          - action: notify.persistent_notification
+            metadata: {}
+            data:
+              message: |-
+                Tariff change fails (ZN)
+                {{ attempts }}
+                {{ now().strftime('%m/%d %H:%M:%S') }}
+      - action: rest_command.send_envoy_param_tariff
+        continue_on_error: true
+        metadata: {}
+        data: "{{ tariff }}"
+        response_variable: response
+      - variables:
+          attempts: "{{ attempts + 1 }}"
+      while:
+      - condition: template
+        value_template: "{{ \n  attempts == 0 or \n  response.status | int(0) != 200
+          and attempts < 100\n}}"
+  - action: script.ee_decode_tariff
+    metadata: {}
+    data:
+      response: "{{ response }}"
+  mode: single

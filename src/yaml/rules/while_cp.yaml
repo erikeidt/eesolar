@@ -1,0 +1,115 @@
+- alias: EE While CP
+  id: ee_while_cp
+  description: ""
+  triggers:
+  - trigger: template
+    value_template: |-
+      {{
+        (states('input_text.ee_observed_tariff') == 'CP' or
+          states('input_text.ee_observed_tariff') == 'ZN' or 
+          states('input_text.ee_observed_tariff') == 'DL') and 
+        states('input_number.ee_observed_solar_production') | float >= 100000 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+  - trigger: time
+    at: "16:45:00"
+  conditions: []
+  actions:
+  - variables:
+#     new_reserve: "{{ (states('input_number.ee_observed_charge') | float - 4) | int }}"
+      new_reserve: "{{ states('sensor.ee_desired_battery_reserve') | int }}"
+      workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
+      dl_time: |-
+        {% set yetz = now () %}
+        {% set hr = yetz.hour * 100 + yetz.minute %}
+        {{ hr >= 1644 }}
+      observed_tariff: "{{ states('input_text.ee_observed_tariff') }}"
+      observed_production: "{{ states('input_number.ee_observed_solar_production') }}"
+  - if:
+    - condition: template
+      value_template: "{{ workday and dl_time }}"
+    then:
+    - action: automation.turn_off
+      metadata: {}
+      data:
+        stop_actions: false
+      target:
+        entity_id: "{{ this.entity_id }}"
+    - action: automation.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: automation.ee_while_dl
+    else:
+    - variables:
+        response:
+          status: timeout
+        attempts: 0
+    - repeat:
+        sequence:
+        - if:
+          - condition: template
+            value_template: "{{ attempts > 0 }}"
+          then:
+          - if:
+            - condition: template
+              value_template: "{{ attempts < 10 }}"
+            then:
+            - delay:
+                hours: 0
+                minutes: 0
+                seconds: 2
+                milliseconds: 0
+            else:
+            - delay:
+                hours: 0
+                minutes: 30
+                seconds: 0
+                milliseconds: 0
+            - action: notify.persistent_notification
+              metadata: {}
+              data:
+                message: |-
+                  Tariff change fails (CP)
+                  {{ attempts }}
+                  {{ now().strftime('%m/%d %H:%M:%S') }}
+        - action: rest_command.send_envoy_param_tariff
+          continue_on_error: true
+          metadata: {}
+          data:
+            peak_rule: ZN
+            peak_start: 420
+            peak_end: 1141
+            reserve: "{{ new_reserve }}"
+          response_variable: response
+        - variables:
+            attempts: "{{ attempts + 1 }}"
+        while:
+        - condition: template
+          value_template: |-
+            {{ attempts == 0 or response.status | int(0) != 200 and attempts < 100 }}
+    - action: script.ee_decode_tariff
+      metadata: {}
+      data:
+        response: '{{ response }}'
+    - delay:
+        hours: 0
+        minutes: 1
+        seconds: 0
+        milliseconds: 0
+    - action: automation.turn_off
+      metadata: {}
+      data:
+        stop_actions: false
+      target:
+        entity_id: "{{ this.entity_id }}"
+    - action: automation.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: automation.ee_while_zn
+  mode: single

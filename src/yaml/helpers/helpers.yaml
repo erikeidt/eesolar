@@ -1,0 +1,121 @@
+
+input_boolean:
+  ee_solar_is_tou_workday:
+    name: "EE Solar is TOU Workday"
+    initial: off
+
+input_number:
+  ee_observed_battery_flow:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Battery Flow"
+    initial: 0
+  ee_observed_solar_production:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Solar Production"
+    initial: 0
+  ee_observed_net_consumption:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Net Consumption"
+    initial: 0
+  ee_observed_home_load:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Home Load"
+    initial: 0
+  ee_observed_total_consumption:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Total Consumption"
+    initial: 0
+  ee_observed_charge:
+    min: 0.0
+    max: 200.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "%"
+    name: "EE Observed Charge %"
+    initial: 0
+  ee_observed_tariff_battery_reserve:
+    min: 0.0
+    max: 200.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "%"
+    name: "EE Observed Tariff Battery Reserve %"
+    initial: 0
+  ee_observed_envoy_read_battery_latency:
+    min: 0.0
+    max: 1000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "ms"
+    name: "EE Observed Envoy Read Battery Latency"
+    initial: 0
+  ee_observed_envoy_read_livedata_latency:
+    min: 0.0
+    max: 1000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "ms"
+    name: "EE Observed Envoy Read Livedata Latency"
+    initial: 0
+  ee_hour_of_day:
+    min: 0
+    max: 24
+    mode: "box"
+    step: 1.0
+    name: "EE Hour of Day"
+    initial: 0
+
+input_text:
+  ee_observed_tariff:
+    max: 16
+    name: "EE Observed Tariff"
+    initial: "??"
+  ee_observed_tariff_schedule:
+    max: 255
+    name: "EE Observed Tariff Schedule"
+    initial: "??"
+  ee_observed_batteries:
+    max: 255
+    name: "EE Observed Batteries"
+    initial: "??"
+  ee_observed_vers:
+    max: 16 
+    name: "EE Observed Vers"
+    initial: "??"
+  ee_observed_grid_status:
+    max: 16 
+    name: "EE Observed Grid Status"
+    initial: "??"
+
+input_datetime:
+  ee_envoy_pc_reporting_time:
+    has_time: true
+    has_date: false
+    name: "EE Envoy PC Reporting Time"
+    initial: 00:00
+  ee_envoy_battery_reporting_time:
+    has_time: true
+    has_date: false
+    name: "EE Envoy Battery Reporting Time"
+    initial: 00:00
+

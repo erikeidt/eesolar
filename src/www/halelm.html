@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>HA Envoy Live Monitor v1.1.0</title>
+</head>
+<body>
+    <script>
+        var totalProduction = 0;
+        var netConsumption = 0;
+        var totalConsumption = 0;
+        var homeLoad = 0;
+        var chargeDischarge = 0;
+        var stateOfCharge = 0;
+
+        var pcXhr = null;
+        var pcto = null;
+
+        var btXhr = null;
+        var btto = null;
+
+        var trXhr = null;
+        var trto = null;
+
+        var gmXhr = null;
+        var gmto = null;
+
+        var eiXhr = null;
+        var eito = null;
+
+        var myURL = new URL(location);
+        var haobs = myURL.origin + "/api/states/sensor.ee_envoy_observed_large";
+        var bearer = decodeURIComponent(myURL.search.substring(1));
+
+        var cnt1,cnt2,cnt3;
+
+        var v_grid;
+        var v_solar;
+        var v_home;
+        var v_batt;
+
+        var v_soch;
+        var txt;
+
+        var g_h, g_b;
+        var s_g, s_h, s_b;
+        var b_g, b_h;
+
+        var v_g_h, v_g_b;
+        var v_s_g, v_s_h, v_s_b;
+        var v_b_g, v_b_h;
+
+        var vl_g_h, vl_g_b;
+        var vl_s_g, vl_s_h, vl_s_b;
+        var vl_b_g, vl_b_h;
+
+        var vb_g_h, vb_g_b;
+        var vb_s_g, vb_s_h, vb_s_b;
+        var vb_b_g, vb_b_h;
+
+        var tcntElem;
+        var modeElem;
+        var reserveElem;
+        var shutoffElem;
+
+        var tariffChartElem;
+        var tariffTimeElem;
+        var altTariffTimeElem;
+        var instalTimeElem;
+        var batteryChartElem;
+        var modeKeyChartElem;
+
+        var gridStatusElem;
+        var envoyTimeElem;
+        var envoyVersElem;
+
+        var gridChargeElem;
+        var gridDischargElem;
+        var chargeStartElem;
+        var chargeEndElem;
+        var chargeRuleElem;
+        var afterHoursElem;
+        var peakRuleElem;
+
+        function initVars() {
+            if (v_solar == null || v_solar == undefined) {
+                var shb = document.getElementById("showhidebearer");
+                shb.style.display = "none";
+
+                tariffChartElem = document.getElementById("tarifftab");
+                batteryChartElem = document.getElementById("batterytab");
+                modeKeyChartElem = document.getElementById("modekeys");
+
+                txt = document.getElementById("txt");
+                //txt.innerHTML += bearer;
+
+                cnt1 = document.getElementById("cnt1");
+                cnt2 = document.getElementById("cnt2");
+                cnt3 = document.getElementById("cnt3");
+
+                v_grid = document.getElementById("v.grid");
+                v_solar = document.getElementById("v.solar");
+                v_home = document.getElementById("v.home");
+                v_batt = document.getElementById("v.batt");
+
+                v_soch = document.getElementById("v.soc");
+
+                v_g_h = document.getElementById("v.g.h");
+                vl_g_h = document.getElementById("vl.g.h");
+                vb_g_h = document.getElementById("vb.g.h");
+
+                v_g_b = document.getElementById("v.g.b");
+                vl_g_b = document.getElementById("vl.g.b");
+                vb_g_b = document.getElementById("vb.g.b");
+
+                v_s_g = document.getElementById("v.s.g");
+                vl_s_g = document.getElementById("vl.s.g");
+                vb_s_g = document.getElementById("vb.s.g");
+
+                v_s_h = document.getElementById("v.s.h");
+                vl_s_h = document.getElementById("vl.s.h");
+                vb_s_h = document.getElementById("vb.s.h");
+
+                v_s_b = document.getElementById("v.s.b");
+                vl_s_b = document.getElementById("vl.s.b");
+                vb_s_b = document.getElementById("vb.s.b");
+
+                v_b_g = document.getElementById("v.b.g");
+                vl_b_g = document.getElementById("vl.b.g");
+                vb_b_g = document.getElementById("vb.b.g");
+
+                v_b_h = document.getElementById("v.b.h");
+                vl_b_h = document.getElementById("vl.b.h");
+                vb_b_h = document.getElementById("vb.b.h");
+
+                tcntElem = document.getElementById("tcnt");
+                modeElem = document.getElementById("mode");
+                reserveElem = document.getElementById("reserve");
+                shutoffElem = document.getElementById("shutoff");
+
+                tariffTimeElem = document.getElementById("tarifftime");
+                schedTimeElem = document.getElementById("schedtime");
+                altTariffTimeElem = document.getElementById("altttime");
+
+                gridStatusElem = document.getElementById("gridstat");
+                envoyTimeElem = document.getElementById("envoytime");
+                envoyVersElem = document.getElementById("envoyvers");
+
+                gridChargeElem = document.getElementById("gridcharge");
+                gridDischargElem = document.getElementById("griddischarge");
+                chargeStartElem = document.getElementById("mustchargestart");
+                chargeEndElem = document.getElementById("mustchargeduration");
+                chargeRuleElem = document.getElementById("mustchargerule");
+                afterHoursElem = document.getElementById("afterhours");
+                peakRuleElem = document.getElementById("peakrule");
+            }
+        }
+
+        function startMonitoring() {
+            stopMonitoring();
+            initVars();
+            startProductionConsumptionMonitoring();
+        //    startBatteryMonitoring();
+        //    startTariffMonitoring();
+        //    startGridMonitoring();
+        }
+
+        function startProductionConsumptionMonitoring() {
+            initVars();
+            if (pcXhr != null)
+                pcXhr.abort();
+            if (pcto != null) {
+                clearTimeout(pcto);
+                pcto = null;
+            }
+            var characterCount = 0;
+            var lastlen = 0;
+
+            pcXhr = new XMLHttpRequest();
+            pcXhr.open("GET", haobs, true);
+            pcXhr.setRequestHeader("Accept", "application/json");
+            pcXhr.setRequestHeader("Content-Type", "application/json");
+            pcXhr.setRequestHeader("Authorization", bearer);
+
+            pcXhr.onabort = function (ev) {
+                // don't know why abort happens on this one but must have sthg to do with streaming
+                if (pcXhr.readyState == 4)
+                    return;
+                console.log("stream/meter aborted", ev, pcXhr);
+                txt.innerHTML += "p: aborted<br/>";
+            }
+
+            pcXhr.onerror = function (ev) {
+                console.log("stream/meter errored", ev, pcXhr);
+                txt.innerHTML += "p: errored<br/>";
+                pcXhr.abort();
+                pcXhr = null;
+                if (pcto != null)
+                    pcto = null;
+                pcto = setTimeout(startProductionConsumptionMonitoring, 2000);
+            }
+
+            pcXhr.onprogress = function () {
+                var resp = pcXhr.response;
+                try {
+                    var json_resp = JSON.parse(resp);
+                } catch (err) {
+                    return;
+                }
+
+                //var state = json_resp.attributes;
+                //var dataObj = JSON.parse(state);
+                var dataObj = json_resp.attributes;
+                if (!dataObj) {
+                  pcto = setTimeout(startProductionConsumptionMonitoring, 1250);
+                  return;
+                }
+
+                cnt1.innerHTML = "&nbsp;" + new Date().toLocaleTimeString("en-GB") + "&nbsp;";
+                cnt2.innerHTML = "&nbsp;" + dataObj.pc + "&nbsp;";
+                cnt3.innerHTML = "&nbsp;" + dataObj.bt + "&nbsp;";
+
+                var grid = dataObj.gs;
+                if (grid === "closed") { 
+                    grid = "On Grid";
+                    gridStatusElem.style.color = "seagreen";
+                } 
+                else {
+                    gridStatusElem.style.color = "red";
+                    if (grid == "open") { grid = "Off Grid"; }
+                }
+                gridStatusElem.innerHTML = "&nbsp;" + grid + "&nbsp;";
+
+                envoyVersElem.innerHTML = "&nbsp;" + dataObj.vs + "&nbsp;";
+
+                totalProduction = parseFloat(dataObj.sp);
+                netConsumption = parseFloat(dataObj.nc);
+                totalConsumption = parseFloat(dataObj.tc);
+                homeLoad = parseFloat(dataObj.hl);
+
+                var sstr = (totalProduction/1000).toFixed(0);
+                setSvgSignedNumericField(sstr, v_solar, 0);
+
+                var gridValue = netConsumption < 0 ? -netConsumption : netConsumption;
+                var gstr = (gridValue/1000).toFixed(0);
+                setSvgSignedNumericField(gstr, v_grid, netConsumption);
+
+                chargeDischarge = - parseFloat(dataObj.bf);
+                stateOfCharge = parseFloat(dataObj.bc);
+
+                var bchrg = chargeDischarge < 0 ? -chargeDischarge : chargeDischarge;
+                var bstr = (bchrg/1000).toFixed(0);
+                setSvgSignedNumericField(bstr, v_batt, chargeDischarge);
+
+                // Batteries Detail
+                var batteries = dataObj.ba;
+                if (batteries) {
+                    var r = batteryChartElem.tBodies[0].rows;
+                    while (r.length >= 3) 
+                        batteryChartElem.deleteRow(2);
+
+                    var count = batteries.length;
+                    for (var i = 0; i < count; i++) {
+                        var soc = batteries[i];
+                        var r2 = batteryChartElem.insertRow();
+                        var socCol = r2.insertCell();
+                        socCol.innerHTML = padNbsp(batteries[i++] + "%", 4);
+                        var stateCol = r2.insertCell();
+                        var flow = Math.trunc(batteries[i]/1000);
+                        stateCol.innerHTML = padNbsp((flow > 0 ? "+" : "") + flow.toFixed(0), 5);
+                    }
+                }
+
+                if (stateOfCharge == 100) {
+                    v_soch.innerHTML = "100%";
+                } else {
+                    var ttt = stateOfCharge.toFixed(2).padStart(3, ' ');
+                    v_soch.innerHTML = ttt + "%";
+                }
+
+                // Tariff
+                var schedule = dataObj.sc;
+                var mode = schedule.mode;
+                if (mode == "economy") mode = "&nbsp;Savings&nbsp;";
+                else if (mode == "self-consumption") mode = "&nbsp;Self Consumption&nbsp;";
+                else if (mode == "backup") mode = "&nbsp;Full Backup&nbsp;";
+                else mode = "Unknown(" + mode + ")";
+
+                modeElem.innerHTML = mode;
+                var reserveLevel = schedule.reserve.toFixed(1) + "%";
+                reserveElem.innerHTML = reserveLevel;
+                shutoffElem.innerHTML = schedule.shutoff.toFixed(1) + "%";
+
+                // Envoy Generated Schedule
+                var nowItem = new Date();
+
+                var setting = schedule.schedule; 
+                var nowMinutes = nowItem.getMinutes();
+                var nowTimeMinutes = nowItem.getHours() * 60 + nowMinutes;
+                var nowSet = "";
+
+                var r = tariffChartElem.tBodies[0].rows;
+                while (r.length > 1)
+                    tariffChartElem.deleteRow(1);
+
+                if (nowTimeMinutes < 10) {
+                    //r = modeKeyChartElem.tBodies[0].rows
+                    //while (r.length > 1)
+                    //    modeKeyChartElem.deleteRow(1);
+                }
+
+                for (var i = 0; i < setting.length; i++) {
+                    var oneSet = setting[i];
+                    var timeMinutes = oneSet.start;
+
+                    var currentPeriod = false;
+                    if (nowTimeMinutes >= timeMinutes && nowTimeMinutes < timeMinutes + oneSet.duration) {
+                        nowSet = oneSet.setting;
+                        currentPeriod = true;
+                    }
+                    var r2 = tariffChartElem.insertRow();
+                    var startTimeCol = r2.insertCell();
+                    startTimeCol.innerHTML = "&nbsp;" + makeTimeStringFromTimeMinutes(timeMinutes) + "&nbsp;";
+
+                    var endTimeCol = r2.insertCell();
+                    endTimeCol.innerHTML = "&nbsp;" + makeTimeStringFromTimeMinutes(timeMinutes + oneSet.duration - 1) + "&nbsp;";
+
+                    var modekey = r2.insertCell();
+                    modekey.innerHTML = "&nbsp;" + oneSet.setting + "&nbsp;";
+
+                    var nnooww = r2.insertCell();
+                    nnooww.innerHTML = currentPeriod ? "&nbsp;&#x2714;&nbsp;" : "";
+                }
+
+                computeHome();
+
+                pcto = setTimeout(startProductionConsumptionMonitoring, 1000);
+            }
+            pcXhr.send();
+        }
+
+        function padNbsp(str, len) {
+            var count = len - str.length;
+            while (--count >= 0) {
+                str = "&nbsp;" + str;
+            }
+            return "&nbsp;" + str + "&nbsp";
+        }
+
+        function makeTimeStringFromTimeMinutes(minutes) {
+            var hour = Math.trunc(minutes / 60);
+            var minute = minutes % 60;
+            return hour.toString().padStart(2, '0') + ":" + minute.toString().padStart(2, '0');
+        }
+
+        // (gs + ss + bs) - (hd + bd + gd) = unaccounted (supply if +, demand if -)
+        function computeHome() {
+            // var homeLoad = totalConsumption + chargeDischarge;
+            var hstr = (homeLoad/1000).toFixed(0);
+            setSvgSignedNumericField(hstr, v_home, -1);
+
+            var gs = netConsumption > 0 ? netConsumption : 0
+            var gd = netConsumption < 0 ? -netConsumption : 0;
+            var bs = chargeDischarge > 0 ? chargeDischarge : 0;
+            var bd = chargeDischarge < 0 ? -chargeDischarge : 0;
+            var supply = gs + totalProduction + bs;
+            var demand = homeLoad + bd + gd;
+            var un = supply - demand;
+
+            if (un < 0 || un > 0) {
+                // unbalanced supply & demand readings
+                if (un >= 1 || un <= -1) {
+                   var xx = 4;
+                }
+
+                chargeDischarge += -un;
+
+                //if (un < 0) {
+                //    // demand is higher than supply, so credit batteries with delivering extra
+                //    chargeDischarge += -un;
+                //} else {
+                //    // supply is higher than demand, so credit batties with consumption
+                //    chargeDischarge -= un;
+                //}
+
+                // and redo bs,bd
+                bs = chargeDischarge > 0 ? chargeDischarge : 0;
+                bd = chargeDischarge < 0 ? -chargeDischarge : 0;
+            }
+
+            var srcCount = 0;
+            if (gs > 0) srcCount++;
+            if (bs > 0) srcCount++;
+            if (totalProduction > 0) srcCount++;
+
+            var drainCount = 1;
+            if (bd > 0) drainCount++;
+            if (gd > 0) drainCount++;
+
+            var b2g = 0;
+            var b2h = 0;
+            var s2b = 0;
+            var s2h = 0;
+            var s2g = 0;
+            var g2b = 0;
+            var g2h = 0;
+
+            switch (srcCount) {
+                case 1:
+                    // identify the source
+                    if (gs > 0) { // grid
+                        g2b = bd;
+                        g2h = homeLoad;
+                    }
+                    else if (bs > 0) { // batt
+                        b2g = gd;
+                        b2h = homeLoad;
+                    }
+                    else { // solar
+                        s2g = gd;
+                        s2h = homeLoad;
+                        s2b = bd;
+                    }
+                    break;
+                case 2:
+                    if (gs > 0) {
+                        if (totalProduction > 0) { // grid & solar -> batt & home
+                            s2b = Math.min(bd, totalProduction);
+                            s2h = totalProduction - s2b;
+                            g2h = homeLoad - s2h;
+                            g2b = gs - g2h;
+                        }
+                        else { // grid & batt -> home
+                            g2h = gs;
+                            b2h = bs;
+                        }
+                    }
+                    else { // not grid
+                        if (totalProduction > 0) { // solar & batt -> grid & home
+                            s2g = Math.min(gd, totalProduction);
+                            s2h = totalProduction - s2g;
+                            b2h = homeLoad - s2h;
+                            b2g = bs - b2h;
+                        }
+                        else { // batt -> grid & home
+                            b2g = gd;
+                            b2h = homeLoad;
+                        }
+                    }
+                    break;
+                case 3:
+                    // all goes home
+                    g2h = gs;
+                    b2h = bs;
+                    s2h = totalProduction;
+                    break;
+            }
+
+            //if (g2b < 0)
+            //    g2b = 0;
+
+            var tab = "\t";
+            if (un <= -1000 || un >= 1000 || s2h < 0 || g2h < 0 || b2h < 0 || s2g < 0 || s2b < 0 || g2b < 0)
+                console.log(un,tab,totalProduction,tab,netConsumption,tab,totalConsumption,tab,homeLoad,tab,homeLoad,tab,chargeDischarge,tab,g2h,tab,g2b,tab,s2g,tab,s2b,tab,s2h,tab,b2g,tab,b2h,tab);
+
+            if (s2h < 0)
+               s2h = 0;
+            if (g2h < 0)
+                g2h = 0
+            if (b2h < 0)
+               b2h = 0;
+
+            if (s2g < 0)
+               s2g = 0
+            if (s2b < 0)
+               s2b = 0
+            if (g2b < 0)
+               g2b = 0;
+
+            b2g = (b2g/1000).toFixed(0);
+            b2h = (b2h/1000).toFixed(0);
+            s2g = (s2g/1000).toFixed(0);
+            s2b = (s2b/1000).toFixed(0);
+            s2h = (s2h/1000).toFixed(0);
+            g2b = (g2b/1000).toFixed(0);
+            g2h = (g2h/1000).toFixed(0);
+
+            setSvgCenteredNumericField(b2g, vb_b_g, v_b_g, vl_b_g);
+            setSvgCenteredNumericField(b2h, vb_b_h, v_b_h, vl_b_h);
+            setSvgCenteredNumericField(s2g, vb_s_g, v_s_g, vl_s_g);
+            setSvgCenteredNumericField(s2b, vb_s_b, v_s_b, vl_s_b);
+            setSvgCenteredNumericField(s2h, vb_s_h, v_s_h, vl_s_h);
+            setSvgCenteredNumericField(g2b, vb_g_b, v_g_b, vl_g_b);
+            setSvgNumericFieldWithBoxBehindCentered(g2h, vb_g_h, v_g_h, vl_g_h);
+        }
+
+        function stopMonitoring() {
+            if (pcXhr != null) {
+                pcXhr.abort();
+                pcXhr = null;
+            }
+            if (pcto != null) {
+                clearTimeout(pcto);
+                pcto = null;
+            }
+        }
+
+        function setSvgSignedNumericField(str, numElem, dirNum) {
+            if (str === "0" || str === "-0") {
+                if (numElem.innerHTML !== "&nbsp;&nbsp;&nbsp;0") {
+                    numElem.innerHTML = "&nbsp;&nbsp;&nbsp;0";
+                }
+            }
+            else {
+                var sign = dirNum < 0 ? "+" : "-";
+                var disp = str;
+                switch (str.length) {
+                    case 1: disp = sign + "&nbsp;&nbsp;" + str; break;
+                    case 2: disp = sign + "&nbsp;&nbsp;" + str; break;
+                    case 3: disp = sign + "&nbsp;" + str; break;
+                    case 4: disp = sign + "&nbsp;&nbsp;" + str; break;
+                    default: disp = sign + "&nbsp;" + str; break;
+                }
+                if (numElem.innerHTML !== disp)
+                    numElem.innerHTML = disp;
+            }
+        }
+
+        function setSvgCenteredNumericField(str, boxElem, numElem, lineElem) {
+            if (str === "0" || str === "-0") {
+                if (numElem.innerHTML !== "") {
+                    lineElem.style.display = "none";
+                    numElem.innerHTML = "";
+                }
+            }
+            else {
+                if (lineElem.style.display === "none") {
+                    lineElem.style.display = "";
+                }
+                var oldi = numElem.innerHTML;
+                if (oldi !== str) {
+                    if (oldi.length != str.length) {
+                        var width = boxElem.width.baseVal.value;
+                        var midw = width >> 1;
+                        var wpc = width / 5;
+                        var xoff = Math.round(midw - str.length / 2 * wpc);
+                        var newx = boxElem.x.baseVal.value + xoff + 4;
+                        numElem.setAttribute("x", newx);
+                    }
+                    numElem.innerHTML = str;
+                }
+            }
+        }
+
+        function setSvgNumericFieldWithBoxBehindCentered(str, boxElem, numElem, lineElem) {
+            if (str === "0" || str === "-0") {
+                if (numElem.innerHTML !== "") {
+                    lineElem.style.display = "none";
+                    numElem.innerHTML = "";
+                }
+            }
+            else {
+                if (lineElem.style.display === "none") {
+                    lineElem.style.display = "";
+                }
+                var oldi = numElem.innerHTML;
+                if (numElem.innerHTML !== str) {
+                    numElem.innerHTML = str;
+                    if (oldi.length != str.length) {
+                        var bb = numElem.getBBox();
+                        var x = bb.x;
+                        var w = bb.width;
+                        boxElem.setAttribute("x", x - 3);
+                        boxElem.setAttribute("width", w + 6);
+                    }
+                }
+            }
+        }
+
+        function toggleLongWideDisplayMode() {
+            var od = document.getElementById("outerdiv");
+            if (od.style.display === "")
+                od.style.display = "flex"
+            else
+                od.style.display = ""
+        }
+
+        window.onload = () => startMonitoring();
+
+    </script>
+
+    <div id="showhidebearer">
+        <p>Enter HA Bearer Token</p>
+        <input id="bearer" />
+        <button onclick="startMonitoring()">Start</button>
+    </div>
+
+    <div id="outerdiv" style="margin: 2px" width="100%">
+        <svg id="svgchart" height="360" width="360" font-family="Courier New, Courier, monospace" font-size="medium">
+            <defs>
+                <marker id="arwhead" markerWidth="14" markerHeight="14" refX="1" refY="5" orient="auto" markerUnits="userSpaceOnUse" stroke="context-stroke" fill="context-stroke">
+                    <path d="M 1 1 L 1 9 L 12 5 z" />
+                </marker>
+            </defs>
+
+            <circle cx="52" cy="180" r="42" fill="crimson" />
+            <text x="41" y="205" stroke="WhiteSmoke" style="font-size: xx-small; font-style: italic">Grid</text>
+
+            <circle cx="180" cy="52" r="42" fill="#E6C300" />
+            <text x="166" y="77" stroke="WhiteSmoke" style="font-size: xx-small; font-style: italic">Solar</text>
+
+            <circle cx="298" cy="180" r="42" fill="seagreen" />
+            <text x="288" y="205" stroke="WhiteSmoke" style="font-size: xx-small; font-style: italic">Home</text>
+
+            <circle cx="180" cy="308" r="42" fill="#4078A5" />
+            <text x="162" y="333" stroke="WhiteSmoke" style="font-size: xx-small; font-style: italic">Battery</text>
+
+            <!--<path d="M 52 180 L 180 52" stroke="black" />
+            <path d="M 180 52 L 298 180" stroke="black" />
+            <path d="M 298 180 L 180 308" stroke="black" />
+            <path d="M 180 308 L 52 180" stroke="black" />-->
+            <!-- grid to home -->
+            <path id="vl.g.h" d="M 94 180 L 243 180" stroke="crimson" stroke-width="3px" marker-end="url(#arwhead)" />
+
+            <!-- solar to grid -->
+            <path id="vl.s.g" d="M 150 82 L 91 141" stroke="#E6C300" stroke-width="3px" marker-end="url(#arwhead)" />
+            <!-- solar battery -->
+            <path id="vl.s.b" d="M 180 94 L 180 253" stroke="#E6C300" stroke-width="3px" marker-end="url(#arwhead)" />
+            <!-- solar to home -->
+            <path id="vl.s.h" d="M 209 83 L 261 140" stroke="#E6C300" stroke-width="3px" marker-end="url(#arwhead)" />
+
+            <!-- battery to home -->
+            <path id="vl.b.h" d="M 209 277 L 261 220" stroke="#4078A5" stroke-width="3px" marker-end="url(#arwhead)" />
+
+            <!-- numbers on paths between consumers & producers -->
+            <!-- grid to battery -->
+            <g id="vl.g.b">
+                <path d="M 82 210 L 141 269" stroke="crimson" stroke-width="3px" marker-end="url(#arwhead)" />
+                <rect id="vb.g.b" x="72" y="225" width="64" height="16" fill="white" />
+                <text id="v.g.b" x="80" y="238" stroke="crimson">00000</text>
+            </g>
+
+            <!-- battery to grid -->
+            <g id="vl.b.g">
+                <path d="M 150 278 L 91 219" stroke="#4078A5" stroke-width="3px" marker-end="url(#arwhead)" />
+                <rect id="vb.b.g" x="91" y="244" width="64" height="16" fill="white" />
+                <text id="v.b.g" x="100" y="257" stroke="#4078A5">00000</text>
+            </g>
+
+            <rect id="vb.g.h" x="115" y="171" width="50" height="16" fill="white" />
+            <text id="v.g.h" x="116" y="184" stroke="crimson">00000</text>
+
+            <rect id="vb.s.h" x="198" y="99" width="64" height="16" fill="white" />
+            <text id="v.s.h" x="206" y="112" stroke="#E6C300">00000</text>
+
+            <rect id="vb.s.b" x="148" y="119" width="64" height="16" fill="white" />
+            <text id="v.s.b" x="156" y="132" stroke="#E6C300">00000</text>
+
+            <rect id="vb.s.g" x="91" y="99" width="64" height="16" fill="white" />
+            <text id="v.s.g" x="100" y="112" stroke="#E6C300">00000</text>
+
+            <rect id="vb.b.h" x="198" y="244" width="64" height="16" fill="white" />
+            <text id="v.b.h" x="206" y="257" stroke="#4078A5">00000</text>
+
+            <text id="v.soc" x="224" y="338" stroke="#4078A5">100%</text>
+
+            <!-- consumers & producers-->
+            <rect x="14" y="172" width="76" height="18" rx="6" fill="white" />
+            <text id="v.grid" x="20" y="186" stroke="crimson">- 00000</text>
+
+            <rect x="142" y="44" width="76" height="18" rx="6" fill="white" />
+            <text id="v.solar" x="148" y="58" stroke="#E6C300">- 00000</text>
+
+            <rect x="260" y="172" width="76" height="18" rx="6" fill="white" />
+            <text id="v.home" x="266" y="186" stroke="seagreen">+ 00000</text>
+
+            <rect x="142" y="300" width="76" height="18" rx="6" fill="white" />
+            <text id="v.batt" x="148" y="314" stroke="#4078A5">- 00000</text>
+
+            <!--<rect x="45" y="152" width="15" height="15" fill="white" />
+            <text id="v.imex" x="48" y="164" stroke="crimson">+</text>
+
+            <rect x="173" y="280" width="15" height="15" fill="white" />
+            <text id="v.chrg" x="176" y="292" stroke="#4078A5">+</text>-->
+
+        </svg>
+    <div style="display: flex">
+        <div style="padding-left: 15px; padding-top: 5px">
+            <table border="1" cellpadding="2"
+                   style="border-collapse: collapse; text-align: center; font-size: small;
+                    font-family: Courier New, Courier, monospace; font-weight: bold">
+
+                <tr style="color: gray"><td>&nbsp;Browser&nbsp;</td><td id="cnt1">00:00:00</td></tr>
+                <tr style="color: #998200"><td>&nbsp;Solar Last&nbsp;</td><td id="cnt2">00:00:00</td></tr>
+                <tr style="color: #4078A5"><td>&nbsp;Batt Last&nbsp;</td><td id="cnt3">00:00:00</td></tr>
+            </table>
+
+            <div style="font-size: xx-small">&nbsp;</div>
+
+            <table border="1" cellpadding="2"
+                   style="border-collapse: collapse; text-align: center; font-size: small;
+                    font-family: Courier New, Courier, monospace; font-weight: bold">
+                <tr><th style="color: seagreen">Grid</th><td id="gridstat"></td></tr>
+                <tr><th style="color: seagreen">&nbsp;Envoy Vers&nbsp;</th><td id="envoyvers"></td></tr>
+            </table>
+
+            <div style="font-size: xx-small">&nbsp;</div>
+
+            <table border="1" cellpadding="2"
+                   style="padding-left: 20px; border-collapse: collapse; text-align: center; font-size: small;
+                    font-family: Courier New, Courier, monospace; font-weight: bold;
+                    padding-left: 5px; padding-right: 5px">
+                <tr><th colspan="2">&nbsp;Tariff&nbsp;</th></tr>
+                <tr><th style="color: #998200">&nbsp;Mode&nbsp;</th><td id="mode"></td></tr>
+                <tr><th style="color: #4078A5">&nbsp;Reserve&nbsp;</th><td id="reserve"></td></tr>
+                <tr><th style="color: crimson">&nbsp;Shutoff&nbsp;</th><td id="shutoff"></td></tr>
+
+                <!--<tr><th style="color: crimson" rowspan="5">Charge</th><th>By Import</th><td id="gridcharge">false</td></tr>
+                <tr><th style="color: crimson">Allow Export</th><td id="griddischarge">false</td></tr>
+                <tr><th>Charge Start</th><td id="mustchargestart">start</td></tr>
+                <tr><th>Charge Duration</th><td id="mustchargeduration">Charge Duration</td></tr>
+                <tr><th>Charge Mode</th><td id="mustchargerule"></td></tr>
+                <tr><th style="color: crimson">After Hours</th><td id="afterhours">false</td></tr>
+                <tr><th style="color: crimson">Peak Mode</th><td id="peakrule">false</td></tr>-->
+
+                <tr style="display: none"><th>Written</th><td id="tarifftime">1/1/2025</td></tr>
+                <tr style="display: none"><th>Alternate</th><td id="altttime">1/1/2025</td></tr>
+                <tr style="display: none"><th>Installed</th><td id="schedtime">1/1/2025</td></tr>
+            </table>
+
+            <div style="font-size: xx-small">&nbsp;</div>
+<!--
+            <table border="1" cellpadding="2"
+                   style="padding-left: 20px; border-collapse: collapse; text-align: center; font-size: small;
+                    font-family: Courier New, Courier, monospace; font-weight: bold;
+                    padding-left: 5px; padding-right: 5px; color:blue">
+                <tr><th rowspan="2">&nbsp;Clock&nbsp;</th><td>&nbsp;Browser&nbsp;</td><td id="tcnt"></td></tr>
+                <tr><td>&nbsp;Envoy&nbsp;</td><td id="envoytime"></td></tr>
+            </table>
+
+            <div style="font-size: xx-small">&nbsp;</div>
+-->
+
+            <table id="tarifftab" border="1" cellpadding="2"
+                   style="border-collapse: collapse; text-align: center; font-size: small;
+                    font-family: Courier New, Courier, monospace; font-weight: bold;
+                    padding-left: 5px; padding-right: 5px; color: #864300">
+                <tr><th colspan="4">&nbsp;Current Schedule&nbsp;</th></tr>
+            </table>
+
+        </div>
+
+        <div style="padding-left: 25px; padding-top: 5px">
+            <div>
+                <table id="batterytab" border="1" cellpadding="2" style="border-collapse: collapse; text-align: right; font-size: medium; font-weight: bold; font-family: Courier New, Courier, monospace; padding-left: 5px; padding-right: 5px; color: #4078A5">
+                    <tr><th colspan="2" style="text-align: center">&nbsp;Batteries&nbsp;</th></tr>
+                    <tr><th style="text-align: center">SoC</th><th style="text-align: center">+/-</th></tr>
+                </table>
+            </div>
+
+<!--
+            <div style="padding-top: 10px">
+                <table id="modekeys" border="1" cellpadding="2" style="border-collapse: collapse; text-align: right; font-size: small; font-weight: bold; font-family: Courier New, Courier, monospace; padding-left: 5px; padding-right: 5px; padding-top: 5px; color: #864300">
+                    <tr><th colspan="4" style="text-align: center">&nbsp;Modes&nbsp;</th></tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+-->
+      <div style="padding-top: 10px">
+        <button onclick="toggleLongWideDisplayMode()">Tall/Wide</button>
+      </div>
+    </div>
+
+    <div id="txt">
+    </div>
+
+</body>
+</html>

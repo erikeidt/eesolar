@@ -1,0 +1,153 @@
+- alias: EE Read Envoy Livedata
+  id: ee_read_envoy_livedata
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: template
+    value_template: '{{ states(this.entity_id) == "on" }}'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  conditions: []
+  actions:
+  - repeat:
+      sequence:
+      - variables:
+          request_time: '{{ now() }}'
+          response:
+            status: timeout
+      - action: rest_command.read_envoy_livedata_status
+        continue_on_error: true
+        metadata: {}
+        data: {}
+        response_variable: response
+      - variables:
+          response_time: '{{ now() }}'
+          just_now: '{{ (response_time | as_datetime).strftime("%H:%M:%S") }}'
+          latency: '{{ response_time | as_timestamp - request_time | as_timestamp }}'
+      - action: notify.persistent_notification
+        metadata: {}
+        data:
+          message: '{{ response }}'
+        enabled: false
+      - if:
+        - condition: template
+          value_template: |-
+            {{
+              response is not defined or response.status == 'timeout' or
+              response.status | int(0) != 200
+            }}
+        then:
+        - action: notify.persistent_notification
+          metadata: {}
+          data:
+            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Read Livedata -- {{ response.status | default(response) }}'
+        - stop: Rest command failed
+          error: true
+          enabled: false
+        - delay:
+            hours: 0
+            minutes: 1
+            seconds: 0
+            milliseconds: 0
+        else:
+        - variables:
+            content: '{{ response.content }}'
+            connection: '{{ content.connection }}'
+            sc_stream: '{{ connection.sc_stream }}'
+        - if:
+          - condition: template
+            value_template: "{{ sc_stream != 'enabled' }}"
+          then:
+          - action: rest_command.envoy_enable_livedata_stream
+            metadata: {}
+            data: {}
+            response_variable: response
+          - action: notify.persistent_notification
+            metadata: {}
+            data:
+              message: |-
+                {{ now().strftime("%m/%d %H:%M:%S") }}
+                Enabling Stream 
+          - delay:
+              hours: 0
+              minutes: 1
+              seconds: 0
+              milliseconds: 0
+          else:
+          - variables:
+              meters: '{{ content.meters }}'
+              last_update: '{{ meters.last_update }}'
+              solar_production: '{{ meters.pv.agg_p_mw }}'
+              net_consumption: '{{ meters.grid.agg_p_mw }}'
+              battery_flow: '{{ - meters.storage.agg_p_mw }}'
+              home_load: '{{ meters.load.agg_p_mw }}'
+              total_consumption: '{{ home_load + battery_flow }}'
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ battery_flow }}'
+            target:
+              entity_id: input_number.ee_observed_battery_flow
+            enabled: true
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ solar_production }}'
+            target:
+              entity_id: input_number.ee_observed_solar_production
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ net_consumption }}'
+            target:
+              entity_id: input_number.ee_observed_net_consumption
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ total_consumption }}'
+            target:
+              entity_id: input_number.ee_observed_total_consumption
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ home_load }}'
+            target:
+              entity_id: input_number.ee_observed_home_load
+          - action: input_datetime.set_datetime
+            metadata: {}
+            data:
+              time: '{{ just_now }}'
+            target:
+              entity_id: input_datetime.ee_envoy_pc_reporting_time
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ (latency * 1000) | int }}'
+            target:
+              entity_id: input_number.ee_observed_envoy_read_livedata_latency
+          - action: notify.persistent_notification
+            metadata: {}
+            data:
+              message: '{{ last_update | as_datetime  }}'
+            enabled: false
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 1
+              milliseconds: 0
+      count: 60
+  - action: automation.turn_off
+    metadata: {}
+    data:
+      stop_actions: false
+    target:
+      entity_id: '{{ this.entity_id }}'
+  - action: automation.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: '{{ this.entity_id }}'
+  mode: single

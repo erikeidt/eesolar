@@ -1,0 +1,122 @@
+- alias: EE Read Envoy Battery
+  id: ee_read_envoy_battery
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: template
+    value_template: '{{ states(this.entity_id) == "on" }}'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  conditions: []
+  actions:
+  - repeat:
+      sequence:
+      - variables:
+          request_time: '{{ now() }}'
+          response:
+            status: timeout
+      - action: rest_command.read_envoy_batteries
+        continue_on_error: true
+        metadata: {}
+        data: {}
+        response_variable: response
+      - variables:
+          response_time: '{{ now() }}'
+          latency: '{{ response_time | as_timestamp - request_time | as_timestamp }}'
+      - action: notify.persistent_notification
+        metadata: {}
+        data:
+          message: '{{ response }}'
+        enabled: false
+      - if:
+        - condition: template
+          value_template: |-
+            {{
+              response is not defined or response.status == 'timeout' or
+              response.status | int(0) != 200
+            }}
+        then:
+        - action: notify.persistent_notification
+          metadata: {}
+          data:
+            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Read Battery -- {{ response.status | default(response) }}'
+        - stop: Rest command failure
+          error: true
+          enabled: false
+        - delay:
+            hours: 0
+            minutes: 1
+            seconds: 0
+            milliseconds: 0
+        else:
+        - variables:
+            newline: '
+
+              '
+            content: '{{ response.content | replace(newline, '' '') }}'
+            devices: '{{ content[''devices:''] }}'
+            pwr_soc: |-
+              {% set ns = namespace(pwr=0,soc=0,batts=[]) %}
+              {% for d in devices %}
+                {% set ns.pwr = ns.pwr + d.real_power_mw %}
+                {% set ns.soc = ns.soc + d.soc %}
+                {% set ns.batts = ns.batts + [d.soc] %}
+                {% set ns.batts = ns.batts + [(-d.real_power_mw)] %}
+              {% endfor %}
+              {{
+                { 
+                  "pwr": ns.pwr,
+                  "soc": ns.soc,
+                  "num": devices | count,
+                  "batts": ns.batts
+                }
+              }}
+            flow: '{{ -pwr_soc.pwr }}'
+            soc: '{{ pwr_soc.soc }}'
+            socpct: '{{ soc / pwr_soc.num }}'
+            batts: '{{ pwr_soc.batts }}'
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: '{{ socpct | round(2) }}'
+          target:
+            entity_id: input_number.ee_observed_charge
+        - action: input_text.set_value
+          metadata: {}
+          data:
+            value: '{{ batts }}'
+          target:
+            entity_id: input_text.ee_observed_batteries
+        - action: input_datetime.set_datetime
+          metadata: {}
+          data:
+            time: '{{ now().strftime(''%H:%M:%S'') }}'
+          target:
+            entity_id: input_datetime.ee_envoy_battery_reporting_time
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: '{{ (latency * 1000) | int }}'
+          target:
+            entity_id: input_number.ee_observed_envoy_read_battery_latency
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 2
+            milliseconds: 0
+      count: 60
+  - action: automation.turn_off
+    metadata: {}
+    data:
+      stop_actions: false
+    target:
+      entity_id: '{{ this.entity_id }}'
+  - action: automation.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: '{{ this.entity_id }}'
+  mode: single

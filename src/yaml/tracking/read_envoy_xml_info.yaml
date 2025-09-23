@@ -1,0 +1,41 @@
+- alias: EE Read Envoy XML Info
+  id: ee_read_envoy_xml_info
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    hours: /12
+  conditions: []
+  actions:
+  - action: rest_command.read_envoy_relay
+    metadata: {}
+    data: {}
+    response_variable: envoy_ivp_ensemble_relay
+    enabled: false
+  - variables:
+      content: '{{ envoy_ivp_ensemble_relay.content }}'
+      grid: '{{ content.mains_oper_state == "closed" }}'
+    enabled: false
+  - action: rest_command.read_envoy_xml_info
+    metadata: {}
+    data: {}
+    response_variable: envoy_info_xml
+  - variables:
+      xml_text: '{{ envoy_info_xml.content }}'
+      time_tag: '{{ xml_text | regex_findall_index("<time>.*</time>") }}'
+      time: '{{ time_tag[6:-7] }}'
+      software_tag: '{{ xml_text | regex_findall_index("<software>.*</software>")
+        }}'
+      vers: '{{ software_tag[10:-11] }}'
+    enabled: false
+  - variables:
+      xml_text: '{{ envoy_info_xml.content }}'
+      software_tag: '{{ xml_text | regex_findall_index("<software>.*</software>")
+        }}'
+      vers: '{{ software_tag[10:-11] }}'
+  - action: input_text.set_value
+    metadata: {}
+    data:
+      value: '{{ vers }}'
+    target:
+      entity_id: input_text.ee_observed_vers
+  mode: single

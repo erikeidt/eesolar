@@ -1,0 +1,108 @@
+script:
+  ee_decode_tariff:
+    alias: EE Decode Tariff
+    sequence:
+      - if:
+          - condition: template
+            value_template: "{{ response.status | int == 200 }}"
+        then:
+          - variables:
+              rawcontent: "{{ response.content }}"
+              content: "{{ rawcontent | from_json }}"
+              tariff: "{{ content.tariff }}"
+              storage_settings: "{{ tariff.storage_settings }}"
+              mode1: "{{ storage_settings.mode }}"
+              reserved_soc: "{{ storage_settings.reserved_soc | round(1) }}"
+              shutoff: "{{ storage_settings.very_low_soc }}"
+              seasons: "{{ tariff.seasons }}"
+              days: "{{ seasons[0].days }}"
+              schedule: "{{ content.schedule }}"
+              gen_tariff: "{{ schedule.schedule.tariff }}"
+              gent: "{{ gen_tariff[0] }}"
+              oned: "{{ gent[now().strftime('%a')] }}"
+              sck: >-
+                {{ { 'mode': mode1, 'reserve': reserved_soc, 'shutoff': shutoff, 'schedule': oned } }}
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: "{{ reserved_soc }}"
+            target:
+              entity_id: input_number.ee_observed_tariff_battery_reserve
+          - action: input_text.set_value
+            metadata: {}
+            data:
+              value: "{{ sck }}"
+            target:
+              entity_id: input_text.ee_observed_tariff_schedule
+          - if:
+              - condition: template
+                value_template: "\"{{ mode1 == 'self consumption' or mode1 == 'self-consumption' }}"
+            then:
+              - action: input_text.set_value
+                metadata: {}
+                data:
+                  value: SC
+                target:
+                  entity_id: input_text.ee_observed_tariff
+              - stop: Found SC
+          - if:
+              - condition: template
+                value_template: "\"{{ mode1 == 'backup' or mode1 == 'full backup' }}"
+            then:
+              - action: input_text.set_value
+                metadata: {}
+                data:
+                  value: FB
+                target:
+                  entity_id: input_text.ee_observed_tariff
+              - stop: Found FB
+          - if:
+              - condition: template
+                value_template: "{{ seasons | count == 1 and days | count == 1 }}"
+            then:
+              - variables:
+                  day: "{{ days[0] }}"
+                  peak_rule: "{{ day.peak_rule }}"
+                  mode2: "{{ schedule.batt_mode }}"
+                  mode3: "{{ schedule.battery_mode }}"
+              - if:
+                  - condition: template
+                    value_template: "{{ gen_tariff | count == 1 }}"
+                then:
+                  - variables:
+                      gen_peak_rule: "{{ oned[1].setting }}"
+                  - if:
+                      - condition: template
+                        value_template: >-
+                          {{ mode1 == 'economy' and mode2 == 'economy' and mode3 ==
+                          'economy' }}
+                    then:
+                      - if:
+                          - condition: template
+                            value_template: "{{ gen_peak_rule == 'ZN' }}"
+                        then:
+                          - action: input_text.set_value
+                            metadata: {}
+                            data:
+                              value: ZN
+                            target:
+                              entity_id:
+                                - input_text.ee_observed_tariff
+                          - stop: Found ZN
+                      - if:
+                          - condition: template
+                            value_template: "{{ gen_peak_rule == 'DL' }}"
+                        then:
+                          - action: input_text.set_value
+                            metadata: {}
+                            data:
+                              value: DL
+                            target:
+                              entity_id: input_text.ee_observed_tariff
+                          - stop: Found DL
+      - action: input_text.set_value
+        metadata: {}
+        data:
+          value: "??"
+        target:
+          entity_id: input_text.ee_observed_tariff

@@ -1,0 +1,88 @@
+- alias: EE Set is TOU Workday
+  id: ee_set_is_tou_workday
+  description: 'Determine todays rates as to workday or holiday'
+  triggers:
+  - trigger: time
+    at: 00:15:00
+  - trigger: homeassistant
+    event: start
+  conditions: []
+  actions:
+  - if:
+    - condition: or
+      conditions:
+      - condition: time
+        weekday:
+        - sun
+        - sat
+      - condition: template
+        value_template: '{{ states("calendar.utility_tou_holidays") == "on" }}'
+    then:
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_tou_workday
+    else:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_tou_workday
+  - variables:
+      tidx: "{{ trigger.idx }}"
+  - if:
+    - condition: template
+      value_template: '{{ tidx != 0 }}'
+    then:
+    - action: automation.turn_off
+      metadata: {}
+      data:
+        stop_actions: true
+      target:
+        entity_id:
+          - automation.ee_while_zn
+          - automation.ee_while_dl
+          - automation.ee_while_cp
+    - action: automation.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: automation.ee_while_cp
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 5
+        milliseconds: 0
+    - action: automation.trigger
+      metadata: {}
+      data:
+        skip_condition: true
+      target:
+        entity_id:
+        - automation.ee_read_envoy_tariff
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 5
+        milliseconds: 0
+    - action: automation.trigger
+      metadata: {}
+      data:
+        skip_condition: true
+      target:
+        entity_id:
+        - automation.ee_read_envoy_relay
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 5
+        milliseconds: 0
+    - action: automation.trigger
+      metadata: {}
+      data:
+        skip_condition: true
+      target:
+        entity_id:
+        - automation.ee_read_envoy_xml_info
+  mode: single
