@@ -64,7 +64,7 @@
             { 
               "time" : now().timestamp() | int,
               "peak_rule": "DL",
-              "peak_start": 1022 if workday else 780,
+              "peak_start": 1021 if workday else 780,
               "peak_end": 1201 if workday else 785,
               "reserve": min(50, states('input_number.ee_observed_charge') | int)
             }
