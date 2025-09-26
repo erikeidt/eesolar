@@ -12,8 +12,8 @@
       }}
     for:
       hours: 0
-      minutes: 0
-      seconds: 20
+      minutes: 5
+      seconds: 0 
   - alias: Drop out of ZN
     trigger: template
     value_template: |-
@@ -52,6 +52,12 @@
               "reserve": states('sensor.ee_desired_battery_reserve') | float 
             }
           }}
+    - action: automation.turn_off
+      metadata: {}
+      data:
+        stop_actions: false
+      target:
+        entity_id: "{{ this.entity_id }}"
     else:
     - if:
       - condition: template
@@ -135,10 +141,23 @@
           attempts: "{{ attempts + 1 }}"
       while:
       - condition: template
-        value_template: "{{ \n  attempts == 0 or \n  response.status | int(0) != 200
-          and attempts < 100\n}}"
+        value_template: >-
+          {{
+            attempts == 0 or 
+            response.status | int(0) != 200 and attempts < 100
+          }}
   - action: script.ee_decode_tariff
     metadata: {}
     data:
       response: "{{ response }}"
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 1
+      milliseconds: 0
+  - action: automation.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: automation.ee_while_zn
   mode: single
