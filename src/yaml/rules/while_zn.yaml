@@ -32,6 +32,7 @@
   conditions: []
   actions:
   - variables:
+      automat: automation.ee_while_zn
       tidx: "{{ trigger.idx }}"
       workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
       observed_tariff: "{{ states('input_text.ee_observed_tariff') }}"
@@ -65,6 +66,7 @@
       then:
       - stop: It is 4:45pm but not workday
     - variables:
+        use_zn: false
         tariff: |-
           {{
             { 
@@ -89,17 +91,11 @@
         - condition: time
           after: "16:44:00"
       then:
-      - action: automation.turn_on
-        metadata: {}
-        data: {}
-        target:
-          entity_id: automation.ee_while_dl
+      - variables:
+          automat: automation.ee_while_dl
       else:
-      - action: automation.turn_on
-        metadata: {}
-        data: {}
-        target:
-          entity_id: automation.ee_while_cp
+      - variables:
+          automat: automation.ee_while_cp
   - variables:
       response:
         status: timeout
@@ -159,5 +155,5 @@
     metadata: {}
     data: {}
     target:
-      entity_id: automation.ee_while_zn
+      entity_id: "{{ automat }}"
   mode: single
