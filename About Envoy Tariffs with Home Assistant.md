@@ -2,13 +2,18 @@ The Envoy uses use a tariff specification to accomplish desired behaviors regard
 The tariff is sent, as json text, to a REST API endpoint, namely https://envoy.local/admin/lib/tariff.json using an HTTP PUT command.&nbsp;
 (This is a local endpoint &#8212; it does not use the cloud, however, it does require a jwt, which is obtained from the cloud though lasts for about a year.)
 
-The tariff is meant to be self sufficient, including scheduling features, summer vs. winter, weekday vs. weekend, etc..&nbsp; So, set and forget.
+The Envoy tariff mechanism is meant to be configurable, yet self sufficient, including scheduling features, summer vs. winter, weekday vs. weekend, etc..&nbsp; So, "set and forget".
 
 However, the behaviors some of us we really want require dynamic adjustments.&nbsp; Because of that my approach is let Home Assistant determine what tariff and when, 
-i.e. taking over the scheduling functions.&nbsp; Thus, in my tariffs, I don't bother differentiating between summer vs. winter, or even weekend vs. seekday; 
+i.e. taking over the scheduling functions.&nbsp; Thus, in my generated tariffs, I don't bother differentiating between summer vs. winter, or even weekend vs. weekday; 
 I don't bother setting complex pricings either, so I just use simple values like 0.25 and 0.5.
 
-I use Saving mode exclusively as, among all the possible behaviors that we can accomplish, Saving mode with dynamic tariffs can accomplish them all.
+Let's also note that changes to the battery Reserve limits are not accommodated within the Envoy's set and forget tariff mechanism.&nbsp; 
+To accomplish some behaviors we need to dynamically adjust the Reserve limit.
+
+---
+
+I use Saving mode exclusively as, among all the possible behaviors that we can use by local Envoy configuration, Saving mode with dynamic tariffs can accomplish them all.
 
 Savings mode has two periods per day: on peak and off peak.
 
@@ -16,8 +21,9 @@ Generally speaking the off-peak behavior comes from mode key CP, while the on-pe
 So, we can have tariffs that alternate periods between CP and one other mode key.&nbsp; 
 Yet, since we can rewrite the tariff (e.g. at least once per minute), we can control the behavior more precisely than the standard set and forget.
 
-The tariff json text comes as two parts, the first part (called the "tariff:" field is an object that) indicates the schedule and has a few other options and is the input to the REST API to set a new tariff.&nbsp;
-One particular setting of interest is the "peak_rule:" field, which determines the on peak mode key setting.
+The tariff json text comes as two parts, the first part (called the "tariff:" field is an object that) indicates the desired scheduling of peak and off peak periods and has a few other options.&nbsp;
+This part is the input to the REST API to set a new tariff.&nbsp;
+One particular setting of interest is the "peak_rule:" field, which determines the on-peak mode key setting.
 
 The second part is the daily schedule of specific modes & times, and the envoy (re)generates this second part based on the first part when given.&nbsp;
 This part is called the "schedule:" object field.&nbsp; 
