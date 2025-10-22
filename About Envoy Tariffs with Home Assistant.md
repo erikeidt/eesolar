@@ -92,3 +92,54 @@ Mode Key Settings:
 
 6. CG - Charge from Grid
 
+---
+
+Here is the Home Assistant rest command I'm using:
+```
+  send_envoy_param_tariff: 
+#   url: "https://envoy.local/admin/lib/tariff.json"
+    url: "https://<ipaddr>/admin/lib/tariff.json"
+    method: post                                     
+    verify_ssl: false
+    timeout: 60      
+    content_type: "application/json"
+    headers:
+      Authorization: !secret enjt
+    payload: >-            
+      {{
+        '{"tariff":{"currency":{"code":"USD"},"logger":"mylogger","date":"' +
+        time | string +                              
+        '","storage_settings":{"mode":"economy","operation_mode_sub_type":"","reserved_soc":' +
+        reserve | round(1) | string +
+        ',"very_low_soc":25,"charge_from_grid":false,"date":"' +
+        time | string +
+        '","opt_schedules":false},"single_rate":{"rate":0.25,"sell":0.25},' +
+        '"seasons":[{"id":"all_year_long","start":"1/1",' +
+        '"days":[{"id":"all_days","days":"Mon,Tue,Wed,Thu,Fri,Sat,Sun",' +
+        '"must_charge_start":0,"must_charge_duration":0,"must_charge_mode":"CP","peak_rule":"' +
+        peak_rule +
+        '","enable_discharge_to_grid":false,"periods":[{"id":"filler","start":0,"rate":0.25},{"id":"peak-1_","start":' +
+        peak_start | int | string +
+        ',"rate":0.5},{"id":"filler","start":' +
+        peak_end | int | string +
+        ',"rate":0.25}]}]}]}}'
+      }}
+```
+And it is invoked using an action like this:
+```
+action: rest_command.send_envoy_param_tariff_ex
+continue_on_error: true
+metadata: {}
+data:
+  time: "{{ now().timestamp() | int }}"
+  peak_rule: ZN
+  peak_start: 420
+  peak_end: 1141
+  reserve: 89
+response_variable: response
+```
+The peak_start and peak_end are times of day in minutes starting with midnight as 0.&nbsp;
+The peak_rule is a mode key as described above.&nbsp;
+And the reserve is the battery reserve level.&nbsp;
+(I have hard-coded mode:"economy" and very_low_soc:25 in the rest command template, though these can be changed and/or parameterized.)
+
