@@ -33,7 +33,7 @@
         var haobs = myURL.origin + "/api/states/sensor.ee_envoy_observed_large";
         var bearer = decodeURIComponent(myURL.search.substring(1));
 
-        var cnt1,cnt2,cnt3,cnt4,txt4;
+        var cnt1,cnt2,cnt3,cnt4,txt4,max4,maxTableChart;
         var maxsp = 0;
 
         var v_grid;
@@ -101,6 +101,8 @@
                 cnt3 = document.getElementById("cnt3");
                 cnt4 = document.getElementById("cnt4");
                 txt4 = document.getElementById("txt4");
+                max4 = document.getElementById("max4");
+                maxTableChart = document.getElementById("maxTable");
 
                 v_grid = document.getElementById("v.grid");
                 v_solar = document.getElementById("v.solar");
@@ -312,8 +314,19 @@
                 while (r.length > 1)
                     tariffChartElem.deleteRow(1);
 
-                if (nowTimeMinutes < 10) {
+                if (nowTimeMinutes < 10 && maxsp > 0) {
                     maxsp = 0;
+
+                    var mt = maxTableChart.insertRow();
+                    mt.outerHTML = max4.outerHTML;
+                    //mt.style = max4.style; 
+                    //mt.innerHTML = max4.innerHTML;
+
+                    // var c1 = mt.insertCell();
+                    // c1.innerHTML = txt4.innerHTML;
+                    // var c2 = mt.insertCell();
+                    // c2.innerHTML = cnt4.innerHTML;
+
                     //r = modeKeyChartElem.tBodies[0].rows
                     //while (r.length > 1)
                     //    modeKeyChartElem.deleteRow(1);
@@ -710,15 +723,6 @@
             <table border="1" cellpadding="2"
                    style="border-collapse: collapse; text-align: center; font-size: small;
                     font-family: Courier New, Courier, monospace; font-weight: bold">
-
-                <tr style="color: #998200"><td id="cnt4">&nbsp;Max Solar&nbsp;</td><td id="txt4">0</td></tr>
-            </table>
-
-            <div style="font-size: xx-small">&nbsp;</div>
-
-            <table border="1" cellpadding="2"
-                   style="border-collapse: collapse; text-align: center; font-size: small;
-                    font-family: Courier New, Courier, monospace; font-weight: bold">
                 <tr><th style="color: seagreen">Grid</th><td id="gridstat"></td></tr>
                 <tr><th style="color: seagreen">&nbsp;Envoy Vers&nbsp;</th><td id="envoyvers"></td></tr>
             </table>
@@ -776,6 +780,15 @@
                     <tr><th style="text-align: center">SoC</th><th style="text-align: center">+/-</th></tr>
                 </table>
             </div>
+
+            <div style="font-size: xx-small">&nbsp;</div>
+
+            <table border="1" cellpadding="2" id="maxTable"
+                   style="border-collapse: collapse; text-align: center; font-size: small;
+                    font-family: Courier New, Courier, monospace; font-weight: bold">
+
+                <tr style="color: #998200" id="max4"><td id="cnt4">&nbsp;Max Solar&nbsp;</td><td id="txt4">0</td></tr>
+            </table>
 
 <!--
             <div style="padding-top: 10px">
