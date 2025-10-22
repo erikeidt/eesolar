@@ -30,6 +30,15 @@ This because, while an idling and non-idling configurations are possible, going 
 
 ---
 
+At present I don't know how to turn on or off Storm Guard, as this seems to be externally automated by the Enphase Cloud dynamically making changes to the Envoy.&nbsp;
+And that traditionally, Storm Guard comes back on even after having been turned off.&nbsp;
+However, let's note that recently Enphase App now has a "really really turn off Storm Guard option"!
+I used to have rules that looked for the bad behavior of Storm Guard (i.e. charging from grid possibly even during a peak rate period),
+and would have home assistant jerk the system out of that (by cycling through the other modes: true Self-Consumption and/or Full Backup before returning to Savings mode), 
+but fortunately this seems no longer necessary.
+
+---
+
 This project is a lightweight solar & battery monitor and controller for Enphase Envoy systems, built using Home Assistant automation platform.
 
 It includes automation for monitoring an Envoy, a dashboard, and a live monitor web page along with rules for automation for my situation,
