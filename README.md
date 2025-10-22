@@ -5,7 +5,7 @@ That seemed like charging the batteries from the grid to me.
 
 While the system in Self Consumption is capable of charging from solar while also powering the home load from solar, it then will no longer understand evening peak vs. off peak Time-of-Use.
 
-So, we can have the nice behavior in the mornings (solar being shared between home load and charging), or the nice behavior evening discharging (using battery discharge only during the TOU peak rate period), 
+So, we can have the nice behavior in the mornings (solar being shared between home load and charging), or the nice behavior evening (using battery discharge only during the actual TOU peak rate period), 
 but not necessarily both together without a mode switch, which cannot be accomplished within the Envoy's set-and-forget configuration choices.
 
 Fortunately, the Envoy has a local REST API that allows configurations to be uploaded and downloaded using simple HTTP commands!
@@ -20,21 +20,22 @@ While also allowing the batteries to discharge a limited amount to accommodate s
 This climbing reserve locks in previously obtained charge while also still allowing some battery usage/discharge for short term home loads.&nbsp; 
 The amount of lattitude can be configured and depends on how the reserve is climbed.&nbsp; 
 I'm using about 1%, meaning I keep the reserve limit about 1% below the SoC, so that gives the system allowance to use about that much battery before pulling from the grid.&nbsp;
-And whenver the SoC goes higher, I climb the reserve up.
+And whenver the SoC goes higher, I climb the reserve up to lock in the new charge level and save battery for TOU peak.
 
 Then for peak hours, a rule that engages the batteries for discharge and later to idle after-peak throughout the dark evenings and mornings.
 
 Other automations are also possible though not yet here, i.e. to stop battery charging at reaching some SoC lower than 100%, e.g. 70% as some might prefer.&nbsp;
 To do this well, we would also need automation to idle the batteries, and also bring them out of idle.&nbsp;
-This because, while an idling and non-idling configurations are possible, going into or out of idle is not built-in features of the Envoy, so would have to be automated externally.
+This because, while idling and non-idling configurations are possible, going into or out of idle are not built-in features of the Envoy, so would also have to be automated externally, e.g. with HA.
 
 ---
 
-At present I don't know how to turn on or off Storm Guard, as this seems to be externally automated by the Enphase Cloud dynamically making changes to the Envoy.&nbsp;
+At present I don't know how to turn on or off Storm Guard directly, as this seems to be externally automated by the Enphase Cloud dynamically making changes to the Envoy.&nbsp;
+So, there's no tariff option I know of in the local Envoy.&nbsp;
 And that traditionally, Storm Guard comes back on even after having been turned off.&nbsp;
-However, let's note that recently Enphase App now has a "really really turn off Storm Guard option"!
+However, let's note that recently Enphase App now has a "really really turn off Storm Guard option"!&nbsp;
 I used to have rules that looked for the bad behavior of Storm Guard (i.e. charging from grid possibly even during a peak rate period),
-and would have home assistant jerk the system out of that (by cycling through the other modes: true Self-Consumption and/or Full Backup before returning to Savings mode), 
+and would have home assistant "jerk the system out of that" (by cycling through the other modes: true Self-Consumption and/or Full Backup before returning to Savings mode), 
 but fortunately this seems no longer necessary.
 
 ---
