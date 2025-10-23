@@ -380,6 +380,14 @@ template:
         {% set i = v | int %}
         {{ i + (0 if v-i < 0.5 else 0.5) }}  
 
+command_line:                                       
+  - sensor:                                         
+      name: "Get my IP"                             
+      unique_id: "get_my_ip"
+      command: /sbin/ip address show | fgrep '192.' | cut -d ' ' -f 6 | cut -d '/' -f 1
+      value_template: "{{ value }}"
+      scan_interval: 31556926 
+
 
 automation:
 - alias: EE Read Envoy Battery
