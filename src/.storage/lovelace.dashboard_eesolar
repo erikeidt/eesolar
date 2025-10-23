@@ -1,7 +1,7 @@
 {
   "version": 1,
   "minor_version": 1,
-  "key": "lovelace.dashboard_solar",
+  "key": "lovelace.dashboard_eesolar",
   "data": {
     "config": {
       "views": [
@@ -65,7 +65,7 @@
                   "heading_style": "title",
                   "grid_options": {
                     "columns": 6,
-                    "rows": 2
+                    "rows": 1
                   }
                 },
                 {
@@ -99,16 +99,33 @@
                   "features_position": "bottom",
                   "vertical": false,
                   "name": "Livedata Latency"
+                }
+              ],
+              "column_span": 5
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  },
+                  "heading": "Climbing Reserve"
                 },
                 {
                   "type": "tile",
-                  "entity": "input_text.ee_observed_batteries",
+                  "entity": "sensor.ee_desired_battery_reserve",
                   "features_position": "bottom",
                   "vertical": false,
+                  "name": "Desired Reserve",
                   "grid_options": {
-                    "columns": 39,
+                    "columns": 6,
                     "rows": 1
-                  }
+                  },
+                  "state_content": "solar_only"
                 }
               ],
               "column_span": 5
@@ -122,7 +139,7 @@
                   "heading_style": "title",
                   "grid_options": {
                     "columns": 6,
-                    "rows": 2
+                    "rows": 1
                   }
                 },
                 {
@@ -155,13 +172,10 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "input_text.ee_observed_tariff_schedule",
+                  "entity": "input_boolean.ee_solar_is_tou_workday",
                   "features_position": "bottom",
                   "vertical": false,
-                  "grid_options": {
-                    "columns": 39,
-                    "rows": 1
-                  }
+                  "name": "Workday"
                 }
               ],
               "column_span": 5
@@ -241,7 +255,7 @@
               "cards": [
                 {
                   "type": "markdown",
-                  "content": "<a href=\"http://ehadev.local:8123/local/halelm.html?{{states('sensor.ee_hajt')|urlencode}}\" target=\"_blank\">Open Solar Monitor</a>",
+                  "content": "<a href=\"http://eha5.local:8123/local/halelm.html?{{states('sensor.ee_hajt')|urlencode}}\" target=\"_blank\">Open Solar Monitor</a>",
                   "title": "Monitor",
                   "text_only": true
                 }

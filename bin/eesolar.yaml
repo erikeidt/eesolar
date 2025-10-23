@@ -359,9 +359,8 @@ template:
       unique_id: "ee_desired_battery_reserve"
       unit_of_measurement: "%"
       state: |-
-        {% set SP=states('input_number.ee_observed_solar_production') | float / 1000 %}
-        {{
-          (
+        {% set SP = states('input_number.ee_observed_solar_production') | float / 1000 %}
+        {% set v =  
             min(
               max(
                 states('input_number.ee_observed_charge') | float - 
@@ -377,9 +376,9 @@ template:
               ),
               100
             )
-            / 5
-          ) | round(1) * 5
-        }}
+        %}
+        {% set i = v | int %}
+        {{ i + (0 if v-i < 0.5 else 0.5) }}  
 
 
 automation:
@@ -865,8 +864,11 @@ automation:
   conditions: []
   actions:
   - variables:
+      charge_v: "{{ states('input_number.ee_observed_charge') | float }}"
+      charge_i: "{{ charge_v | int }}"
+      new_reserve: "{{ charge_i + (0 if charge_v - charge_i < 0.5 else 0.5) }}" 
 #     new_reserve: "{{ (states('input_number.ee_observed_charge') | float - 4) | int }}"
-      new_reserve: "{{ states('sensor.ee_desired_battery_reserve') | int }}"
+#     new_reserve: "{{ states('sensor.ee_desired_battery_reserve') | int }}"
       workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
       dl_time: |-
         {% set yetz = now () %}

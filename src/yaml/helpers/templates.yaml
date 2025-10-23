@@ -23,9 +23,8 @@ template:
       unique_id: "ee_desired_battery_reserve"
       unit_of_measurement: "%"
       state: |-
-        {% set SP=states('input_number.ee_observed_solar_production') | float / 1000 %}
-        {{
-          (
+        {% set SP = states('input_number.ee_observed_solar_production') | float / 1000 %}
+        {% set v =  
             min(
               max(
                 states('input_number.ee_observed_charge') | float - 
@@ -41,7 +40,7 @@ template:
               ),
               100
             )
-            / 5
-          ) | round(1) * 5
-        }}
+        %}
+        {% set i = v | int %}
+        {{ i + (0 if v-i < 0.5 else 0.5) }}  
 
