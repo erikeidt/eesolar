@@ -83,7 +83,7 @@
           data:
             peak_rule: ZN
             peak_start: 420
-            peak_end: 1141
+            peak_end: 1201
             reserve: "{{ new_reserve }}"
           response_variable: response
         - variables:
