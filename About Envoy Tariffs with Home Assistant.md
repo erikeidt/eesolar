@@ -29,7 +29,7 @@ The second part is the daily schedule of specific modes & times, and the envoy (
 This part is called the "schedule:" object field.&nbsp; 
 It would be nice if we could write the second part directly but this does not take &#8212; the envoy ignores any second part and regenerates that second part based on the first part.
 
-Both parts are returned in any GET or PUT to the REST API &nbsp; a slightly altered version of the input part and the envoy-generated part.&nbsp;
+Both parts are returned in any GET or PUT to the REST API: a slightly altered version of the input part and the envoy-generated part.&nbsp;
 The return from GET or PUT looks like a json object as follows:
 ```
 {
@@ -90,7 +90,7 @@ Mode Key Settings:
 
 4. DL - Discharge to Load
 	* Power home load from batteries until reserve is reached.
-  * Send all solar to the grid as long as batteries are powering the home load.
+    * Send all solar to the grid as long as batteries are powering the home load.
 	* When the reserve is reached, will not charge batteries.
 	* This is an on-peak setting, i.e. to use it now, choose a peak period that covers now.
 
