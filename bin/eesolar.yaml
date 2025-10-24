@@ -1001,8 +1001,8 @@ automation:
         states(this.entity_id) == 'on'
       }}
     for:
-      hours: 0
-      minutes: 5
+      hours: 3
+      minutes: 0
       seconds: 0 
   - alias: Drop out of ZN
     trigger: template
