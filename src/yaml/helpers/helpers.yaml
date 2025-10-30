@@ -3,6 +3,9 @@ input_boolean:
   ee_solar_is_tou_workday:
     name: "EE Solar is TOU Workday"
     initial: off
+  ee_solar_is_cloudy:
+    name: "EE Solar is Cloudy"
+    initial: off
 
 input_number:
   ee_observed_battery_flow:
@@ -20,6 +23,14 @@ input_number:
     step: 1.0
     unit_of_measurement: "mW"
     name: "EE Observed Solar Production"
+    initial: 0
+  ee_observed_solar_production_max:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Solar Production Max"
     initial: 0
   ee_observed_net_consumption:
     min: -10000000000.0
@@ -84,7 +95,7 @@ input_number:
     step: 1.0
     name: "EE Hour of Day"
     initial: 0
-
+    
 input_text:
   ee_observed_tariff:
     max: 16

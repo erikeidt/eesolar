@@ -3,6 +3,9 @@ input_boolean:
   ee_solar_is_tou_workday:
     name: "EE Solar is TOU Workday"
     initial: off
+  ee_solar_is_cloudy:
+    name: "EE Solar is Cloudy"
+    initial: off
 
 input_number:
   ee_observed_battery_flow:
@@ -20,6 +23,14 @@ input_number:
     step: 1.0
     unit_of_measurement: "mW"
     name: "EE Observed Solar Production"
+    initial: 0
+  ee_observed_solar_production_max:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "EE Observed Solar Production Max"
     initial: 0
   ee_observed_net_consumption:
     min: -10000000000.0
@@ -84,7 +95,7 @@ input_number:
     step: 1.0
     name: "EE Hour of Day"
     initial: 0
-
+    
 input_text:
   ee_observed_tariff:
     max: 16
@@ -127,7 +138,7 @@ rest_command:
     url: "https://192.168.68.102/info.xml"
     method: get
     verify_ssl: false
-    timeout: 60 
+    timeout: 12 
     headers:
       Authorization: !secret enjt
       Accept: "application/xml"
@@ -136,7 +147,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/ensemble/relay"
     method: get
     verify_ssl: false
-    timeout: 45 
+    timeout: 12 
     headers:
       Authorization: !secret enjt
   read_enovy_basic:
@@ -144,7 +155,7 @@ rest_command:
     url: "https://192.168.68.102/production.json"
     method: get
     verify_ssl: false
-    timeout: 45
+    timeout: 12
     headers:
       Authorization: !secret enjt
   read_envoy_batteries:
@@ -152,7 +163,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/ensemble/power"
     method: get
     verify_ssl: false
-    timeout: 45
+    timeout: 12
     headers:
       Authorization: !secret enjt
   envoy_enable_livedata_stream:
@@ -160,7 +171,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/livedata/stream"
     method: post 
     verify_ssl: false
-    timeout: 45
+    timeout: 12
     headers:
       Authorization: !secret enjt
     payload: '{"enable":1}'
@@ -169,7 +180,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/livedata/stream"
     method: post 
     verify_ssl: false
-    timeout: 45
+    timeout: 12
     headers:
       Authorization: !secret enjt
     payload: '{"enable":0}'
@@ -178,7 +189,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/livedata/status"
     method: get
     verify_ssl: false
-    timeout: 45
+    timeout: 12
     headers:
       Authorization: !secret enjt
   read_envoy_stream:
@@ -194,7 +205,7 @@ rest_command:
     url: "https://192.168.68.102/admin/lib/tariff.json"
     method: get
     verify_ssl: false
-    timeout: 45 
+    timeout: 12 
     headers:
       Authorization: !secret enjt
   send_envoy_param_tariff:
@@ -202,7 +213,7 @@ rest_command:
     url: "https://192.168.68.102/admin/lib/tariff.json"
     method: post
     verify_ssl: false
-    timeout: 60 
+    timeout: 25 
     content_type: "application/json"
     headers:
       Authorization: !secret enjt
@@ -440,8 +451,8 @@ automation:
           enabled: false
         - delay:
             hours: 0
-            minutes: 1
-            seconds: 0
+            minutes: 0
+            seconds: 12
             milliseconds: 0
         else:
         - variables:
@@ -497,7 +508,7 @@ automation:
         - delay:
             hours: 0
             minutes: 0
-            seconds: 2
+            seconds: 1
             milliseconds: 0
       count: 60
   - action: automation.turn_off
@@ -563,8 +574,8 @@ automation:
           enabled: false
         - delay:
             hours: 0
-            minutes: 1
-            seconds: 0
+            minutes: 0
+            seconds: 12
             milliseconds: 0
         else:
         - variables:
@@ -587,8 +598,8 @@ automation:
                 Enabling Stream 
           - delay:
               hours: 0
-              minutes: 1
-              seconds: 0
+              minutes: 0
+              seconds: 12
               milliseconds: 0
           else:
           - variables:
@@ -612,6 +623,15 @@ automation:
               value: '{{ solar_production }}'
             target:
               entity_id: input_number.ee_observed_solar_production
+          - if:
+            - condition: template
+              value_template: "{{ solar_production | float > states('input_number.ee_observed_solar_production_max') | float }}"
+            then:
+            - action: input_number.set_value
+              metadata: {}
+              data:
+                value: '{{ solar_production }}'
+              entity_id: input_number.ee_observed_solar_production_max
           - action: input_number.set_value
             metadata: {}
             data:
@@ -762,6 +782,31 @@ automation:
         entity_id: input_number.ee_hour_of_day
   mode: single
 
+- alias: EE Set is Cloudy
+  description: ""
+  triggers:
+    - trigger: template
+      value_template: |-
+        {% set sp = states('input_number.ee_observed_solar_production') | float %}
+        {{
+          states('input_number.ee_hour_of_day') | float < 12 and 
+          sp | float >= 400000  and
+          sp | float < 
+            states('input_number.ee_observed_solar_production_max') | float * 0.75
+        }}
+      for:
+        hours: 0
+        minutes: 5
+        seconds: 0
+  conditions: []
+  actions:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_cloudy
+  mode: single
+
 - alias: EE Set is TOU Workday
   id: ee_set_is_tou_workday
   description: 'Determine todays rates as to workday or holiday'
@@ -793,6 +838,17 @@ automation:
       data: {}
       target:
         entity_id: input_boolean.ee_solar_is_tou_workday
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.ee_solar_is_cloudy
+  - action: input_number.set_value
+    metadata: {}
+    data:
+      value: 0
+    target:
+      entity_id: input_number.ee_observed_solar_production_max
   - variables:
       tidx: "{{ trigger.idx }}"
   - if:
@@ -859,14 +915,41 @@ automation:
       {{
         (states('input_text.ee_observed_tariff') == 'CP' or
           states('input_text.ee_observed_tariff') == 'ZN' or 
-          states('input_text.ee_observed_tariff') == 'DL') and 
-        states('input_number.ee_observed_solar_production') | float >= 100000 and
+          states('input_text.ee_observed_tariff') == 'DL' or
+          states('input_number.ee_observed_charge') >= 98) and 
+        states('input_number.ee_observed_solar_production') | float >= 1200000 and
         states(this.entity_id) == 'on'
       }}
     for:
       hours: 0
-      minutes: 0
-      seconds: 20
+      minutes: 40 
+      seconds: 0 
+  - trigger: template
+    value_template: |-
+      {{
+        (states('input_text.ee_observed_tariff') == 'CP' or
+          states('input_text.ee_observed_tariff') == 'ZN' or 
+          states('input_text.ee_observed_tariff') == 'DL') and 
+        states('input_number.ee_observed_solar_production') | float >= 1600000 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 10 
+      seconds: 0 
+  - trigger: template
+    value_template: |-
+      {{
+        (states('input_text.ee_observed_tariff') == 'CP' or
+          states('input_text.ee_observed_tariff') == 'ZN' or 
+          states('input_text.ee_observed_tariff') == 'DL') and 
+        states('input_number.ee_observed_solar_production') | float >= 1900000 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0 
   - trigger: time
     at: "16:45:00"
   conditions: []
@@ -1004,26 +1087,64 @@ automation:
       hours: 3
       minutes: 0
       seconds: 0 
-  - alias: Drop out of ZN
+  - alias: Ready for DL
+    trigger: time
+    at: "16:45:00"
+  - alias: Drop out of ZN 1
     trigger: template
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
-        states('input_number.ee_observed_solar_production') | int < 50000 and
+        states('input_number.ee_observed_solar_production') | int < 800000 and
+        states('input_number.ee_observed_charge') < 90 and
         states(this.entity_id) == 'on'
       }}
     for:
       hours: 0
-      minutes: 0
-      seconds: 45
-  - alias: Ready for DL
-    trigger: time
-    at: "16:45:00"
+      minutes: 30
+      seconds: 00 
+  - alias: Drop out of ZN 2
+    trigger: template
+    value_template: |-
+      {{
+        states('input_text.ee_observed_tariff') == 'ZN' and
+        states('input_number.ee_observed_solar_production') | int < 400000 and
+        states('input_number.ee_observed_charge') < 95 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 00 
+  - alias: Drop out of ZN 3
+    trigger: template
+    value_template: |-
+      {{
+        states('input_text.ee_observed_tariff') == 'ZN' and
+        states('input_number.ee_observed_solar_production') | int < 200000 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 00 
+  - alias: Drop out of ZN 4
+    trigger: template
+    value_template: |-
+      {{
+        states('input_text.ee_observed_tariff') == 'ZN' and
+        states('input_number.ee_observed_solar_production') | int < 100000 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 00 
   conditions: []
   actions:
   - variables:
       automat: automation.ee_while_zn
-      tidx: "{{ trigger.idx }}"
+      tidx: "{{ trigger.idx | int }}"
       workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
       observed_tariff: "{{ states('input_text.ee_observed_tariff') }}"
       observed_production: "{{ states('input_number.ee_observed_solar_production') }}"
@@ -1052,7 +1173,7 @@ automation:
     else:
     - if:
       - condition: template
-        value_template: "{{ tidx == 2 and not workday }}"
+        value_template: "{{ tidx == 1 and not workday }}"
       then:
       - stop: It is 4:45pm but not workday
     - variables:

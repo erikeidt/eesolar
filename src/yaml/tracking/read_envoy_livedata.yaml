@@ -49,8 +49,8 @@
           enabled: false
         - delay:
             hours: 0
-            minutes: 1
-            seconds: 0
+            minutes: 0
+            seconds: 12
             milliseconds: 0
         else:
         - variables:
@@ -73,8 +73,8 @@
                 Enabling Stream 
           - delay:
               hours: 0
-              minutes: 1
-              seconds: 0
+              minutes: 0
+              seconds: 12
               milliseconds: 0
           else:
           - variables:
@@ -98,6 +98,15 @@
               value: '{{ solar_production }}'
             target:
               entity_id: input_number.ee_observed_solar_production
+          - if:
+            - condition: template
+              value_template: "{{ solar_production | float > states('input_number.ee_observed_solar_production_max') | float }}"
+            then:
+            - action: input_number.set_value
+              metadata: {}
+              data:
+                value: '{{ solar_production }}'
+              entity_id: input_number.ee_observed_solar_production_max
           - action: input_number.set_value
             metadata: {}
             data:

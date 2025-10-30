@@ -1,0 +1,25 @@
+- alias: EE Set is Cloudy
+  description: ""
+  triggers:
+    - trigger: template
+      value_template: |-
+        {% set sp = states('input_number.ee_observed_solar_production') | float %}
+        {{
+          states('input_number.ee_hour_of_day') | float < 12 and 
+          sp | float >= 400000  and
+          sp | float < 
+            states('input_number.ee_observed_solar_production_max') | float * 0.75
+        }}
+      for:
+        hours: 0
+        minutes: 5
+        seconds: 0
+  conditions: []
+  actions:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_cloudy
+  mode: single
+

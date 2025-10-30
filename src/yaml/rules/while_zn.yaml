@@ -14,26 +14,64 @@
       hours: 3
       minutes: 0
       seconds: 0 
-  - alias: Drop out of ZN
+  - alias: Ready for DL
+    trigger: time
+    at: "16:45:00"
+  - alias: Drop out of ZN 1
     trigger: template
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
-        states('input_number.ee_observed_solar_production') | int < 50000 and
+        states('input_number.ee_observed_solar_production') | int < 800000 and
+        states('input_number.ee_observed_charge') < 90 and
         states(this.entity_id) == 'on'
       }}
     for:
       hours: 0
-      minutes: 0
-      seconds: 45
-  - alias: Ready for DL
-    trigger: time
-    at: "16:45:00"
+      minutes: 30
+      seconds: 00 
+  - alias: Drop out of ZN 2
+    trigger: template
+    value_template: |-
+      {{
+        states('input_text.ee_observed_tariff') == 'ZN' and
+        states('input_number.ee_observed_solar_production') | int < 400000 and
+        states('input_number.ee_observed_charge') < 95 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 00 
+  - alias: Drop out of ZN 3
+    trigger: template
+    value_template: |-
+      {{
+        states('input_text.ee_observed_tariff') == 'ZN' and
+        states('input_number.ee_observed_solar_production') | int < 200000 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 00 
+  - alias: Drop out of ZN 4
+    trigger: template
+    value_template: |-
+      {{
+        states('input_text.ee_observed_tariff') == 'ZN' and
+        states('input_number.ee_observed_solar_production') | int < 100000 and
+        states(this.entity_id) == 'on'
+      }}
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 00 
   conditions: []
   actions:
   - variables:
       automat: automation.ee_while_zn
-      tidx: "{{ trigger.idx }}"
+      tidx: "{{ trigger.idx | int }}"
       workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
       observed_tariff: "{{ states('input_text.ee_observed_tariff') }}"
       observed_production: "{{ states('input_number.ee_observed_solar_production') }}"
@@ -62,7 +100,7 @@
     else:
     - if:
       - condition: template
-        value_template: "{{ tidx == 2 and not workday }}"
+        value_template: "{{ tidx == 1 and not workday }}"
       then:
       - stop: It is 4:45pm but not workday
     - variables:
