@@ -50,7 +50,7 @@
         - delay:
             hours: 0
             minutes: 0
-            seconds: 2
+            seconds: 30
             milliseconds: 0
         else:
         - variables:
@@ -74,7 +74,7 @@
           - delay:
               hours: 0
               minutes: 0
-              seconds: 2
+              seconds: 20
               milliseconds: 0
           else:
           - variables:

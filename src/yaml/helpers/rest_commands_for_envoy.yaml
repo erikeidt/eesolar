@@ -6,7 +6,7 @@ rest_command:
     url: "https://192.168.68.102/info.xml"
     method: get
     verify_ssl: false
-    timeout: 60 
+    timeout: 120 
     headers:
       Authorization: !secret enjt
       Accept: "application/xml"
@@ -15,7 +15,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/ensemble/relay"
     method: get
     verify_ssl: false
-    timeout: 60 
+    timeout: 120 
     headers:
       Authorization: !secret enjt
   read_enovy_basic:
@@ -23,7 +23,7 @@ rest_command:
     url: "https://192.168.68.102/production.json"
     method: get
     verify_ssl: false
-    timeout: 60
+    timeout: 120
     headers:
       Authorization: !secret enjt
   read_envoy_batteries:
@@ -31,7 +31,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/ensemble/power"
     method: get
     verify_ssl: false
-    timeout: 60
+    timeout: 120
     headers:
       Authorization: !secret enjt
   envoy_enable_livedata_stream:
@@ -39,7 +39,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/livedata/stream"
     method: post 
     verify_ssl: false
-    timeout: 60
+    timeout: 120
     headers:
       Authorization: !secret enjt
     payload: '{"enable":1}'
@@ -48,7 +48,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/livedata/stream"
     method: post 
     verify_ssl: false
-    timeout: 60
+    timeout: 120
     headers:
       Authorization: !secret enjt
     payload: '{"enable":0}'
@@ -57,7 +57,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/livedata/status"
     method: get
     verify_ssl: false
-    timeout: 60
+    timeout: 120
     headers:
       Authorization: !secret enjt
   read_envoy_stream:
@@ -73,7 +73,7 @@ rest_command:
     url: "https://192.168.68.102/admin/lib/tariff.json"
     method: get
     verify_ssl: false
-    timeout: 60 
+    timeout: 120 
     headers:
       Authorization: !secret enjt
   send_envoy_param_tariff:
@@ -81,7 +81,7 @@ rest_command:
     url: "https://192.168.68.102/admin/lib/tariff.json"
     method: post
     verify_ssl: false
-    timeout: 70 
+    timeout: 180 
     content_type: "application/json"
     headers:
       Authorization: !secret enjt
