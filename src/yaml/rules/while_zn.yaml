@@ -73,6 +73,7 @@
       automat: automation.ee_while_zn
       tidx: "{{ trigger.idx | int }}"
       workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
+      off_season: "{{ states('input_boolean.ee_solar_is_off_sesason') == 'on' }}"
       observed_tariff: "{{ states('input_text.ee_observed_tariff') }}"
       observed_production: "{{ states('input_number.ee_observed_solar_production') }}"
   - if:
@@ -104,12 +105,11 @@
       then:
       - stop: It is 4:45pm but not workday
     - variables:
-        use_zn: false
         tariff: |-
           {{
             { 
               "time" : now().timestamp() | int,
-              "peak_rule": "DL",
+              "peak_rule": "ZN" if off_season else "DL",
               "peak_start": 1021 if workday else 780,
               "peak_end": 1201 if workday else 785,
               "reserve": min(50, states('input_number.ee_observed_charge') | int)
@@ -166,11 +166,11 @@
                 Tariff change fails (ZN)
                 {{ attempts }}
                 {{ now().strftime('%m/%d %H:%M:%S') }}
-      - action: rest_command.send_envoy_param_tariff
-        continue_on_error: true
-        metadata: {}
-        data: "{{ tariff }}"
-        response_variable: response
+      -  action: rest_command.send_envoy_param_tariff
+         continue_on_error: true
+         metadata: {}
+         data: "{{ tariff }}"
+         response_variable: response
       - variables:
           attempts: "{{ attempts + 1 }}"
       while:

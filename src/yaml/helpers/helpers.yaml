@@ -6,6 +6,9 @@ input_boolean:
   ee_solar_is_cloudy:
     name: "EE Solar is Cloudy"
     initial: off
+  ee_solar_is_off_season:
+    name: "EE Solar is Off Season"
+    initial: off
 
 input_number:
   ee_observed_battery_flow:

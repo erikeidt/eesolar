@@ -25,7 +25,8 @@
         response_variable: response
       - variables:
           response_time: '{{ now() }}'
-          latency: '{{ response_time | as_timestamp - request_time | as_timestamp }}'
+          just_now: '{{ (response_time | as_datetime).strftime(''%H:%M:%S'') }}'
+          latency: '{{ ((response_time | as_timestamp - request_time | as_timestamp) * 1000) | int }}'
       - action: notify.persistent_notification
         metadata: {}
         data:
@@ -42,14 +43,14 @@
         - action: notify.persistent_notification
           metadata: {}
           data:
-            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Read Battery -- {{ response.status | default(response) }}'
+            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Battery -- {{ response.status | default(response) }} -- {{ latency }} ms'
         - stop: Rest command failure
           error: true
           enabled: false
         - delay:
             hours: 0
-            minutes: 0
-            seconds: 45
+            minutes: 2
+            seconds: 0
             milliseconds: 0
         else:
         - variables:
@@ -93,13 +94,13 @@
         - action: input_datetime.set_datetime
           metadata: {}
           data:
-            time: '{{ now().strftime(''%H:%M:%S'') }}'
+            time: '{{ just_now }}'
           target:
             entity_id: input_datetime.ee_envoy_battery_reporting_time
         - action: input_number.set_value
           metadata: {}
           data:
-            value: '{{ (latency * 1000) | int }}'
+            value: '{{ latency }}'
           target:
             entity_id: input_number.ee_observed_envoy_read_battery_latency
         - delay:

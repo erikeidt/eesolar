@@ -8,13 +8,13 @@
         (states('input_text.ee_observed_tariff') == 'CP' or
           states('input_text.ee_observed_tariff') == 'ZN' or 
           states('input_text.ee_observed_tariff') == 'DL' or
-          states('input_number.ee_observed_charge') >= 98) and 
+          states('input_number.ee_observed_charge') >= 96) and 
         states('input_number.ee_observed_solar_production') | float >= 1200000 and
         states(this.entity_id) == 'on'
       }}
     for:
       hours: 0
-      minutes: 40 
+      minutes: 30 
       seconds: 0 
   - trigger: template
     value_template: |-
@@ -22,12 +22,12 @@
         (states('input_text.ee_observed_tariff') == 'CP' or
           states('input_text.ee_observed_tariff') == 'ZN' or 
           states('input_text.ee_observed_tariff') == 'DL') and 
-        states('input_number.ee_observed_solar_production') | float >= 1600000 and
+        states('input_number.ee_observed_solar_production') | float >= 1400000 and
         states(this.entity_id) == 'on'
       }}
     for:
       hours: 0
-      minutes: 10 
+      minutes: 5
       seconds: 0 
   - trigger: template
     value_template: |-
@@ -35,13 +35,9 @@
         (states('input_text.ee_observed_tariff') == 'CP' or
           states('input_text.ee_observed_tariff') == 'ZN' or 
           states('input_text.ee_observed_tariff') == 'DL') and 
-        states('input_number.ee_observed_solar_production') | float >= 1900000 and
+        states('input_number.ee_observed_solar_production') | float >= 1800000 and
         states(this.entity_id) == 'on'
       }}
-    for:
-      hours: 0
-      minutes: 3
-      seconds: 0 
   - trigger: time
     at: "16:45:00"
   conditions: []

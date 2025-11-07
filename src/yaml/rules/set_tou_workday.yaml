@@ -6,34 +6,45 @@
     at: 00:15:00
   - trigger: homeassistant
     event: start
+  - trigger: template
+    value_template: "{{ states(this.entity_id) == 'on' }}" 
   conditions: []
   actions:
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+        - input_boolean.ee_solar_is_cloudy
+        - input_boolean.ee_solar_is_tou_workday
+        - input_boolean.ee_solar_is_off_season
   - if:
-    - condition: or
+    - condition: and
       conditions:
       - condition: time
         weekday:
-        - sun
-        - sat
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
       - condition: template
-        value_template: '{{ states("calendar.utility_tou_holidays") == "on" }}'
+        value_template: "{{ states('calendar.utility_tou_holidays') != 'on' }}"
     then:
-    - action: input_boolean.turn_off
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_tou_workday
-    else:
     - action: input_boolean.turn_on
       metadata: {}
       data: {}
       target:
         entity_id: input_boolean.ee_solar_is_tou_workday
-  - action: input_boolean.turn_off
-    metadata: {}
-    data: {}
-    target:
-      entity_id: input_boolean.ee_solar_is_cloudy
+  - if:
+      - condition: template
+        value_template: "{{ now().month <= 5 or now().month >= 10 }}"
+    then:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_off_season
   - action: input_number.set_value
     metadata: {}
     data:
@@ -44,7 +55,7 @@
       tidx: "{{ trigger.idx }}"
   - if:
     - condition: template
-      value_template: '{{ tidx != 0 }}'
+      value_template: "{{ tidx != 0 }}"
     then:
     - action: automation.turn_off
       metadata: {}

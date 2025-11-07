@@ -26,7 +26,7 @@
       - variables:
           response_time: '{{ now() }}'
           just_now: '{{ (response_time | as_datetime).strftime("%H:%M:%S") }}'
-          latency: '{{ response_time | as_timestamp - request_time | as_timestamp }}'
+          latency: '{{ ((response_time | as_timestamp - request_time | as_timestamp) * 1000) | int }}' 
       - action: notify.persistent_notification
         metadata: {}
         data:
@@ -43,14 +43,14 @@
         - action: notify.persistent_notification
           metadata: {}
           data:
-            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Read Livedata -- {{ response.status | default(response) }}'
+            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Livedata -- {{ response.status | default(response) }} -- {{ latency }} ms'
         - stop: Rest command failed
           error: true
           enabled: false
         - delay:
             hours: 0
-            minutes: 0
-            seconds: 45
+            minutes: 2
+            seconds: 0
             milliseconds: 0
         else:
         - variables:
@@ -134,7 +134,7 @@
           - action: input_number.set_value
             metadata: {}
             data:
-              value: '{{ (latency * 1000) | int }}'
+              value: '{{ latency }}'
             target:
               entity_id: input_number.ee_observed_envoy_read_livedata_latency
           - action: notify.persistent_notification
