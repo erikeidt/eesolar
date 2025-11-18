@@ -149,3 +149,17 @@ The peak_rule is a mode key as described above.&nbsp;
 And the reserve is the battery reserve level.&nbsp;
 (I have hard-coded mode:"economy" and very_low_soc:25 in the rest command template, though these can be changed and/or parameterized.)
 
+---
+
+Charge from grid is different from all the other mode keys in how it is described in the tariff representation.&nbsp;
+I can make my system charge from the grid by a combination of settings in the tariff representation, as follows: 
+
+    tariff.storage_settings.charge_from_grid: true
+    tariff.seasons.days.must_charge_start: 0
+    tariff.seasons.days.must_charge_duration: 180
+    tariff.seasons.days.must_charge_mode: "CG"
+
+These settings will make it create a schedule that charges from grid from midnight to 3am.&nbsp; Duration is in minutes; time of day is minutes of the day (e.g. 900=3pm).  The seasons can otherwise specify a regular schedule.
+
+
+
