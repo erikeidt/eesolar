@@ -43,7 +43,7 @@
   conditions: []
   actions:
   - variables:
-      charge_v: "{{ states('input_number.ee_observed_charge') | float }}"
+      charge_v: "{{ min(states('input_number.ee_observed_charge') | float, 90) }}"
       charge_i: "{{ charge_v | int }}"
       new_reserve: "{{ charge_i + (0 if charge_v - charge_i < 0.5 else 0.5) }}" 
 #     new_reserve: "{{ (states('input_number.ee_observed_charge') | float - 4) | int }}"

@@ -3,11 +3,17 @@ input_boolean:
   ee_solar_is_tou_workday:
     name: "EE Solar is TOU Workday"
     initial: off
+  ee_solar_is_tou_workday_tomorrow:
+    name: "EE Solar is TOU Workday Tomorrow"
+    initial: off
   ee_solar_is_cloudy:
     name: "EE Solar is Cloudy"
     initial: off
   ee_solar_is_off_season:
     name: "EE Solar is Off Season"
+    initial: off
+  ee_solar_is_off_season_tomorrow:
+    name: "EE Solar is Off Season Tomorrow"
     initial: off
 
 input_number:
@@ -141,7 +147,7 @@ rest_command:
     url: "https://192.168.68.102/info.xml"
     method: get
     verify_ssl: false
-    timeout: 120 
+    timeout: 330 
     headers:
       Authorization: !secret enjt
       Accept: "application/xml"
@@ -150,7 +156,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/ensemble/relay"
     method: get
     verify_ssl: false
-    timeout: 120 
+    timeout: 330 
     headers:
       Authorization: !secret enjt
   read_enovy_basic:
@@ -158,7 +164,7 @@ rest_command:
     url: "https://192.168.68.102/production.json"
     method: get
     verify_ssl: false
-    timeout: 120
+    timeout: 330
     headers:
       Authorization: !secret enjt
   read_envoy_batteries:
@@ -166,7 +172,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/ensemble/power"
     method: get
     verify_ssl: false
-    timeout: 120
+    timeout: 330
     headers:
       Authorization: !secret enjt
   envoy_enable_livedata_stream:
@@ -174,7 +180,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/livedata/stream"
     method: post 
     verify_ssl: false
-    timeout: 120
+    timeout: 330
     headers:
       Authorization: !secret enjt
     payload: '{"enable":1}'
@@ -183,7 +189,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/livedata/stream"
     method: post 
     verify_ssl: false
-    timeout: 120
+    timeout: 330
     headers:
       Authorization: !secret enjt
     payload: '{"enable":0}'
@@ -192,7 +198,7 @@ rest_command:
     url: "https://192.168.68.102/ivp/livedata/status"
     method: get
     verify_ssl: false
-    timeout: 120
+    timeout: 330
     headers:
       Authorization: !secret enjt
   read_envoy_stream:
@@ -208,7 +214,7 @@ rest_command:
     url: "https://192.168.68.102/admin/lib/tariff.json"
     method: get
     verify_ssl: false
-    timeout: 120 
+    timeout: 330 
     headers:
       Authorization: !secret enjt
   send_envoy_param_tariff:
@@ -216,7 +222,7 @@ rest_command:
     url: "https://192.168.68.102/admin/lib/tariff.json"
     method: post
     verify_ssl: false
-    timeout: 180 
+    timeout: 330 
     content_type: "application/json"
     headers:
       Authorization: !secret enjt
@@ -388,7 +394,7 @@ template:
                   (SP - 1800)/500
                 )
               ),
-              100
+              90
             )
         %}
         {% set i = v | int %}

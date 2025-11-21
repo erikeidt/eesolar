@@ -17,7 +17,30 @@
       entity_id:
         - input_boolean.ee_solar_is_cloudy
         - input_boolean.ee_solar_is_tou_workday
+        - input_boolean.ee_solar_is_tou_workday_tomorrow
         - input_boolean.ee_solar_is_off_season
+        - input_boolean.ee_solar_is_off_season_tomorrow
+  - action: calendar.get_events
+    metadata: {}
+    data:
+      start_date_time: "2025-11-18"
+      duration:
+        hours: 36
+    target:
+      entity_id: 'calendar.utility_tou_holidays'
+    response_variable: agenda
+  - variables:
+      yetz: "{{ now() }}"
+      morgan: "{{ yetz|as_datetime + timedelta(days=1) }}"
+      response: "{{ agenda['calendar.utility_tou_holidays'] }}"
+      events: "{{ response.events }}"
+      theday: "{{ (yetz|as_datetime).strftime('%Y-%m-%d') }}"
+      tou_today: "{{ events|length >= 1 and events[0].start <= theday }}"
+      tou_tomorrow: |-
+        {{ 
+          events|length == 2 or 
+          (events|length == 1 and events[0].start > theday) 
+        }}
   - if:
     - condition: and
       conditions:
@@ -29,7 +52,7 @@
         - thu
         - fri
       - condition: template
-        value_template: "{{ states('calendar.utility_tou_holidays') != 'on' }}"
+        value_template: "{{ not tou_today }}"
     then:
     - action: input_boolean.turn_on
       metadata: {}
@@ -37,14 +60,41 @@
       target:
         entity_id: input_boolean.ee_solar_is_tou_workday
   - if:
+    - condition: and
+      conditions:
+      - condition: time
+        weekday:
+        - sun
+        - mon
+        - tue
+        - wed
+        - thu
       - condition: template
-        value_template: "{{ now().month <= 5 or now().month >= 10 }}"
+        value_template: "{{ not tou_tomorrow }}"
+    then:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_tou_workday_tomorrow
+  - if:
+      - condition: template
+        value_template: "{{ (yetz|as_datetime).month <= 5 or (yetz|as_datetime).month >= 10 }}"
     then:
     - action: input_boolean.turn_on
       metadata: {}
       data: {}
       target:
         entity_id: input_boolean.ee_solar_is_off_season
+  - if:
+      - condition: template
+        value_template: "{{ (morgan|as_datetime).month <= 5 or (morgan|as_datetime).month >= 10 }}"
+    then:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_off_season_tomorrow
   - action: input_number.set_value
     metadata: {}
     data:

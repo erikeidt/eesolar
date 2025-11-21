@@ -34,6 +34,13 @@
                 },
                 {
                   "type": "tile",
+                  "entity": "input_number.ee_observed_solar_production_max",
+                  "name": "Max Solar",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
                   "entity": "input_number.ee_observed_total_consumption",
                   "features_position": "bottom",
                   "vertical": false,
@@ -172,13 +179,71 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "input_boolean.ee_solar_is_tou_workday",
-                  "features_position": "bottom",
+                  "entity": "input_boolean.ee_solar_is_cloudy",
+                  "name": "Cloudy",
                   "vertical": false,
-                  "name": "Workday"
+                  "features_position": "bottom"
                 }
               ],
               "column_span": 5
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Today",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.ee_solar_is_tou_workday",
+                  "name": "Workday",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.ee_solar_is_off_season",
+                  "name": "Off Season",
+                  "vertical": false,
+                  "features_position": "bottom"
+                }
+              ],
+              "column_span": 2
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Tomorrow",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.ee_solar_is_off_season_tomorrow",
+                  "name": "Off Season",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.ee_solar_is_tou_workday_tomorrow",
+                  "name": "Workday",
+                  "vertical": false,
+                  "features_position": "bottom"
+                }
+              ],
+              "column_span": 2
             },
             {
               "type": "grid",

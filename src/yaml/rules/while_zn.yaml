@@ -11,7 +11,7 @@
         states(this.entity_id) == 'on'
       }}
     for:
-      hours: 3
+      hours: 4
       minutes: 0
       seconds: 0 
   - alias: Ready for DL
@@ -23,7 +23,7 @@
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
         states('input_number.ee_observed_solar_production') | int < 800000 and
-        states('input_number.ee_observed_charge') < 90 and
+        states('input_number.ee_observed_charge') < 80 and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -36,7 +36,7 @@
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
         states('input_number.ee_observed_solar_production') | int < 400000 and
-        states('input_number.ee_observed_charge') < 95 and
+        states('input_number.ee_observed_charge') < 90 and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -73,7 +73,7 @@
       automat: automation.ee_while_zn
       tidx: "{{ trigger.idx | int }}"
       workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
-      off_season: "{{ states('input_boolean.ee_solar_is_off_sesason') == 'on' }}"
+      off_season: "{{ states('input_boolean.ee_solar_is_off_season') == 'on' }}"
       observed_tariff: "{{ states('input_text.ee_observed_tariff') }}"
       observed_production: "{{ states('input_number.ee_observed_solar_production') }}"
   - if:
