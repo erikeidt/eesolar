@@ -842,7 +842,6 @@ automation:
   - action: calendar.get_events
     metadata: {}
     data:
-      start_date_time: "2025-11-18"
       duration:
         hours: 36
     target:
@@ -920,11 +919,9 @@ automation:
       value: 0
     target:
       entity_id: input_number.ee_observed_solar_production_max
-  - variables:
-      tidx: "{{ trigger.idx }}"
   - if:
     - condition: template
-      value_template: "{{ tidx != 0 }}"
+      value_template: "{{ trigger.idx | int != 0 }}"
     then:
     - action: automation.turn_off
       metadata: {}
