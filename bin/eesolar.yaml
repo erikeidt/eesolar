@@ -984,7 +984,7 @@ automation:
         (states('input_text.ee_observed_tariff') == 'CP' or
           states('input_text.ee_observed_tariff') == 'ZN' or 
           states('input_text.ee_observed_tariff') == 'DL' or
-          states('input_number.ee_observed_charge') >= 96) and 
+          states('input_number.ee_observed_charge') | float >= 96) and 
         states('input_number.ee_observed_solar_production') | float >= 1200000 and
         states(this.entity_id) == 'on'
       }}
@@ -1083,6 +1083,7 @@ automation:
           continue_on_error: true
           metadata: {}
           data:
+            time: "{{ now().timestamp() | int }}"
             peak_rule: ZN
             peak_start: 420
             peak_end: 1201
