@@ -608,7 +608,14 @@
                 od.style.display = ""
         }
 
-        window.onload = () => startMonitoring();
+        window.onload = () => {
+            if (bearer.startsWith("w=1&")) {
+                bearer = bearer.substring(4);
+                toggleLongWideDisplayMode();
+            }
+            startMonitoring();
+         }
+
 
     </script>
 
