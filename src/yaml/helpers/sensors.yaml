@@ -16,9 +16,9 @@ template:
         sc: "{{ states('input_text.ee_observed_tariff_schedule') }}"
         gs: "{{ states('input_text.ee_observed_grid_status') }}"
         vs: "{{ states('input_text.ee_observed_vers') }}"
-    - name: "EE HAJT"
-      unique_id: "ee_hajt"
-      state: !secret hajt 
+#    - name: "EE HAJT"
+#      unique_id: "ee_hajt"
+#      state: !secret hajt 
     - name: "EE Desired Battery Reserve"
       unique_id: "ee_desired_battery_reserve"
       unit_of_measurement: "%"

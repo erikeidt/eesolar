@@ -372,9 +372,9 @@ template:
         sc: "{{ states('input_text.ee_observed_tariff_schedule') }}"
         gs: "{{ states('input_text.ee_observed_grid_status') }}"
         vs: "{{ states('input_text.ee_observed_vers') }}"
-    - name: "EE HAJT"
-      unique_id: "ee_hajt"
-      state: !secret hajt 
+#    - name: "EE HAJT"
+#      unique_id: "ee_hajt"
+#      state: !secret hajt 
     - name: "EE Desired Battery Reserve"
       unique_id: "ee_desired_battery_reserve"
       unit_of_measurement: "%"
@@ -1160,8 +1160,8 @@ automation:
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
-        states('input_number.ee_observed_solar_production') | int < 800000 and
-        states('input_number.ee_observed_charge') < 80 and
+        states('input_number.ee_observed_solar_production') | int < 1500000 and
+        states('input_number.ee_observed_charge') | int < 80 and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -1173,8 +1173,8 @@ automation:
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
-        states('input_number.ee_observed_solar_production') | int < 400000 and
-        states('input_number.ee_observed_charge') < 90 and
+        states('input_number.ee_observed_solar_production') | int < 1100000 and
+        states('input_number.ee_observed_charge') | int < 90 and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -1186,7 +1186,7 @@ automation:
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
-        states('input_number.ee_observed_solar_production') | int < 200000 and
+        states('input_number.ee_observed_solar_production') | int < 900000 and
         states(this.entity_id) == 'on'
       }}
     for:
@@ -1198,7 +1198,7 @@ automation:
     value_template: |-
       {{
         states('input_text.ee_observed_tariff') == 'ZN' and
-        states('input_number.ee_observed_solar_production') | int < 100000 and
+        states('input_number.ee_observed_solar_production') | int < 400000 and
         states(this.entity_id) == 'on'
       }}
     for:

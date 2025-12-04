@@ -23,7 +23,10 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "input_datetime.ee_envoy_pc_reporting_time"
+                  "entity": "input_datetime.ee_envoy_pc_reporting_time",
+                  "name": "P&C Last",
+                  "vertical": false,
+                  "features_position": "bottom"
                 },
                 {
                   "type": "tile",
@@ -77,7 +80,10 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "input_datetime.ee_envoy_battery_reporting_time"
+                  "entity": "input_datetime.ee_envoy_battery_reporting_time",
+                  "name": "Batt Last",
+                  "vertical": false,
+                  "features_position": "bottom"
                 },
                 {
                   "type": "tile",
@@ -230,15 +236,15 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "input_boolean.ee_solar_is_off_season_tomorrow",
-                  "name": "Off Season",
+                  "entity": "input_boolean.ee_solar_is_tou_workday_tomorrow",
+                  "name": "Workday",
                   "vertical": false,
                   "features_position": "bottom"
                 },
                 {
                   "type": "tile",
-                  "entity": "input_boolean.ee_solar_is_tou_workday_tomorrow",
-                  "name": "Workday",
+                  "entity": "input_boolean.ee_solar_is_off_season_tomorrow",
+                  "name": "Off Season",
                   "vertical": false,
                   "features_position": "bottom"
                 }
@@ -320,7 +326,7 @@
               "cards": [
                 {
                   "type": "markdown",
-                  "content": "<a href=\"http://{{states('sensor.get_my_ip')}}:8123/local/halelm.html?{{states('sensor.ee_hajt')|urlencode}}\" target=\"_blank\">Open Solar Monitor</a>",
+                  "content": "<a href=\"http://{{states('sensor.get_my_ip')}}:8123/local/halelm.html?\" target=\"_blank\">Open Solar Monitor</a>",
                   "title": "Monitor",
                   "text_only": true
                 }
