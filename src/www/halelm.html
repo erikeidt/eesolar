@@ -33,8 +33,10 @@
         var haobs = myURL.origin + "/api/states/sensor.ee_envoy_observed_large";
         var bearer = decodeURIComponent(myURL.search.substring(1));
 
-        var cnt1,cnt2,cnt3,cnt4,txt4,max4,maxTableChart;
-        var maxsp = 0;
+        var cnt1,cnt2,cnt3;
+	var cnt4,txt4,max4,maxTableChart;
+        var cnt5,txt5,min5,minTableCharg;
+        var maxsp = 0, minsp = 0;
 
         var v_grid;
         var v_solar;
@@ -99,10 +101,16 @@
                 cnt1 = document.getElementById("cnt1");
                 cnt2 = document.getElementById("cnt2");
                 cnt3 = document.getElementById("cnt3");
+
                 cnt4 = document.getElementById("cnt4");
                 txt4 = document.getElementById("txt4");
                 max4 = document.getElementById("max4");
                 maxTableChart = document.getElementById("maxTable");
+
+                cnt5 = document.getElementById("cnt5");
+                txt5 = document.getElementById("txt5");
+                max5 = document.getElementById("min5");
+                minTableChart = document.getElementById("minTable");
 
                 v_grid = document.getElementById("v.grid");
                 v_solar = document.getElementById("v.solar");
@@ -240,11 +248,19 @@
                 envoyVersElem.innerHTML = "&nbsp;" + dataObj.vs + "&nbsp;";
 
                 totalProduction = parseFloat(dataObj.sp);
+
                 if (totalProduction > maxsp) {
                     maxsp = totalProduction;
                     cnt4.innerHTML = "&nbsp;" + (maxsp/1000).toFixed(3) + "&nbsp;";
                     txt4.innerHTML = cnt1.innerHTML; 
                 }
+
+		if (totalProduction > 0 && (minsp == 0 || totalProduction < minsp)) {
+			minsp = totalProduction;
+                        cnt5.innerHTML = "&nbsp;" + (minsp/1000).toFixed(3) + "&nbsp;";
+			txt5.innerHTML = cnt1.innerHTML;
+                }
+
                 netConsumption = parseFloat(dataObj.nc);
                 totalConsumption = parseFloat(dataObj.tc);
                 homeLoad = parseFloat(dataObj.hl);
@@ -316,9 +332,13 @@
 
                 if (nowTimeMinutes < 10 && maxsp > 0) {
                     maxsp = 0;
+                    minsp = 0;
 
                     var mt = maxTableChart.insertRow();
                     mt.outerHTML = max4.outerHTML;
+                    mt = minTableChart.insertRow();
+                    mt.outerHTML = min4.innerHTML;
+
                     //mt.style = max4.style; 
                     //mt.innerHTML = max4.innerHTML;
 
@@ -797,6 +817,15 @@
                 <tr style="color: #998200" id="max4"><td id="cnt4">&nbsp;Max Solar&nbsp;</td><td id="txt4">0</td></tr>
             </table>
 
+            <div style="font-size: xx-small">&nbsp;</div>
+
+            <table border="1" cellpadding="2" id="minTable"
+                   style="border-collapse: collapse; text-align: center; font-size: small;
+                    font-family: Courier New, Courier, monospace; font-weight: bold">
+
+                <tr style="color: #998200" id="min5"><td id="cnt5">&nbsp;Min Solar&nbsp;</td><td id="txt5">0</td></tr>
+            </table>
+
 <!--
             <div style="padding-top: 10px">
                 <table id="modekeys" border="1" cellpadding="2" style="border-collapse: collapse; text-align: right; font-size: small; font-weight: bold; font-family: Courier New, Courier, monospace; padding-left: 5px; padding-right: 5px; padding-top: 5px; color: #864300">
@@ -807,6 +836,7 @@
 
     </div>
 -->
+
       <div style="padding-top: 10px">
         <button onclick="toggleLongWideDisplayMode()">Tall/Wide</button>
       </div>

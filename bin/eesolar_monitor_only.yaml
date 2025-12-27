@@ -245,6 +245,37 @@ rest_command:
         peak_end | int | string +
         ',"rate":0.25}]}]}]}}'
       }}
+  send_envoy_param_tariff_ex:
+#   url: "https://envoy.local/admin/lib/tariff.json"
+    url: "https://192.168.68.102/admin/lib/tariff.json"
+    method: post
+    verify_ssl: false
+    timeout: 330 
+    content_type: "application/json"
+    headers:
+      Authorization: !secret enjt
+    payload: >-
+      {{
+        '{"tariff":{"currency":{"code":"USD"},"logger":"mylogger","date":"' +
+        time | string +
+        '","storage_settings":{"mode":"economy","operation_mode_sub_type":"","reserved_soc":' +
+        reserve | round(1) | string +
+        ',"very_low_soc":25,"charge_from_grid":' +
+        ('false' | string if gridcharge is undefined or not gridcharge else 'true' | string) | string  +
+        ',"date":"' +
+        time | string +
+        '","opt_schedules":false},"single_rate":{"rate":0.25,"sell":0.25},' +
+        '"seasons":[{"id":"all_year_long","start":"1/1",' +
+        '"days":[{"id":"all_days","days":"Mon,Tue,Wed,Thu,Fri,Sat,Sun",' +
+        '"must_charge_start":0,"must_charge_duration":0,"must_charge_mode":"CP","peak_rule":"' +
+        peak_rule +
+        '","enable_discharge_to_grid":false,"periods":[{"id":"filler","start":0,"rate":0.25},{"id":"peak-1_","start":' +
+        peak_start | int | string +
+        ',"rate":0.5},{"id":"filler","start":' +
+        peak_end | int | string +
+        ',"rate":0.25}]}]}]}}'
+      }}
+
 
 script:
   ee_decode_tariff:
