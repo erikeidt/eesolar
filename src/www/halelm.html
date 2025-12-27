@@ -109,7 +109,7 @@
 
                 cnt5 = document.getElementById("cnt5");
                 txt5 = document.getElementById("txt5");
-                max5 = document.getElementById("min5");
+                min5 = document.getElementById("min5");
                 minTableChart = document.getElementById("minTable");
 
                 v_grid = document.getElementById("v.grid");
@@ -336,8 +336,9 @@
 
                     var mt = maxTableChart.insertRow();
                     mt.outerHTML = max4.outerHTML;
+
                     mt = minTableChart.insertRow();
-                    mt.outerHTML = min4.innerHTML;
+                    mt.outerHTML = min5.innerHTML;
 
                     //mt.style = max4.style; 
                     //mt.innerHTML = max4.innerHTML;
