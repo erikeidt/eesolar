@@ -6,6 +6,7 @@ template:
       attributes:
         pc: "{{ states('input_datetime.ee_envoy_pc_reporting_time') }}"
         sp: "{{ states('input_number.ee_observed_solar_production') | float }}"
+        sm: "{{ states('sensor.ee_calculated_solar_output') | float }}"
         hl: "{{ states('input_number.ee_observed_home_load') | float }}"
         tc: "{{ states('input_number.ee_observed_total_consumption') | float }}"
         nc: "{{ states('input_number.ee_observed_net_consumption') | float }}"
@@ -43,6 +44,116 @@ template:
         %}
         {% set i = v | int %}
         {{ i + (0 if v-i < 0.5 else 0.5) }}  
+  - sensor:
+    - name: "EE Calculated Solar Output"
+      unique_id: "ee_calculated_solar_output"
+      unit_of_measurement: mW
+      state_class: measurement
+      device_class: power
+      state: |-
+        {# Solar Formula -#}
+        {# https://pubs.nmsu.edu/_circulars/CR674/index.html -#}
+        {# https://pubs.nmsu.edu/_circulars/CR674/CR674.xlsm -#}
+        {% set time_now = now () | as_local -%}
+        {% set time_tuple = time_now.timetuple() -%}
+        {% set time_decimal = time_now.strftime("%H") | int + time_now.strftime("%M") | int / 60 -%}
+        {% set jdoy = time_tuple.tm_yday -%}
+        {% set longitude_correction_radians = ((360/364)*(jdoy-81)) * (pi/180) -%}
+        {% set declination_radians = 23.45 * sin( (360/365.25) * (jdoy - 81) * (pi/180) ) * (pi/180) -%}
+        {% set local_meridan = 
+            ((time_now | as_datetime | as_local).strftime("%z") |int / 100) | int * 15
+        -%}
+        {% set equation_of_time =
+            (9.87*sin(2*longitude_correction_radians)) - 
+            (7.53*cos(longitude_correction_radians)) - 
+            (1.5*sin(longitude_correction_radians))
+        -%}
+        {% set latitude =
+            {
+            'degrees': state_attr('zone.home', 'latitude'), 
+            'radians': state_attr('zone.home', 'latitude') * (pi/180)
+            }
+        -%}
+        {% set longitude =
+            { 
+            'degrees': state_attr('zone.home', 'longitude'), 
+            'radians': state_attr('zone.home', 'longitude') * (pi/180)
+            }
+        -%}
+        {% set local_noon = 
+            ((12*60) - 4 * (longitude.degrees - local_meridan) - equation_of_time)/60 + time_tuple.tm_isdst 
+        -%}
+        {% set noon_to_now = local_noon - time_decimal -%}
+        {% set hour_angle_radians = noon_to_now * 15 * (pi/180) -%}
+        {% set solar_elevation_radians = 
+            asin(
+            cos(latitude.radians) * 
+                cos(declination_radians) *
+                cos(hour_angle_radians)
+            +
+            sin(latitude.radians) *
+                sin(declination_radians)
+            )
+        -%}
+        {% set solar_azimuth0 =
+            asin(
+            (
+                sin(hour_angle_radians) *
+                cos(declination_radians)
+            ) 
+            /
+            cos(solar_elevation_radians)
+            )
+        -%}
+        {% set solar_azimuth_radians = pi - solar_azimuth0 -%}
+        {% set panel_elevation_radians = 26 * (pi/180) -%}
+        {% set panel_azimuth_radians = 180.0 * (pi/180) -%}
+        {#
+        {% set solar_azimuth = 90.36 * (pi/180) -%}
+        {% set solar_elevation = 47.59 * (pi/180) -%}
+        {#% set panel_elevation = 0 -% # }
+        -#}
+        {% set aoi_wo_cos = 
+            sin(solar_elevation_radians) * cos(panel_elevation_radians) +
+            cos(solar_elevation_radians) * sin(panel_elevation_radians) * cos(panel_azimuth_radians - solar_azimuth_radians)
+        -%}
+        {% set sky_factor100 = sin((360/365)*(jdoy-100)*(pi/180)) -%}
+        {% set sky_factor275 = sin((360/365)*(jdoy-275)*(pi/180)) -%}
+        {% set apparent_et_insolation = 1160+75*sky_factor275 -%}
+        {% set optical_depth = 0.174+0.035*sky_factor100 -%}
+        {% set sky_diffuse_factor = 0.095+0.04*sky_factor100 -%}
+        {% set air_mass_ratio = (1/sin(solar_elevation_radians)) | abs -%}
+        {# E27: Clear Sky Beam Radiation at Earth -#}
+        {% set cs_beam_radiation_curr = 
+            apparent_et_insolation*(e**(-optical_depth*air_mass_ratio))
+            if solar_elevation_radians > 0
+            else 0
+        -%}
+        {% set beam_on_panel = cs_beam_radiation_curr * aoi_wo_cos -%}
+        {% set diffuse_on_panel = sky_diffuse_factor * cs_beam_radiation_curr * ((1+cos(panel_elevation_radians))/2) -%}
+        {% set insolation_on_panel = beam_on_panel + diffuse_on_panel -%}
+        {% set insolation_max = 1100 -%}
+        {% set solar_panel_max = 5800000 -%}
+        {% set total = insolation_on_panel * (solar_panel_max / insolation_max) -%}
+        {% set panel_adjusted_total =
+          total if total > 4300000
+          else ((1-(total-2100000)/2000000) * 0.1 + 1.0) * total - 23116 if total > 2300000
+          else ((1-(total-600000)/1300000) * 0.4602 + 1.8677) * total - 1486246 if total > 1000000
+          else (total*0.7) if total > 100000
+          else (total*0.6) if total > 60000
+          else (total*0.1)
+        %}
+        {% set air_temp = states('sensor.pa_air_temp') | float -%}
+        {% set temp_adjusted_total = 
+            panel_adjusted_total if air_temp <= 74
+            else
+            panel_adjusted_total * (1-(air_temp - 74)/500)
+        -%}
+        {% set aqi = states('sensor.pa_air_quality') | float %}
+        {% set aqi_factored = 
+            (1-(aqi / (400/0.12))) * temp_adjusted_total
+        -%}
+        {{ aqi_factored | round(0) }}
 
 command_line:                                       
   - sensor:                                         

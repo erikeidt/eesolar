@@ -13,6 +13,7 @@
         var homeLoad = 0;
         var chargeDischarge = 0;
         var stateOfCharge = 0;
+	var maxCalcProd = 0;
 
         var pcXhr = null;
         var pcto = null;
@@ -42,6 +43,7 @@
         var v_solar;
         var v_home;
         var v_batt;
+        var m_solar;
 
         var v_soch;
         var txt;
@@ -114,6 +116,7 @@
 
                 v_grid = document.getElementById("v.grid");
                 v_solar = document.getElementById("v.solar");
+                m_solar = document.getElementById("m.solar");
                 v_home = document.getElementById("v.home");
                 v_batt = document.getElementById("v.batt");
 
@@ -265,6 +268,8 @@
                 totalConsumption = parseFloat(dataObj.tc);
                 homeLoad = parseFloat(dataObj.hl);
 
+                maxCalcProd = parseFloat(dataObj.sm);
+
                 var sstr = (totalProduction/1000).toFixed(0);
                 setSvgSignedNumericField(sstr, v_solar, 0);
 
@@ -304,6 +309,8 @@
                     var ttt = stateOfCharge.toFixed(2).padStart(3, ' ');
                     v_soch.innerHTML = ttt + "%";
                 }
+                
+		m_solar.innerHTML = (maxCalcProd/1000).toFixed(0).padStart(3, ' ');
 
                 // Tariff
                 var schedule = dataObj.sc;
@@ -657,7 +664,7 @@
             <circle cx="52" cy="180" r="42" fill="crimson" />
             <text x="41" y="205" stroke="WhiteSmoke" style="font-size: xx-small; font-style: italic">Grid</text>
 
-            <circle cx="180" cy="52" r="42" fill="#E6C300" />
+            <circle cx="180" cy="52" r="42" fill="#F6D300" />
             <text x="166" y="77" stroke="WhiteSmoke" style="font-size: xx-small; font-style: italic">Solar</text>
 
             <circle cx="298" cy="180" r="42" fill="seagreen" />
@@ -674,11 +681,11 @@
             <path id="vl.g.h" d="M 94 180 L 243 180" stroke="crimson" stroke-width="3px" marker-end="url(#arwhead)" />
 
             <!-- solar to grid -->
-            <path id="vl.s.g" d="M 150 82 L 91 141" stroke="#E6C300" stroke-width="3px" marker-end="url(#arwhead)" />
+            <path id="vl.s.g" d="M 150 82 L 91 141" stroke="#F6D300" stroke-width="3px" marker-end="url(#arwhead)" />
             <!-- solar battery -->
-            <path id="vl.s.b" d="M 180 94 L 180 253" stroke="#E6C300" stroke-width="3px" marker-end="url(#arwhead)" />
+            <path id="vl.s.b" d="M 180 94 L 180 253" stroke="#F6D300" stroke-width="3px" marker-end="url(#arwhead)" />
             <!-- solar to home -->
-            <path id="vl.s.h" d="M 209 83 L 261 140" stroke="#E6C300" stroke-width="3px" marker-end="url(#arwhead)" />
+            <path id="vl.s.h" d="M 209 83 L 261 140" stroke="#F6D300" stroke-width="3px" marker-end="url(#arwhead)" />
 
             <!-- battery to home -->
             <path id="vl.b.h" d="M 209 277 L 261 220" stroke="#4078A5" stroke-width="3px" marker-end="url(#arwhead)" />
@@ -702,13 +709,13 @@
             <text id="v.g.h" x="116" y="184" stroke="crimson">00000</text>
 
             <rect id="vb.s.h" x="198" y="99" width="64" height="16" fill="white" />
-            <text id="v.s.h" x="206" y="112" stroke="#E6C300">00000</text>
+            <text id="v.s.h" x="206" y="112" stroke="#B6A300">00000</text>
 
             <rect id="vb.s.b" x="148" y="119" width="64" height="16" fill="white" />
-            <text id="v.s.b" x="156" y="132" stroke="#E6C300">00000</text>
+            <text id="v.s.b" x="156" y="132" stroke="#B6A300">00000</text>
 
             <rect id="vb.s.g" x="91" y="99" width="64" height="16" fill="white" />
-            <text id="v.s.g" x="100" y="112" stroke="#E6C300">00000</text>
+            <text id="v.s.g" x="100" y="112" stroke="#B6A300">00000</text>
 
             <rect id="vb.b.h" x="198" y="244" width="64" height="16" fill="white" />
             <text id="v.b.h" x="206" y="257" stroke="#4078A5">00000</text>
@@ -720,7 +727,9 @@
             <text id="v.grid" x="20" y="186" stroke="crimson">- 00000</text>
 
             <rect x="142" y="44" width="76" height="18" rx="6" fill="white" />
-            <text id="v.solar" x="148" y="58" stroke="#E6C300">- 00000</text>
+            <text id="v.solar" x="148" y="58" stroke="#B6A300">- 00000</text>
+
+            <text id="m.solar" x="228" y="34" stroke="#B6A300">0000</text>
 
             <rect x="260" y="172" width="76" height="18" rx="6" fill="white" />
             <text id="v.home" x="266" y="186" stroke="seagreen">+ 00000</text>
