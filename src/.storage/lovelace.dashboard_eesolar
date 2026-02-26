@@ -253,45 +253,6 @@
               "cards": [
                 {
                   "type": "heading",
-                  "heading": "Solar System Automation",
-                  "heading_style": "title",
-                  "grid_options": {
-                    "columns": 9,
-                    "rows": 1
-                  }
-                },
-                {
-                  "type": "entities",
-                  "entities": [
-                    {
-                      "entity": "automation.ee_while_cp",
-                      "secondary_info": "last-updated",
-                      "name": "While CP"
-                    },
-                    {
-                      "entity": "automation.ee_while_dl",
-                      "secondary_info": "last-updated",
-                      "name": "While DL"
-                    },
-                    {
-                      "entity": "automation.ee_while_zn",
-                      "secondary_info": "last-updated",
-                      "name": "While ZN"
-                    }
-                  ],
-                  "grid_options": {
-                    "columns": 9,
-                    "rows": "auto"
-                  }
-                }
-              ],
-              "column_span": 1
-            },
-            {
-              "type": "grid",
-              "cards": [
-                {
-                  "type": "heading",
                   "heading_style": "title",
                   "heading": "Performance"
                 },
@@ -340,19 +301,9 @@
               "type": "grid",
               "cards": [
                 {
-                  "type": "markdown",
-                  "content": "<a href=\"http://{{states('sensor.get_my_ip')}}:8123/local/halelm.html?\" target=\"_blank\">Open Solar Monitor</a>",
-                  "title": "Monitor",
-                  "text_only": true
-                }
-              ]
-            },
-            {
-              "type": "grid",
-              "cards": [
-                {
                   "type": "heading",
-                  "heading": "New section"
+                  "heading": "Tariff Status",
+                  "heading_style": "title"
                 },
                 {
                   "type": "entities",
@@ -374,6 +325,17 @@
                       "type": "simple-entity"
                     }
                   ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "markdown",
+                  "content": "<a href=\"http://{{states('sensor.get_my_ip')}}:8123/local/halelm.html?\" target=\"_blank\">Open Solar Monitor</a>",
+                  "title": "Monitor",
+                  "text_only": true
                 }
               ]
             }
