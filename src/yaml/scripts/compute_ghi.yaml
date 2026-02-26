@@ -1,0 +1,98 @@
+script:
+  ee_compute_irradiance_array:
+    alias: EE Compute Irradiance Array
+    description: "Computed GHI for every 15 minutre for the rest of this solar day"
+    fields:
+      start_time:
+        description: start time
+        required: false
+      count:
+        description: count
+        required: false
+    sequence:
+      - if:
+          - condition: template
+            value_template: "{{ start_time is undefined }}"
+        then:
+          - variables:
+              start_time: "{{ now () }}"
+              count: 15
+      - variables:
+          irradiance: |-
+            {# Solar Formula -#}
+              {# https://pubs.nmsu.edu/_circulars/CR674/index.html -#}
+              {# https://pubs.nmsu.edu/_circulars/CR674/CR674.xlsm -#}
+              {% set time_now = start_time | as_datetime | as_local -%}
+              {% set solar_array_info = states('input_text.solar_array_info') | from_json -%}
+              {% set panel_info = solar_array_info[0] -%}
+              {% set panel_elevation_radians = panel_info.e * (pi/180) -%}
+              {% set panel_azimuth_radians = panel_info.a * (pi/180) -%}
+              {% set latitude_degrees = state_attr('zone.home', 'latitude') | float -%}
+              {% set longitude_degrees = state_attr('zone.home', 'longitude') | float -%}
+              {% set latitude_radians = latitude_degrees * (pi/180) -%} 
+              {# {% set longitude_radians = longitude_degrees * (pi/180) -%} -#}
+              {% set time_tuple = time_now.timetuple() -%}
+              {% set jdoy = time_tuple.tm_yday -%}
+              {% set longitude_correction_radians = ((360/364)*(jdoy-81)) * (pi/180) -%}
+              {% set declination_radians = 23.45 * sin( (360/365.25) * (jdoy - 81) * (pi/180) ) * (pi/180) -%}
+              {% set local_meridan =
+                ((time_now | as_datetime | as_local).strftime("%z") | int / 100) | int * 15
+              -%}
+              {% set equation_of_time =
+                  (9.87*sin(2*longitude_correction_radians)) -
+                  (7.53*cos(longitude_correction_radians)) -
+                  (1.5*sin(longitude_correction_radians))
+              -%}
+              {% set local_noon =
+                ((12*60) - 4 * (longitude_degrees - local_meridan) -
+                equation_of_time)/60 + time_tuple.tm_isdst
+              -%}
+              {% set sky_factor100 = sin((360/365)*(jdoy-100)*(pi/180)) -%}
+              {% set sky_factor275 = sin((360/365)*(jdoy-275)*(pi/180)) -%}
+              {% set apparent_et_irradiance = 1160+75*sky_factor275 -%}
+              {% set optical_depth = 0.174+0.035*sky_factor100 -%}
+              {% set sky_diffuse_factor = 0.095+0.04*sky_factor100 -%}
+              {% set ns = namespace(irr=[], tn=time_now) -%} 
+              {% for i in range(0,count) -%}
+                {% set time_decimal = ns.tn.strftime("%H") | int + ns.tn.strftime("%M") | int / 60 -%}
+                {% set noon_to_now = local_noon - time_decimal -%}
+                {% set hour_angle_radians = noon_to_now * 15 * (pi/180) -%}
+                {% set solar_elevation_radians =
+                    asin(
+                      cos(latitude_radians) * cos(declination_radians) * cos(hour_angle_radians)  +
+                      sin(latitude_radians) * sin(declination_radians)
+                    )
+                -%}
+                {% set solar_azimuth0 =
+                    asin(
+                      (sin(hour_angle_radians) * cos(declination_radians))  /
+                      cos(solar_elevation_radians)
+                    )
+                -%}
+                {% set solar_azimuth_radians = pi - solar_azimuth0 -%}
+                {% set aoi_wo_cos =
+                    sin(solar_elevation_radians) * cos(panel_elevation_radians) +
+                    cos(solar_elevation_radians) * sin(panel_elevation_radians) * cos(panel_azimuth_radians - solar_azimuth_radians)
+                -%}
+                {% set air_mass_ratio = (1/sin(solar_elevation_radians)) | abs -%}            
+                {% set air_density_factor = e**(-optical_depth * air_mass_ratio) -%}
+                {#
+                {% set air_density_factor_stc = e**(-optical_depth * 1.5) -%}
+                {% set amr_factor = air_density_factor / air_density_factor_stc -%}
+                -#}
+                {% set cs_beam_radiation_curr = 
+                  apparent_et_irradiance * air_density_factor
+                    if solar_elevation_radians > 0
+                    else 0
+                -%}
+                {% set beam_on_panel_dni = cs_beam_radiation_curr * aoi_wo_cos -%}
+                {% set diffuse_on_panel_dhi = sky_diffuse_factor * cs_beam_radiation_curr * ((1+cos(panel_elevation_radians))/2) -%}
+                {% set irradiance_on_panel_ghi = beam_on_panel_dni + diffuse_on_panel_dhi -%}
+                {% set ns.irr = ns.irr + [irradiance_on_panel_ghi | round(0)] -%}
+                {% set ns.tn = ns.tn + timedelta(minutes=15) -%}
+              {% endfor -%}
+            {{ { 'ghi': ns.irr } }}
+      - stop: ""
+        response_variable: irradiance
+    mode: single
+

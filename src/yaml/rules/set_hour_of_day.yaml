@@ -1,0 +1,18 @@
+- alias: EE Set Hour of Day
+  id: ee_set_hour_of_day
+  description: "Time trigger to use instead of now(); fires every hour"
+  triggers:
+    - trigger: time_pattern
+      hours: /1
+    - trigger: homeassistant
+      event: start
+  conditions: []
+  actions:
+    - action: input_number.set_value
+      metadata: {}
+      data:
+        value: "{{ now().hour }}"
+      target:
+        entity_id: input_number.ee_hour_of_day
+  mode: single
+

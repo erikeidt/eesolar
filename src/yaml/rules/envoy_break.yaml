@@ -1,0 +1,44 @@
+- alias: EE Solar Envoy Break Time
+  id: ee_solar_envoy_break_time
+  description: "Turn off monitoring to allow Envoy a cleanup break"
+  triggers:
+    - trigger: time
+      at: "23:45:00"
+    - trigger: time
+      at: "04:00:00"
+    - trigger: state
+      entity_id:
+        - input_boolean.ee_utilities_booted
+      to:
+        - "on"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          value_template: >-
+            {{ trigger is undefined or trigger.idx is undefined or trigger.idx |
+            int == 0 }}
+      then:
+        - action: automation.turn_off
+          metadata: {}
+          target:
+            entity_id:
+              - automation.ee_read_envoy_battery
+              - automation.ee_read_envoy_livedata
+              - automation.ee_read_envoy_tariff
+              - automation.ee_read_envoy_relay
+              - automation.ee_read_envoy_xml_info
+          data:
+            stop_actions: true
+      else:
+        - action: automation.turn_on
+          metadata: {}
+          target:
+            entity_id:
+              - automation.ee_read_envoy_battery
+              - automation.ee_read_envoy_livedata
+              - automation.ee_read_envoy_tariff
+              - automation.ee_read_envoy_relay
+              - automation.ee_read_envoy_xml_info
+  mode: single
+

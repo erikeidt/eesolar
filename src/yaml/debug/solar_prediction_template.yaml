@@ -1,0 +1,170 @@
+      {# Solar Formula -#}
+      {# https://pubs.nmsu.edu/_circulars/CR674/index.html -#}
+      {# https://pubs.nmsu.edu/_circulars/CR674/CR674.xlsm -#}
+      {% set time_now = now () | as_local -%}
+      {% set time_tuple = time_now.timetuple() -%}
+      {% set time_decimal = time_now.strftime("%H") | int + time_now.strftime("%M") | int / 60 -%}
+      {% set jdoy = time_tuple.tm_yday -%}
+      {% set longitude_correction_radians = ((360/364)*(jdoy-81)) * (pi/180) -%}
+      {% set declination_radians = 23.45 * sin( (360/365.25) * (jdoy - 81) * (pi/180) ) * (pi/180) -%}
+      {% set local_meridan = 
+        ((time_now | as_datetime | as_local).strftime("%z") |int / 100) | int * 15
+      -%}
+      {% set equation_of_time =
+        (9.87*sin(2*longitude_correction_radians)) - 
+        (7.53*cos(longitude_correction_radians)) - 
+        (1.5*sin(longitude_correction_radians))
+      -%}
+      {% set latitude =
+        {
+          'degrees': state_attr('zone.home', 'latitude'), 
+          'radians': state_attr('zone.home', 'latitude') * (pi/180)
+        }
+      -%}
+      {% set longitude =
+        { 
+          'degrees': state_attr('zone.home', 'longitude'), 
+          'radians': state_attr('zone.home', 'longitude') * (pi/180)
+        }
+      -%}
+      {% set local_noon = 
+        ((12*60) - 4 * (longitude.degrees - local_meridan) - equation_of_time)/60 + time_tuple.tm_isdst 
+      -%}
+      {% set noon_to_now = local_noon - time_decimal -%}
+      {% set hour_angle_radians = noon_to_now * 15 * (pi/180) -%}
+      {% set solar_elevation_radians = 
+        asin(
+          cos(latitude.radians) * 
+            cos(declination_radians) *
+            cos(hour_angle_radians)
+          +
+          sin(latitude.radians) *
+            sin(declination_radians)
+        )
+      -%}
+      {% set solar_azimuth0 =
+        asin(
+          (
+            sin(hour_angle_radians) *
+              cos(declination_radians)
+          ) 
+          /
+          cos(solar_elevation_radians)
+        )
+      -%}
+      {% set solar_azimuth_radians = pi - solar_azimuth0 -%}
+      {% set panel_elevation_radians = 26 * (pi/180) -%}
+      {% set panel_azimuth_radians = 180.0 * (pi/180) -%}
+      {#
+      {% set solar_azimuth = 90.36 * (pi/180) -%}
+      {% set solar_elevation = 47.59 * (pi/180) -%}
+      {#% set panel_elevation = 0 -% # }
+      -#}
+      {% set aoi_wo_cos = 
+        sin(solar_elevation_radians) * cos(panel_elevation_radians) +
+        cos(solar_elevation_radians) * sin(panel_elevation_radians) * cos(panel_azimuth_radians - solar_azimuth_radians)
+      -%}
+      {% set sky_factor100 = sin((360/365)*(jdoy-100)*(pi/180)) -%}
+      {% set sky_factor275 = sin((360/365)*(jdoy-275)*(pi/180)) -%}
+      {% set apparent_et_insolation = 1160+75*sky_factor275 -%}
+      {% set optical_depth = 0.174+0.035*sky_factor100 -%}
+      {% set sky_diffuse_factor = 0.095+0.04*sky_factor100 -%}
+      {% set air_mass_ratio = (1/sin(solar_elevation_radians)) | abs -%}
+      {# E27: Clear Sky Beam Radiation at Earth -#}
+      {% set cs_beam_radiation_curr = 
+        apparent_et_insolation*(e**(-optical_depth*air_mass_ratio))
+          if solar_elevation_radians > 0
+          else 0
+      -%}
+      {% set beam_on_panel = cs_beam_radiation_curr * aoi_wo_cos -%}
+      {% set diffuse_on_panel = sky_diffuse_factor * cs_beam_radiation_curr * ((1+cos(panel_elevation_radians))/2) -%}
+      {% set insolation_on_panel = beam_on_panel + diffuse_on_panel -%}
+      {% set insolation_max = 1100 -%}
+      {% set solar_panel_max = 5800000 -%}
+      {% set total = insolation_on_panel * (solar_panel_max / insolation_max) -%}
+      {% set panel_adjusted_total =
+        total if total > 4300000
+        else ((1-(total-2100000)/2000000) * 0.1 + 1.0) * total - 23116 if total > 2300000
+        else ((1-(total-600000)/1300000) * 0.4602 + 1.8677) * total - 1486246 if total > 1000000
+        else (total*0.7) if total > 100000
+        else (total*0.6) if total > 60000
+        else (total*0.1)
+      %}
+      {% set air_temp = states('sensor.pa_air_temp') | float -%}
+      {% set temp_adjusted_total = 
+        panel_adjusted_total if air_temp <= 74
+        else
+          panel_adjusted_total * (1-(air_temp - 74)/500)
+      -%}
+      {% set aqi = states('sensor.pa_air_quality') | float %}
+      {% set aqi_factored = 
+        (1-(aqi / (400/0.12))) * temp_adjusted_total
+      -%}
+      {{ aqi_factored | round(0) }}
+
+{# ============================================================= -#}
+
+{{ time_now }} -- {{ time_now.strftime ("%H:%M") }}
+{{ time_tuple }}
+time dec: {{ time_decimal }} 
+local_meridan: {{ local_meridan }}
+EqOfT: {{ equation_of_time }}
+location: {{ latitude }} -- {{ longitude }}
+local noon: {{ local_noon }}
+to noon: {{ noon_to_now }}
+Hour Angle: {{ hour_angle_radians }} -- {{ hour_angle_radians * (180/pi) }}
+Declination: {{ declination_radians }} {{ declination_radians * (180/pi) }}
+Solar Elevation: {{ solar_elevation_radians }} -- {{ solar_elevation_radians * (180/pi) }}
+Solar Azimuth: {{ solar_azimuth_radians }} -- {{ solar_azimuth_radians * (180/pi) }}
+Solar Elevation (by sun.sun): {{ state_attr('sun.sun', 'elevation') }}
+Solar Aziumth (by sun.sun): {{ state_attr('sun.sun', 'azimuth') }}
+Panel Elevation:  {{ panel_elevation_radians }} -- {{ panel_elevation_radians * (180/pi) }}
+Panel Azimuth:    {{ panel_azimuth_radians }} -- {{ panel_azimuth_radians * (180/pi) }}
+AoI w/o cos: {{ aoi_wo_cos }} -- {{ cos(aoi_wo_cos) * (180/pi) }}
+Sky Ffactors {{ sky_factor100, sky_factor275 }}
+Apparent Extraterrestrial Solar Insolation: {{ apparent_et_insolation }}
+Optical Depth: {{ optical_depth }}
+Sky diffuse factor: {{ sky_diffuse_factor }}
+Air Mass Ratio: {{ air_mass_ratio }}
+Clear Sky Beam Radiation: {{ cs_beam_radiation_curr }}
+Beam Insolation on Panel: {{ beam_on_panel }}
+Diffuse Radiation on Panel: {{ diffuse_on_panel }}
+Total Insolation on Panel: {{ insolation_on_panel }}
+Flat Total: {{ total }}
+Panel Adjusted total: {{ panel_adjusted_total }}
+
+{% for total in [ 4300001, 4300000, 4000000, 2300001, 2300000, 2000000, 1500001, 1500000, 1000001, 1000000, 833333, 750000, 500000, 250000, 125000, 62000, 32001, 32000, 16000, 800, 400, 200, 100, 0 ] -%}
+{{ total -}}: {{
+  (
+    total if total > 4300000
+    else ((1-(total-2100000)/2000000) * 0.1 + 1.0) * total - 23116 if total > 2300000
+    else ((1-(total-600000)/1300000) * 0.4602 + 1.8677) * total - 1486246 if total > 1000000
+    else (total*0.7) if total > 100000
+    else (total*0.6) if total > 60000
+    else (total*0.1)
+  )
+  | round(2)
+}}
+
+{% endfor -%}
+
+aqi: {{ aqi }}
+aqi loss: {{ aqi_factored }}
+air_temp: {{ air_temp }}
+adjustment per degree: {{ 1/500 }}
+adjustment by temp: {{ (1-(air_temp - 74)/500)}}
+
+temp adjusted: {{ temp_adjusted_total }}
+{{ aqi }} -- {{ aqi / (400/0.12) }} -- {{ (1-(aqi / (400/0.12))) }}
+
+api/final: 
+{% set observed = states('input_number.ee_observed_solar_production' ) | round(0) -%}
+{% set template = aqi_factored | round(0) -%}
+{% set helper = states('sensor.calculated_potential_solar_power' ) | float | round(0) -%}
+{% set sensor = states('sensor.ee_calculated_solar_output' ) | float | round(0) -%} 
+measured       : {{ observed }}
+raw prediction : {{ total | round(0) }} -- {{ ((total | round(0) - observed) / 1000) | round(0) }}
+template       : {{ template }} -- {{ ((template - observed) / 1000) | round(0) }}
+helper         : {{ helper }} -- {{ ((helper - observed) / 1000) | round(0) }}
+sensor         : {{ sensor }} -- {{ ((sensor - observed) / 1000) | round(0) }}
+

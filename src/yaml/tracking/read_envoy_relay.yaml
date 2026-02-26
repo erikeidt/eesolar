@@ -1,0 +1,22 @@
+- alias: EE Read Envoy Relay
+  id: ee_read_envoy_relay
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  conditions: []
+  actions:
+  - action: rest_command.read_envoy_relay
+    metadata: {}
+    data: {}
+    response_variable: envoy_ivp_ensemble_relay
+  - variables:
+      content: '{{ envoy_ivp_ensemble_relay.content }}'
+      grid: '{{ content.mains_oper_state }}'
+  - action: input_text.set_value
+    metadata: {}
+    data:
+      value: '{{ grid }}'
+    target:
+      entity_id: input_text.ee_observed_grid_status
+  mode: single

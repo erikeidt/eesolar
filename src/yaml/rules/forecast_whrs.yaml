@@ -1,0 +1,39 @@
+- alias: EE Forecast Solar Generation
+  id: ee_forecast_solar_generation
+  description: "Predict Whrs of solar for the rest of the day"
+  triggers:
+    - trigger: time_pattern
+      minutes: /1
+  conditions:
+    - condition: time
+      after: "07:00:00"
+    - condition: time
+      before: "17:00:05"
+  actions:
+    - if:
+        - condition: template
+          value_template: "{{ states('input_number.ee_hour_of_day') | int(0) < 17 }}"
+      then:
+        - action: script.ee_forecast_solar_production
+          metadata: {}
+          data: {}
+          response_variable: forecast
+      else:
+        - variables:
+            forecast:
+              whrs_with_clouds_no_load: 0
+              whrs_with_clouds_small_load: 0
+    - action: input_number.set_value
+      metadata: {}
+      target:
+        entity_id: input_number.ee_solar_generation_forecast_just_clouds
+      data:
+        value: "{{ max(forecast.whrs_with_clouds_no_load,0) }}"
+    - action: input_number.set_value
+      metadata: {}
+      target:
+        entity_id: input_number.ee_solar_generation_forecast
+      data:
+        value: "{{ max(forecast.whrs_with_clouds_small_load,0) }}"
+  mode: single
+

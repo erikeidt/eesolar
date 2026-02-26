@@ -1,0 +1,20 @@
+- alias: EE Build Solar Forecast Timetable
+  id: ee_build_solar_forecast_timetable
+  description: "Constructs timetable for the solar day from Open Mateo and solar irradiance formuala"
+  triggers:
+    - trigger: sun
+      event: sunrise
+      offset: "00:45:00"
+  conditions: []
+  actions:
+    - action: script.ee_build_solar_forecsat_timetable
+      metadata: {}
+      data: {}
+    - action: automation.trigger
+      metadata: {}
+      target:
+        entity_id: automation.ee_forecast_solar_generation
+      data:
+        skip_condition: true
+  mode: single
+

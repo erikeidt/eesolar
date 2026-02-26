@@ -1,0 +1,130 @@
+script:
+  ee_forecast_solar_production:
+    alias: "EE Forecast Solar Production"
+    description: ""
+    sequence:
+      - action: todo.get_items
+        metadata: {}
+        target:
+          entity_id: todo.gallipot
+        data:
+          status: needs_action
+        response_variable: todo_items
+      - variables:
+          desc: |-
+            {{ 
+              (
+                todo_items['todo.gallipot']['items']
+                | selectattr('summary', 'search', 'Cloud Cover')
+                | list
+              )
+              [0].description
+            }}
+      - variables:
+          start_time: "{{ desc.time  }}"
+          time_now: "{{ now () }}"
+          tm_year: "{{ (time_now | as_datetime).timetuple().tm_year }}"
+          diff: "{{ time_now | as_timestamp - start_time | as_datetime | as_timestamp }}"
+          index: "{{ (diff / 900) | int }}"
+          last: "{{ desc.ghi | count }}"
+          count: "{{ last - index }}"
+      - if:
+          - condition: template
+            value_template: "{{ count > 0 }}"
+        then:
+          - variables:
+              brightness_raw: "{{ states('sensor.ee_solar_obs_vs_calc_pct_avg_thrt') | float(0) }}"
+              brightness_now: "{{ max(min(brightness_raw,100),1) }}"
+              skyview_now: "{{ 100 - desc.cloud_cover [index] | float(0) }}"
+              skyview_now_shrunk: "{{ skyview_now / 2 + 50 }}"
+          - variables:
+              b2v_ratio: "{{ brightness_now / skyview_now_shrunk }}"
+          - variables:
+              b2v_increment: "{{ (100 - skyview_now_shrunk) / (100 * b2v_ratio - 100) }}"
+          - variables:
+              calc: |-
+                {#
+                  {% set start_time = desc.time -%}
+                  {% set diff = now() | as_timestamp - start_time | as_datetime | as_timestamp -%}
+                  {% set index = (diff / 900) | int -%}
+                  {% set index = 0 -%}
+                  {% set last = desc.ghi | count -%}
+                  {% set count = last - index -%}
+                  {% set tm_year = now().year %}
+              
+                  {{ start_time }} -- {{ diff }} -- {{ index }} -- {{ last }} -- {{ count }}
+              
+                  {% set brightness_raw = states('sensor.ee_solar_obs_vs_calc_pct_avg_thrt') | float(0) -%}
+                  { # % set brightness_raw = 47.5 -% # }
+                  {% set brightness_now = max(min(brightness_raw,100),1) -%}
+                  {% set skyview_now = 100 - desc.cloud_cover [index] | float(0) -%}
+                  {% set skyview_now_shrunk = skyview_now / 2 + 50 -%}              
+                  {% set b2v_ratio = brightness_now / skyview_now_shrunk -%}
+                  {% set b2v_increment = (100 - skyview_now_shrunk) / (100 * b2v_ratio - 100) -%}
+
+                  br:  {{ brightness_raw }} -- {{ brightness_now }}
+                  sk: {{ skyview_now }} -- {{ skyview_now_shrunk }}
+                  ra: {{ b2v_ratio }} -- {{ b2v_increment }}
+                -#}
+
+                  {% set solar_array_info = states('input_text.solar_array_info') | from_json -%}
+                  {% set panel_info = solar_array_info[0] -%}
+                  {% set panel_clip_mw = panel_info.x * 1000 -%}                  
+                  {% set home_load_small = panel_info.h -%}
+                  {% set ns = namespace(mwhwc=0,mwhnc=0) -%}
+                  {% set watts = panel_info.r * (1 + panel_info.d/100) ** (tm_year | int - panel_info.y) -%}                     
+              
+                  {% for i in range(index,last) -%}
+                    {% set irradiance_on_panel_ghi = desc.ghi [i] | float -%}
+                    {% set air_temp_c = desc.temperature_2m [i] -%}
+                    {% set panel_temp_c = air_temp_c + 15 -%}
+                    {% set temp_factor = 1 if panel_temp_c <= 25 else 1+(panel_info.c*(panel_temp_c-25))/100 -%}
+                    {% set aqi = states('sensor.pa_air_quality') | float(50) -%}
+                    {% set aqi_factor = (1-(aqi / (400/0.12))) -%}
+                    {% set skyview_forecast = 100 - desc.cloud_cover [i] | float(0) -%}
+                    {% set skyview_forecast_shrunk = skyview_forecast / 2 + 50 -%}
+                    {% set scaled_brightness = skyview_forecast_shrunk * b2v_ratio -%}
+                    {% set factor1 =
+                      scaled_brightness
+                        if brightness_now == 100 or b2v_increment == 0 else
+                      scaled_brightness - (skyview_forecast_shrunk - skyview_now_shrunk) / b2v_increment
+                    -%}
+                    {% set factor2 = factor1 if factor1 > 0 else 0 -%}
+                    {% set alt_factor = min(max(factor2,1),100) / 100 -%}
+                    {% set mwatts_nc = irradiance_on_panel_ghi * temp_factor * aqi_factor * watts -%}
+                    {% set mwatts_wc = mwatts_nc * alt_factor -%}
+                    {#
+                      f1: {{ factor1 }} -- {{ factor2 }}
+                      fc: {{ skyview_forecast }} -- {{ skyview_forecast_shrunk }}
+                      sb: {{ scaled_brightness }} -- {{ (skyview_forecast_shrunk - skyview_shrunk_now) / b2v_increment }}
+                      af: {{ alt_factor }}
+                      mw: {{ mwatts_nc }} -- {{ mwatts_wc }}
+                    -#}
+                    {% set mwatts_nc = mwatts_nc if mwatts_nc < panel_clip_mw else panel_clip_mw -%}
+                    {% set mwatts_wc = mwatts_wc if mwatts_wc < panel_clip_mw else panel_clip_mw -%}
+                    {% set ns.mwhnc = ns.mwhnc + mwatts_nc -%}
+                    {% set ns.mwhwc = ns.mwhwc + mwatts_wc -%}
+                  {% endfor -%}
+                  {{ 
+                    { 
+                      'from': (start_time | as_datetime | as_local + timedelta(minutes=index*15)) | string,
+                      'whrs_theoretical': (ns.mwhnc / 4000) | round(0),
+                      'whrs_with_clouds_no_load': (ns.mwhwc / 4000) | round(0),
+                      'whrs_with_clouds_small_load': (ns.mwhwc / 4000 - home_load_small/4*count) | round(0)
+                    }
+                  }}
+        else:
+          - variables:
+              calc: |-
+                {{ 
+                  { 
+                    'from': (start_time | as_datetime | as_local + timedelta(minutes=index*15)) | string,
+                    'whrs_theoretical': 0,
+                    'whrs_with_clouds_no_load': 0,
+                    'whrs_with_clouds_small_load': 0
+                  }
+                }}
+      - stop: ""
+        response_variable: calc
+    mode: single
+

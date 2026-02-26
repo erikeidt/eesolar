@@ -1,0 +1,387 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_eesolar",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "Home",
+          "type": "sections",
+          "sections": [
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Observed PC",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_datetime.ee_envoy_pc_reporting_time",
+                  "name": "P&C Last",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_solar_production",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Solar"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_solar_production_max",
+                  "name": "Max Solar",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_total_consumption",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Batt+Home Flow"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_net_consumption",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Grid Flow"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_home_load",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Home Load"
+                }
+              ],
+              "column_span": 5
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Observed Batteries",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_datetime.ee_envoy_battery_reporting_time",
+                  "name": "Batt Last",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_battery_flow",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Batt Flow"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_charge",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "SoC %"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_envoy_read_battery_latency",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Battery Latency"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_envoy_read_livedata_latency",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Livedata Latency"
+                }
+              ],
+              "column_span": 5
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Observed Tariff",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_text.ee_observed_tariff",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Tariff"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_tariff_battery_reserve",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Reserve %"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_text.ee_observed_grid_status",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "On Grid"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_text.ee_observed_vers",
+                  "features_position": "bottom",
+                  "vertical": false,
+                  "name": "Envoy Firmware"
+                }
+              ],
+              "column_span": 5
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Today",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.ee_solar_is_tou_workday",
+                  "name": "Workday",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.ee_solar_is_summer_season",
+                  "name": "Summer",
+                  "vertical": false,
+                  "features_position": "bottom"
+                }
+              ],
+              "column_span": 2
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Tomorrow",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.ee_solar_is_tou_workday_tomorrow",
+                  "name": "Workday",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_boolean.ee_solar_is_summer_season_tomorrow",
+                  "name": "Summer",
+                  "vertical": false,
+                  "features_position": "bottom"
+                }
+              ],
+              "column_span": 2
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Sun",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.sun_next_rising"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.sun_next_setting"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.sun_solar_elevation"
+                },
+                {
+                  "type": "tile",
+                  "entity": "sensor.sun_solar_azimuth"
+                }
+              ],
+              "column_span": 5
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "Solar System Automation",
+                  "heading_style": "title",
+                  "grid_options": {
+                    "columns": 9,
+                    "rows": 1
+                  }
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "automation.ee_while_cp",
+                      "secondary_info": "last-updated",
+                      "name": "While CP"
+                    },
+                    {
+                      "entity": "automation.ee_while_dl",
+                      "secondary_info": "last-updated",
+                      "name": "While DL"
+                    },
+                    {
+                      "entity": "automation.ee_while_zn",
+                      "secondary_info": "last-updated",
+                      "name": "While ZN"
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": 9,
+                    "rows": "auto"
+                  }
+                }
+              ],
+              "column_span": 1
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading_style": "title",
+                  "heading": "Performance"
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "input_number.ee_solar_generation_forecast_just_clouds",
+                      "type": "simple-entity"
+                    },
+                    {
+                      "entity": "input_number.ee_solar_generation_forecast",
+                      "type": "simple-entity"
+                    },
+                    {
+                      "entity": "sensor.ee_envoy_battery_charge_needed"
+                    },
+                    {
+                      "entity": "sensor.ee_solar_obs_vs_calc_pct",
+                      "name": "Act / Predicted %"
+                    },
+                    {
+                      "entity": "sensor.ee_solar_obs_vs_calc_pct_avg_thrt",
+                      "name": "Act / Predicted % (Avg/Thrt)"
+                    },
+                    {
+                      "entity": "input_number.ee_observed_solar_production",
+                      "type": "simple-entity",
+                      "name": "Actual"
+                    },
+                    {
+                      "entity": "sensor.ee_calculated_solar_output",
+                      "name": "Sensor Predicted"
+                    },
+                    {
+                      "entity": "sensor.pa_air_temp"
+                    },
+                    {
+                      "entity": "sensor.pa_air_quality"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "markdown",
+                  "content": "<a href=\"http://{{states('sensor.get_my_ip')}}:8123/local/halelm.html?\" target=\"_blank\">Open Solar Monitor</a>",
+                  "title": "Monitor",
+                  "text_only": true
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
+                  "heading": "New section"
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "input_text.ee_solar_observed_tariff_time",
+                      "type": "simple-entity"
+                    },
+                    {
+                      "entity": "input_text.ee_solar_envoy_tariff_time",
+                      "type": "simple-entity"
+                    },
+                    {
+                      "entity": "input_text.ee_solar_envoy_tariff_name",
+                      "type": "simple-entity"
+                    },
+                    {
+                      "entity": "input_text.ee_solar_envoy_tariff_parameters",
+                      "type": "simple-entity"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "max_columns": 5,
+          "cards": []
+        }
+      ]
+    }
+  }
+}

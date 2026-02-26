@@ -1,0 +1,88 @@
+script:
+  ee_build_solar_forecsat_timetable:                                                  
+    alias: EE Build Solar Forecast Timetable
+    description: ""
+    sequence:
+      - variables:
+          till_end_hours: "{{ 17 - (now() | as_timestamp - today_at() | as_timestamp) / 3600 }}"
+          quarter_hours_count: "{{ (till_end_hours * 4 + 0.5) | round(0) }}"
+          open_meteo: timeout
+      - action: rest_command.get_open_meteo
+        metadata: {}
+        continue_on_error: true
+        data:
+          querystring: |-
+            {{
+              "latitude=" + state_attr('zone.home', 'latitude') | string +
+              "&longitude=" + state_attr('zone.home', 'longitude') | string + 
+               "&timezone=America%2FLos_Angeles&minutely_15=cloud_cover,temperature_2m,&forecast_minutely_15=" + quarter_hours_count | string
+            }}
+        response_variable: open_meteo
+      - if:
+          - condition: template
+            value_template: >-
+              {{ open_meteo is undefined or open_meteo == '' or open_meteo ==
+              'timeout' }}
+        then:
+          - variables:
+              report: |-
+                {# generate report -#}
+                  {% set time_now = now () -%}
+                  {% set cc = 
+                    (1-states('input_number.ee_observed_solar_production') /
+                    states('sensor.calculated_potential_solar_power')) * 100
+                  -%}
+                  {% set tm = (states('sensor.pa_air_temp') - 32) * 5 / 9 -%}
+                  {% set ns=namespace(ti=[],cc=[],tm=[]) -%}
+                  {% for i in range(0,quarter_hours_count) -%}
+                    {% set ns.ti = ns.ti + [(time_now + timedelta(minutes=i*15)) | string] -%}
+                    {% set ns.cc = ns.cc + [cc] -%}
+                    {% set ns.tm = ns.tm + [tm] -%}
+                  {% endfor -%}
+                  {{ { 'time': ns.ti, 'cloud_cover': ns.cc, 'temperature_2m': ns.tm } }}
+        else:
+          - variables:
+              report: "{{ open_meteo.content.minutely_15 }}"
+      - action: script.ee_compute_irradiance_array
+        metadata: {}
+        data:
+          start_time: "{{ report.time[0] }}"
+          count: "{{ report.time | count }}"
+        response_variable: irradiance_script
+      - variables:
+          cc0: |-
+            {# | map('multiply', 10) | map('round', 0) | list -#}
+            {{
+              {
+                'time': report.time[0],
+                'cloud_cover': report.cloud_cover,
+                'temperature_2m': report.temperature_2m,
+                'ghi': irradiance_script.ghi
+              }
+            }}
+          error1: true
+      - variables:
+          cc1: "{{ cc0 | to_json | replace(' ', '') }}"
+      - sequence:
+          - action: todo.update_item
+            metadata: {}
+            target:
+              entity_id: todo.gallipot
+            data:
+              item: Cloud Cover
+              description: "{{ cc1 }}"
+          - variables:
+              error1: false
+        continue_on_error: true
+      - if:
+          - condition: template
+            value_template: "{{ error1 }}"
+        then:
+          - action: todo.add_item
+            metadata: {}
+            target:
+              entity_id: todo.gallipot
+            data:
+              item: Cloud Cover
+              description: "{{ cc1 }}"
+

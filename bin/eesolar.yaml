@@ -1,0 +1,1280 @@
+
+input_boolean:
+  ee_solar_is_tou_workday:
+    name: "EE Solar is TOU Workday"
+    initial: off
+  ee_solar_is_tou_workday_tomorrow:
+    name: "EE Solar is TOU Workday Tomorrow"
+    initial: off
+  ee_solar_is_off_season:
+    name: "EE Solar is Off Season"
+    initial: off
+  ee_solar_is_off_season_tomorrow:
+    name: "EE Solar is Off Season Tomorrow"
+    initial: off
+  ee_solar_is_summer_season:
+    name: "EE Solar is Summer Season"
+    initial: off
+  ee_solar_is_summer_season_tomorrow:
+    name: "EE Solar is Summer Season Tomorrow"
+    initial: off
+
+input_number:
+  ee_observed_battery_flow:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "Battery Flow"
+    initial: 0
+  ee_observed_solar_production:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "Solar Production"
+    initial: 0
+  ee_observed_solar_production_max:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "Solar Production Max"
+    initial: 0
+  ee_observed_net_consumption:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "Net Consumption"
+    initial: 0
+  ee_observed_home_load:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "Home Load"
+    initial: 0
+  ee_observed_total_consumption:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "Total Consumption"
+    initial: 0
+  ee_observed_charge:
+    min: 0.0
+    max: 200.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "%"
+    name: "Charge %"
+    initial: 0
+  ee_observed_tariff_battery_reserve:
+    min: 0.0
+    max: 200.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "%"
+    name: "Battery Reserve %"
+    initial: 0
+  ee_observed_envoy_read_battery_latency:
+    min: 0.0
+    max: 1000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "ms"
+    name: "Battery Latency"
+    initial: 0
+  ee_observed_envoy_read_livedata_latency:
+    min: 0.0
+    max: 1000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "ms"
+    name: "Livedata Latency"
+    initial: 0
+  ee_hour_of_day:
+    min: 0
+    max: 24
+    mode: "box"
+    step: 1.0
+    name: "Hour of Day"
+    initial: 0
+  ee_solar_generation_forecast_just_clouds:
+    min: -1000000
+    max:  10000000.0
+    mode: "box"
+    step: 1000
+    name: Solar Generation Forecast just Clouds
+    unit_of_measurement: "Wh"
+    initial: 0
+  ee_solar_generation_forecast:
+    min: -1000000
+    max:  10000000.0
+    mode: "box"
+    step: 1000
+    name: Solar Generation Forecast
+    unit_of_measurement: "Wh"
+    initial: 0
+    
+input_text:
+  ee_observed_tariff:
+    max: 16
+    name: "Observed Tariff"
+    initial: "??"
+  ee_observed_tariff_schedule:
+    max: 255
+    name: "Observed Tariff Schedule"
+    initial: "??"
+  ee_observed_batteries:
+    max: 255
+    name: "Observed Batteries"
+    initial: "??"
+  ee_observed_vers:
+    max: 16 
+    name: "Observed Vers"
+    initial: "??"
+  ee_observed_grid_status:
+    max: 16 
+    name: "Observed Grid Status"
+    initial: "??"
+  solar_array_info:
+    name: "Solar Array Info"
+    max: 255
+    initial: '[ { "e": 26, "a": 180, "r": 6660, "c": -0.38, "x": 5310, "b": 20.16, "h": 1100, "y": 2021, "d": -0.3 } ]'
+  ee_solar_envoy_tariff_name:
+    max: 255
+    name: "Tariff Name"
+  ee_solar_envoy_tariff_time:
+    max: 255
+    name: "Tariff Time"
+  ee_solar_envoy_tariff_parameters:
+    max: 255
+    name: "Tariff Params"
+  ee_solar_observed_tariff_time:
+    max: 255
+    name: "Observed Tariff Time"
+
+input_datetime:
+  ee_envoy_pc_reporting_time:
+    has_time: true
+    has_date: false
+    name: "PC Reporting Time"
+    initial: 00:00
+  ee_envoy_battery_reporting_time:
+    has_time: true
+    has_date: false
+    name: "Battery Reporting Time"
+    initial: 00:00
+
+rest_command:
+  read_pa_sensor:
+    url: "http://192.168.68.107/json?live=true"
+  read_envoy_xml_info:
+#   url: "https://envoy.local/info.xml"
+    url: "https://192.168.68.102/info.xml"
+    method: get
+    verify_ssl: false
+    timeout: 400 
+    headers:
+      Authorization: !secret enjt
+      Accept: "application/xml"
+  read_envoy_relay:
+#   url: "https://envoy.local/ivp/ensemble/relay"
+    url: "https://192.168.68.102/ivp/ensemble/relay"
+    method: get
+    verify_ssl: false
+    timeout: 400 
+    headers:
+      Authorization: !secret enjt
+  read_enovy_basic:
+#   url: "https://envoy.local/production.json"
+    url: "https://192.168.68.102/production.json"
+    method: get
+    verify_ssl: false
+    timeout: 400
+    headers:
+      Authorization: !secret enjt
+  read_envoy_batteries:
+#   url: "https://envoy.local/ivp/ensemble/power"
+    url: "https://192.168.68.102/ivp/ensemble/power"
+    method: get
+    verify_ssl: false
+    timeout: 400
+    headers:
+      Authorization: !secret enjt
+  envoy_enable_livedata_stream:
+#   url: "https://envoy.local/ivp/livedata/stream"
+    url: "https://192.168.68.102/ivp/livedata/stream"
+    method: post 
+    verify_ssl: false
+    timeout: 400
+    headers:
+      Authorization: !secret enjt
+    payload: '{"enable":1}'
+  envoy_disable_livedata_stream:
+#   url: "https://envoy.local/ivp/livedata/stream"
+    url: "https://192.168.68.102/ivp/livedata/stream"
+    method: post 
+    verify_ssl: false
+    timeout: 400
+    headers:
+      Authorization: !secret enjt
+    payload: '{"enable":0}'
+  read_envoy_livedata_status:
+#   url: "https://envoy.local/ivp/livedata/status"
+    url: "https://192.168.68.102/ivp/livedata/status"
+    method: get
+    verify_ssl: false
+    timeout: 400
+    headers:
+      Authorization: !secret enjt
+  read_envoy_stream:
+#   url: "https://envoy.local/stream/meter"
+    url: "https://192.168.68.102/stream/meter"
+    method: get
+    verify_ssl: false
+    timeout: 6 
+    headers:
+      Authorization: !secret enjt
+  read_envoy_tariff:
+#   url: "https://envoy.local/admin/lib/tariff.json"
+    url: "https://192.168.68.102/admin/lib/tariff.json"
+    method: get
+    verify_ssl: false
+    timeout: 400 
+    headers:
+      Authorization: !secret enjt
+  send_envoy_param_tariff:
+#   url: "https://envoy.local/admin/lib/tariff.json"
+    url: "https://192.168.68.102/admin/lib/tariff.json"
+#   url: "https://echo.free.beeceptor.com/"
+    method: post
+    verify_ssl: false
+    timeout: 400 
+    content_type: "application/json"
+    headers:
+      Authorization: !secret enjt
+    payload: >-
+      {{
+        '{"tariff":{"currency":{"code":"USD"},"logger":"mylogger","date":"' +
+        time | string +
+        '","storage_settings":{"mode":"economy","operation_mode_sub_type":"","reserved_soc":' +
+        reserve | round(1) | string +
+        ',"very_low_soc":25,"charge_from_grid":' +
+        ('false' | string if gridcharge is undefined or not gridcharge else 'true' | string) | string  +
+        ',"date":"' +
+        time | string +
+        '","opt_schedules":false},"single_rate":{"rate":0.25,"sell":0.25},' +
+        '"seasons":[{"id":"all_year_long","start":"1/1",' +
+        '"days":[{"id":"all_days","days":"Mon,Tue,Wed,Thu,Fri,Sat,Sun",' +
+        '"must_charge_start":0,"must_charge_duration":0,"must_charge_mode":"CP","peak_rule":"' +
+        peak_rule +
+        '","enable_discharge_to_grid":false,"periods":[{"id":"filler","start":0,"rate":0.25},{"id":"peak-1_","start":' +
+        peak_start | int | string +
+        ',"rate":0.5},{"id":"filler","start":' +
+        peak_end | int | string +
+        ',"rate":0.25}' + 
+        ('' | string if second_start is undefined or second_end is undefined else
+          (',{"id":"peak-2_","start":' + second_start | int | string + ',"rate":0.5},{"id":"filler","start":' + second_end | int | string + ',"rate":0.25}')
+        ) | string + 
+        ']}]}]}}'
+      }}
+
+
+template:
+  - sensor:
+    - name: "EE Envoy Observed Large"
+      unique_id: "ee_envoy_observed_large"
+      state: "on"
+      attributes:
+        pl: "{{ states('input_number.ee_observed_envoy_read_livedata_latency') }}"
+        sp: "{{ states('input_number.ee_observed_solar_production') | float(0) }}"
+        sm: "{{ states('sensor.ee_calculated_solar_output') | float(0) }}"
+        hl: "{{ states('input_number.ee_observed_home_load') | float(0) }}"
+        tc: "{{ states('input_number.ee_observed_total_consumption') | float(0) }}"
+        nc: "{{ states('input_number.ee_observed_net_consumption') | float(0) }}"
+        bl: "{{ states('input_number.ee_observed_envoy_read_battery_latency') }}"
+        bf: "{{ states('input_number.ee_observed_battery_flow') | float(0) }}"
+        bc: "{{ states('input_number.ee_observed_charge') | float(0) | round(2) }}"
+        ba: "{{ states('input_text.ee_observed_batteries') }}"
+        sc: "{{ states('input_text.ee_observed_tariff_schedule') }}"
+        gs: "{{ states('input_text.ee_observed_grid_status') }}"
+        vs: "{{ states('input_text.ee_observed_vers') }}"
+        e1: "{{ states('input_number.ee_solar_generation_forecast_just_clouds') }}"
+        e2: "{{ states('input_number.ee_solar_generation_forecast') }}"
+        bn: "{{ states('sensor.ee_envoy_battery_charge_needed') | float(0) | round(0) }}"
+    - name: "EE Solar Obs vs Calc Pct"
+      unique_id: "ee_solar_obs_vs_calc_pct"
+      unit_of_measurement: "%"
+      state_class: measurement
+      state: |-
+        {% set cso = states('sensor.ee_calculated_solar_output') | float(0) -%}
+        {{
+          0 if cso == 0 else
+          ( (states('input_number.ee_observed_solar_production') | float(0) / cso) * 100 )
+          | round(2)
+        }}
+    - name: "EE Envoy Battery Charge Needed"
+      unique_id: "ee_envoy_battery_charge_needed"
+      unit_of_measurement: "Wh"
+      state_class: measurement
+      device_class: energy_storage
+      state: "{{ (1-states('input_number.ee_observed_charge')|float/100) * (20.16 * 1000)}}"
+      attributes:
+        friendly_name: "Charge Needed"
+    - name: "EE Calculated Solar Output"
+      unique_id: "ee_calculated_solar_output"
+      unit_of_measurement: mW
+      device_class: power
+      state_class: measurement
+      state: |-
+        {# Solar Formula -#}
+        {# https://pubs.nmsu.edu/_circulars/CR674/index.html -#}
+        {# https://pubs.nmsu.edu/_circulars/CR674/CR674.xlsm -#}
+        {% set latitude_degrees = state_attr('zone.home', 'latitude') -%}
+        {% set longitude_degrees = state_attr('zone.home', 'longitude') -%}
+        {% set latitude_radians = latitude_degrees * (pi/180) -%}
+        {# {% set longitude_radians = longitude_degrees * (pi/180) -%} -#}
+        {% set solar_array_info = states('input_text.solar_array_info') | from_json -%}
+        {% set panel_info = solar_array_info[0] -%}
+        {% set panel_elevation_radians = panel_info.e * (pi/180) -%}
+        {% set panel_azimuth_radians = panel_info.a * (pi/180) -%}
+        {% set time_now = now () | as_local -%}
+        {% set time_tuple = time_now.timetuple() -%}
+        {% set jdoy = time_tuple.tm_yday -%}
+        {% set longitude_correction_radians = ((360/364)*(jdoy-81)) * (pi/180) -%}
+        {% set declination_radians = 23.45 * sin( (360/365.25) * (jdoy - 81) * (pi/180) ) * (pi/180) -%}
+        {% set watts = panel_info.r * (1 + panel_info.d/100) ** (time_tuple.tm_year - panel_info.y) -%}
+        {% set local_meridan = ((time_now | as_datetime | as_local).strftime("%z") |int / 100) | int * 15 -%}
+        {% set equation_of_time =
+          (9.87*sin(2*longitude_correction_radians)) - 
+          (7.53*cos(longitude_correction_radians)) - 
+          (1.5*sin(longitude_correction_radians))
+        -%}
+        {% set local_noon = 
+          ((12*60) - 4 * (longitude_degrees - local_meridan) - equation_of_time)/60 + time_tuple.tm_isdst 
+        -%}
+        {% set sky_factor100 = sin((360/365)*(jdoy-100)*(pi/180)) -%}
+        {% set sky_factor275 = sin((360/365)*(jdoy-275)*(pi/180)) -%}
+        {% set apparent_et_irradiance = 1160+75*sky_factor275 -%}
+        {% set optical_depth = 0.174+0.035*sky_factor100 -%}
+        {% set sky_diffuse_factor = 0.095+0.04*sky_factor100 -%}
+        {% set time_decimal = time_now.strftime("%H") | int + time_now.strftime("%M") | int / 60 -%}
+        {% set noon_to_now = local_noon - time_decimal -%}
+        {% set hour_angle_radians = noon_to_now * 15 * (pi/180) -%}
+        {% set solar_elevation_radians = 
+          asin(
+            cos(latitude_radians) * cos(declination_radians) * cos(hour_angle_radians)  +
+            sin(latitude_radians) * sin(declination_radians)
+          )
+        -%}
+        {% set solar_azimuth0 =
+          asin(
+            ( sin(hour_angle_radians) * cos(declination_radians) )  /
+            cos(solar_elevation_radians)
+          )
+        -%}
+        {% set solar_azimuth_radians = pi - solar_azimuth0 -%}
+        {% set aoi_wo_cos = 
+          sin(solar_elevation_radians) * cos(panel_elevation_radians) +
+          cos(solar_elevation_radians) * sin(panel_elevation_radians) * cos(panel_azimuth_radians - solar_azimuth_radians)
+        -%}
+        {% set air_mass_ratio = (1/sin(solar_elevation_radians)) | abs -%}
+        {% set air_density_factor = e**(-optical_depth * air_mass_ratio) -%}
+        {# set air_density_factor_stc = e**(-optical_depth * 1.5) -#}
+        {% set cs_beam_radiation_curr = 
+          apparent_et_irradiance * air_density_factor
+            if solar_elevation_radians > 0
+            else 0
+        -%}
+        {% set beam_on_panel_dni = cs_beam_radiation_curr * aoi_wo_cos -%}
+        {% set diffuse_on_panel_dhi = sky_diffuse_factor * cs_beam_radiation_curr * ((1+cos(panel_elevation_radians))/2) -%}
+        {% set irradiance_on_panel_ghi = beam_on_panel_dni + diffuse_on_panel_dhi -%}
+        {% set air_temp_f = states('sensor.pa_air_temp') | float(77) -%}
+        {% set air_temp_c = (air_temp_f - 32) * 5 / 9 -%}
+        {% set panel_temp_c = air_temp_c + 15 -%}
+        {% set temp_factor = 1 if panel_temp_c <= 35 else 1+(panel_info.c*(panel_temp_c-25))/100 -%}
+        {% set aqi = states('sensor.pa_air_quality') | float(50) %}
+        {% set aqi_factor = (1-(aqi / (400/0.12))) -%}
+        {% set irradiance = irradiance_on_panel_ghi * watts * temp_factor * aqi_factor -%} 
+        {{ irradiance | round(0) }}
+
+command_line:                                       
+  - sensor:                                         
+      name: "Get my IP"                             
+      unique_id: "get_my_ip"
+      command: /sbin/ip address show | fgrep '192.' | cut -d ' ' -f 6 | cut -d '/' -f 1
+      value_template: "{{ value }}"
+      scan_interval: 31556926 
+
+sensor:
+  - name: "EE Solar Obs vs Calc Pct Avg Thrt"
+    platform: filter
+    unique_id: "ee_solar_obs_vs_calc_pct_avg_thrt"
+    entity_id: sensor.ee_solar_obs_vs_calc_pct
+    filters:
+      - filter: time_simple_moving_average
+        window_size: "00:30"
+      - filter: time_throttle
+        window_size: "00:01"
+
+
+
+automation:
+- alias: EE Read Envoy Battery
+  id: ee_read_envoy_battery
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: template
+    value_template: '{{ states(this .entity_id) == "on" }}'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  conditions: []
+  actions:
+  - repeat:
+      sequence:
+      - variables:
+          request_time: '{{ now() }}'
+          response:
+            status: timeout
+      - action: rest_command.read_envoy_batteries
+        continue_on_error: true
+        metadata: {}
+        data: {}
+        response_variable: response
+      - variables:
+          response_time: '{{ now() }}'
+          just_now: '{{ (response_time | as_datetime).strftime(''%H:%M:%S'') }}'
+          latency: '{{ ((response_time | as_timestamp - request_time | as_timestamp) * 1000) | int }}'
+      - action: notify.persistent_notification
+        metadata: {}
+        data:
+          message: '{{ response }}'
+        enabled: false
+      - if:
+        - condition: template
+          value_template: |-
+            {{
+              response is not defined or response.status == 'timeout' or
+              response.status | int(0) != 200
+            }}
+        then:
+        - action: notify.persistent_notification
+          metadata: {}
+          data:
+            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Battery -- {{ response.status | default(response) }} -- {{ latency }} ms'
+        - stop: Rest command failure
+          error: true
+          enabled: false
+        - delay:
+            hours: 0
+            minutes: 4
+            seconds: 0
+            milliseconds: 0
+        else:
+        - variables:
+            newline: '
+
+              '
+            content: '{{ response.content | replace(newline, '' '') }}'
+            devices: '{{ content[''devices:''] }}'
+            pwr_soc: |-
+              {% set ns = namespace(pwr=0,soc=0,batts=[]) %}
+              {% for d in devices %}
+                {% set ns.pwr = ns.pwr + d.real_power_mw %}
+                {% set ns.soc = ns.soc + d.soc %}
+                {% set ns.batts = ns.batts + [d.soc] %}
+                {% set ns.batts = ns.batts + [(-d.real_power_mw)] %}
+              {% endfor %}
+              {{
+                { 
+                  "pwr": ns.pwr,
+                  "soc": ns.soc,
+                  "num": devices | count,
+                  "batts": ns.batts
+                }
+              }}
+            flow: '{{ -pwr_soc.pwr }}'
+            soc: '{{ pwr_soc.soc }}'
+            socpct: '{{ soc / pwr_soc.num }}'
+            batts: '{{ pwr_soc.batts }}'
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: '{{ socpct | round(2) }}'
+          target:
+            entity_id: input_number.ee_observed_charge
+        - action: input_text.set_value
+          metadata: {}
+          data:
+            value: '{{ batts }}'
+          target:
+            entity_id: input_text.ee_observed_batteries
+        - action: input_datetime.set_datetime
+          metadata: {}
+          data:
+            time: '{{ just_now }}'
+          target:
+            entity_id: input_datetime.ee_envoy_battery_reporting_time
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: '{{ latency }}'
+          target:
+            entity_id: input_number.ee_observed_envoy_read_battery_latency
+        - delay:
+            milliseconds: "{{ 1030 if latency < 55 else 1030 + (latency-55) * 2.5 if latency < 1600 else 15000 if latency < 8000 else 45000 }}" 
+      count: 60
+  - action: automation.turn_off
+    metadata: {}
+    data:
+      stop_actions: false
+    target:
+      entity_id: '{{ this.entity_id }}'
+  - action: automation.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: '{{ this.entity_id }}'
+  mode: single
+- alias: EE Read Envoy Livedata
+  id: ee_read_envoy_livedata
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: template
+    value_template: '{{ states(this.entity_id ) == "on" }}'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 1
+  conditions: []
+  actions:
+  - repeat:
+      sequence:
+      - variables:
+          request_time: '{{ now() }}'
+          response:
+            status: timeout
+      - action: rest_command.read_envoy_livedata_status
+        continue_on_error: true
+        metadata: {}
+        data: {}
+        response_variable: response
+      - variables:
+          response_time: '{{ now() }}'
+          just_now: '{{ (response_time | as_datetime).strftime("%H:%M:%S") }}'
+          latency: '{{ ((response_time | as_timestamp - request_time | as_timestamp) * 1000) | int }}' 
+      - action: notify.persistent_notification
+        metadata: {}
+        data:
+          message: '{{ response }}'
+        enabled: false
+      - if:
+        - condition: template
+          value_template: |-
+            {{
+              response is not defined or response.status == 'timeout' or
+              response.status | int(0) != 200
+            }}
+        then:
+        - action: notify.persistent_notification
+          metadata: {}
+          data:
+            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Livedata -- {{ response.status | default(response) }} -- {{ latency }} ms'
+        - stop: Rest command failed
+          error: true
+          enabled: false
+        - delay:
+            hours: 0
+            minutes: 4
+            seconds: 0
+            milliseconds: 0
+        else:
+        - variables:
+            content: '{{ response.content }}'
+            connection: '{{ content.connection }}'
+            sc_stream: '{{ connection.sc_stream }}'
+        - if:
+          - condition: template
+            value_template: "{{ sc_stream != 'enabled' }}"
+          then:
+          - action: rest_command.envoy_enable_livedata_stream
+            metadata: {}
+            data: {}
+            response_variable: response
+          - action: notify.persistent_notification
+            metadata: {}
+            data:
+              message: |-
+                {{ now().strftime("%m/%d %H:%M:%S") }}
+                Enabling Stream 
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 30
+              milliseconds: 0
+          else:
+          - variables:
+              meters: '{{ content.meters }}'
+              last_update: '{{ meters.last_update }}'
+              solar_production: '{{ meters.pv.agg_p_mw }}'
+              net_consumption: '{{ meters.grid.agg_p_mw }}'
+              battery_flow: '{{ - meters.storage.agg_p_mw }}'
+              home_load: '{{ meters.load.agg_p_mw }}'
+              total_consumption: '{{ home_load + battery_flow }}'
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ battery_flow }}'
+            target:
+              entity_id: input_number.ee_observed_battery_flow
+            enabled: true
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ solar_production }}'
+            target:
+              entity_id: input_number.ee_observed_solar_production
+          - if:
+            - condition: template
+              value_template: "{{ solar_production | float > states('input_number.ee_observed_solar_production_max') | float }}"
+            then:
+            - action: input_number.set_value
+              metadata: {}
+              data:
+                value: '{{ solar_production }}'
+              entity_id: input_number.ee_observed_solar_production_max
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ net_consumption }}'
+            target:
+              entity_id: input_number.ee_observed_net_consumption
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ total_consumption }}'
+            target:
+              entity_id: input_number.ee_observed_total_consumption
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ home_load }}'
+            target:
+              entity_id: input_number.ee_observed_home_load
+          - action: input_datetime.set_datetime
+            metadata: {}
+            data:
+              time: '{{ just_now }}'
+            target:
+              entity_id: input_datetime.ee_envoy_pc_reporting_time
+          - action: input_number.set_value
+            metadata: {}
+            data:
+              value: '{{ latency }}'
+            target:
+              entity_id: input_number.ee_observed_envoy_read_livedata_latency
+          - action: notify.persistent_notification
+            metadata: {}
+            data:
+              message: '{{ last_update | as_datetime  }}'
+            enabled: false
+          - delay:
+              milliseconds: "{{ 1030 if latency < 55 else 1030 + (latency-55) * 2.5 if latency < 1600 else 15000 if latency < 8000 else 45000 }}"
+      count: 60
+  - action: automation.turn_off
+    metadata: {}
+    data:
+      stop_actions: false
+    target:
+      entity_id: '{{ this.entity_id }}'
+  - action: automation.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: '{{ this.entity_id }}'
+  mode: single
+- alias: EE Read Envoy Relay
+  id: ee_read_envoy_relay
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  conditions: []
+  actions:
+  - action: rest_command.read_envoy_relay
+    metadata: {}
+    data: {}
+    response_variable: envoy_ivp_ensemble_relay
+  - variables:
+      content: '{{ envoy_ivp_ensemble_relay.content }}'
+      grid: '{{ content.mains_oper_state }}'
+  - action: input_text.set_value
+    metadata: {}
+    data:
+      value: '{{ grid }}'
+    target:
+      entity_id: input_text.ee_observed_grid_status
+  mode: single
+- alias: EE Read Envoy Tariff
+  id: ee_read_envoy_tariff
+  description: ''
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  conditions: []
+  actions:
+  - action: rest_command.read_envoy_tariff
+    metadata: {}
+    data: {}
+    response_variable: response
+  - action: script.ee_decode_tariff
+    metadata: {}
+    data:
+      response: '{{ response }}'
+  mode: single
+- alias: EE Read Envoy XML Info
+  id: ee_read_envoy_xml_info
+  description: ''
+  triggers:
+  - trigger: homeassistant
+    event: start
+  - trigger: template
+    value_template: '{{ states( this.entity_id) == "on" }}'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 15 
+  - trigger: time_pattern
+    hours: /12
+  conditions: []
+  actions:
+  - action: rest_command.read_envoy_relay
+    metadata: {}
+    data: {}
+    response_variable: envoy_ivp_ensemble_relay
+    enabled: false
+  - variables:
+      content: '{{ envoy_ivp_ensemble_relay.content }}'
+      grid: '{{ content.mains_oper_state == "closed" }}'
+    enabled: false
+  - action: rest_command.read_envoy_xml_info
+    metadata: {}
+    data: {}
+    response_variable: envoy_info_xml
+  - variables:
+      xml_text: '{{ envoy_info_xml.content }}'
+      time_tag: '{{ xml_text | regex_findall_index("<time>.*</time>") }}'
+      time: '{{ time_tag[6:-7] }}'
+      software_tag: '{{ xml_text | regex_findall_index("<software>.*</software>")
+        }}'
+      vers: '{{ software_tag[10:-11] }}'
+    enabled: false
+  - variables:
+      xml_text: '{{ envoy_info_xml.content }}'
+      software_tag: '{{ xml_text | regex_findall_index("<software>.*</software>")
+        }}'
+      vers: '{{ software_tag[10:-11] }}'
+  - action: input_text.set_value
+    metadata: {}
+    data:
+      value: '{{ vers }}'
+    target:
+      entity_id: input_text.ee_observed_vers
+  mode: single
+- alias: EE Solar Envoy Break Time
+  id: ee_solar_envoy_break_time
+  description: "Turn off monitoring to allow Envoy a cleanup break"
+  triggers:
+    - trigger: time
+      at: "23:45:00"
+    - trigger: time
+      at: "04:00:00"
+    - trigger: state
+      entity_id:
+        - input_boolean.ee_utilities_booted
+      to:
+        - "on"
+  conditions: []
+  actions:
+    - if:
+        - condition: template
+          value_template: >-
+            {{ trigger is undefined or trigger.idx is undefined or trigger.idx |
+            int == 0 }}
+      then:
+        - action: automation.turn_off
+          metadata: {}
+          target:
+            entity_id:
+              - automation.ee_read_envoy_battery
+              - automation.ee_read_envoy_livedata
+              - automation.ee_read_envoy_tariff
+              - automation.ee_read_envoy_relay
+              - automation.ee_read_envoy_xml_info
+          data:
+            stop_actions: true
+      else:
+        - action: automation.turn_on
+          metadata: {}
+          target:
+            entity_id:
+              - automation.ee_read_envoy_battery
+              - automation.ee_read_envoy_livedata
+              - automation.ee_read_envoy_tariff
+              - automation.ee_read_envoy_relay
+              - automation.ee_read_envoy_xml_info
+  mode: single
+
+- alias: EE Forecast Solar Generation
+  id: ee_forecast_solar_generation
+  description: "Predict Whrs of solar for the rest of the day"
+  triggers:
+    - trigger: time_pattern
+      minutes: /1
+  conditions:
+    - condition: time
+      after: "07:00:00"
+    - condition: time
+      before: "17:00:05"
+  actions:
+    - if:
+        - condition: template
+          value_template: "{{ states('input_number.ee_hour_of_day') | int(0) < 17 }}"
+      then:
+        - action: script.ee_forecast_solar_production
+          metadata: {}
+          data: {}
+          response_variable: forecast
+      else:
+        - variables:
+            forecast:
+              whrs_with_clouds_no_load: 0
+              whrs_with_clouds_small_load: 0
+    - action: input_number.set_value
+      metadata: {}
+      target:
+        entity_id: input_number.ee_solar_generation_forecast_just_clouds
+      data:
+        value: "{{ max(forecast.whrs_with_clouds_no_load,0) }}"
+    - action: input_number.set_value
+      metadata: {}
+      target:
+        entity_id: input_number.ee_solar_generation_forecast
+      data:
+        value: "{{ max(forecast.whrs_with_clouds_small_load,0) }}"
+  mode: single
+
+- alias: EE Solar Load New Tariff
+  id: ee_solar_load_new_tariff
+  description: "Load Tariff into Envoy, if it isn't the one we want"
+  triggers:
+    - trigger: template
+      value_template: |-
+        {{ 
+          states('input_text.ee_solar_envoy_tariff_time') !=
+              states('input_text.ee_solar_observed_tariff_time')
+            and
+          states('input_boolean.ee_utilities_booted') == 'on'
+        }}
+      for:
+        seconds: 4
+  conditions: []
+  actions:
+    - action: rest_command.send_envoy_param_tariff
+      continue_on_error: true
+      metadata: {}
+      data: "{{ states('input_text.ee_solar_envoy_tariff_parameters') }}"
+      response_variable: response
+    - action: script.ee_decode_tariff
+      metadata: {}
+      data:
+        response: "{{ response }}"
+    - delay:
+        minutes: 1
+  mode: single
+
+- alias: EE Set Hour of Day
+  id: ee_set_hour_of_day
+  description: "Time trigger to use instead of now(); fires every hour"
+  triggers:
+    - trigger: time_pattern
+      hours: /1
+    - trigger: homeassistant
+      event: start
+  conditions: []
+  actions:
+    - action: input_number.set_value
+      metadata: {}
+      data:
+        value: "{{ now().hour }}"
+      target:
+        entity_id: input_number.ee_hour_of_day
+  mode: single
+
+- alias: EE Set is TOU Workday
+  id: ee_set_is_tou_workday
+  description: 'Determine todays rates as to workday or holiday'
+  triggers:
+  - trigger: time
+    at: 00:15:00
+  - trigger: homeassistant
+    event: start
+  - trigger: template
+    value_template: "{{ states(this.entity_id) == 'on' }}" 
+  conditions: []
+  actions:
+  - action: calendar.get_events
+    metadata: {}
+    data:
+      duration:
+        hours: 36
+    target:
+      entity_id: 'calendar.utility_tou_holidays'
+    response_variable: agenda
+  - variables:
+      yetz: "{{ now() }}"
+      morgan: "{{ yetz|as_datetime + timedelta(days=1) }}"
+      response: "{{ agenda['calendar.utility_tou_holidays'] }}"
+      events: "{{ response.events }}"
+      theday: "{{ (yetz|as_datetime).strftime('%Y-%m-%d') }}"
+      tou_today: "{{ events|length >= 1 and events[0].start <= theday }}"
+      tou_tomorrow: |-
+        {{ 
+          events|length == 2 or 
+          (events|length == 1 and events[0].start > theday) 
+        }}
+  - if:
+    - condition: and
+      conditions:
+      - condition: time
+        weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+        - fri
+      - condition: template
+        value_template: "{{ not tou_today }}"
+    then:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_tou_workday
+    else:
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_tou_workday
+  - if:
+    - condition: and
+      conditions:
+      - condition: time
+        weekday:
+        - sun
+        - mon
+        - tue
+        - wed
+        - thu
+      - condition: template
+        value_template: "{{ not tou_tomorrow }}"
+    then:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_tou_workday_tomorrow
+    else:
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_tou_workday_tomorrow
+  - if:
+      - condition: template
+        value_template: "{{ 5 < (yetz|as_datetime).month < 10 }}"
+    then:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_summer_season
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_off_season
+    else:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_off_season
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_summer_season
+  - if:
+      - condition: template
+        value_template: "{{ 5 < (morgan|as_datetime).month < 10 }}"
+    then:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_summer_season_tomorrow
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_off_season_tomorrow
+    else:
+    - action: input_boolean.turn_on
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_off_season_tomorrow
+    - action: input_boolean.turn_off
+      metadata: {}
+      data: {}
+      target:
+        entity_id: input_boolean.ee_solar_is_summer_season_tomorrow
+  - action: input_number.set_value
+    metadata: {}
+    data:
+      value: 0
+    target:
+      entity_id: input_number.ee_observed_solar_production_max
+  mode: single
+- alias: EE Solar Controller
+  id: ee_solar_controller
+  description: "Change Envoy Tariff for best battery usage"
+  trigger_variables:
+    ZN80_M_8: ZN80/M-8
+    ZN80_5p_8: ZN80/5p-8
+    ZN96_M_5: ZN96/M-4p
+    DL65_5p_8: DL65/5p-8
+  triggers:
+    - alias: Go ZN Workday
+      trigger: template
+      value_template: |-
+        {{ 
+          states('input_boolean.ee_solar_is_tou_workday') == 'on' 
+            and
+          states('input_number.ee_observed_solar_production') | int >= 850000
+            and
+          states('input_number.ee_solar_generation_forecast') | int > 
+              states('sensor.ee_envoy_battery_charge_needed') | int 
+            and
+          states('input_number.ee_hour_of_day') | int < 12 
+            and
+          states('input_text.ee_solar_envoy_tariff_name') != ZN80_M_8 
+            and
+          states('input_boolean.ee_utilities_booted') == 'on'
+        }}
+      for:
+        seconds: 4
+    - trigger: template
+      alias: Stop ZN
+      value_template: |-
+        {{
+          states('input_boolean.ee_solar_is_tou_workday') == 'on' 
+            and
+          states('input_number.ee_solar_generation_forecast') | int < 
+              states('sensor.ee_envoy_battery_charge_needed') | int
+            and
+          11 < states('input_number.ee_hour_of_day') | int < 16
+            and
+          states('input_text.ee_solar_envoy_tariff_name') == ZN80_M_8 
+            and
+          states('input_number.ee_observed_charge') | int <= 97 
+            and
+          states('input_boolean.ee_utilities_booted') == 'on'
+        }}
+      for:
+        minutes: 30
+    - trigger: template
+      alias: Go ZN Weekend/Holiday
+      value_template: |-
+        {{
+          states('input_boolean.ee_solar_is_tou_workday') == 'off'
+            and
+          states('input_text.ee_solar_envoy_tariff_name') != ZN96_M_5
+            and
+          states('input_boolean.ee_utilities_booted') == 'on'
+        }}
+    - trigger: time
+      alias: Go DL?
+      at: "16:45:00"
+    - trigger: state
+      entity_id:
+        - input_boolean.ee_utilities_booted
+      to:
+        - "on"
+  conditions: []
+  actions:
+    - variables:
+        idx: "{{ trigger.idx | int }}"
+        time_now: "{{ now() }}"
+        timestamp: "{{ (time_now | as_datetime).timestamp() | int }}"
+        summer: "{{ states('input_boolean.ee_solar_is_summer_season') == 'on' }}"
+        workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
+        current_tariff: "{{ states('input_text.ee_solar_envoy_tariff_name') }}"
+        doit: false
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ idx == 0 }}"
+          sequence:
+            - variables:
+                tariff:
+                  time: "{{ now().timestamp() | int }}"
+                  name: "{{ ZN80_M_8 }}"
+                  peak_rule: ZN
+                  peak_start: |-
+                    {{ 
+                      (time_now | as_datetime).hour * 60 + (time_now | as_datetime).minute
+                    }}
+                  peak_end: 960
+                  second_start: 1021
+                  second_end: 1201
+                  reserve: 80
+                doit: true
+        - conditions:
+            - condition: template
+              value_template: "{{ idx == 1 }}"
+          sequence:
+            - variables:
+                tariff:
+                  time: "{{ timestamp }}"
+                  name: "{{ DL65_5p_8 if summer else ZN80_5p_8 }}"
+                  peak_rule: "{{ 'DL' if summer else 'ZN' }}"
+                  peak_start: 1021
+                  peak_end: 1201
+                  reserve: "{{ 65 if summer else 80 }}"
+                doit: true
+        - conditions:
+            - condition: template
+              value_template: "{{ idx == 2 }}"
+          sequence:
+            - variables:
+                tariff:
+                  time: "{{ timestamp }}"
+                  name: "{{ ZN96_M_5 }}"
+                  peak_rule: ZN
+                  peak_start:
+                    "[object Object]": null
+                  peak_end: 1020
+                  reserve: 96
+                doit: true
+        - conditions:
+            - condition: template
+              value_template: "{{ idx == 3 or idx == 4 }}"
+          sequence:
+            - if:
+                - condition: and
+                  conditions:
+                    - condition: template
+                      value_template: "{{ workday }}"
+                    - condition: or
+                      conditions:
+                        - condition: template
+                          value_template: "{{ idx == 3 }}"
+                        - condition: time
+                          after: "16:40:00"
+                          before: "20:00:00"
+              then:
+                - if:
+                    - condition: template
+                      value_template: "{{ summer and current_tariff != DL65_5p_8 }}"
+                  then:
+                    - variables:
+                        tariff:
+                          time: "{{ timestamp }}"
+                          name: "{{ DL65_5p_8 }}"
+                          peak_rule: DL
+                          peak_start: 1021
+                          peak_end: 1201
+                          reserve: 65
+                        doit: true
+                - if:
+                    - condition: template
+                      value_template: >-
+                        {{ not summer and current_tariff != ZN80_5p_8 and
+                        current_tariff != ZN80_M_8 }}
+                  then:
+                    - variables:
+                        tariff:
+                          time: "{{ timestamp }}"
+                          name: "{{ ZN80_5p_8 }}"
+                          peak_rule: ZN
+                          peak_start: 1021
+                          peak_end: 1201
+                          reserve: 65
+                        doit: true
+    - if:
+        - condition: template
+          value_template: "{{ doit }}"
+      then:
+        - action: input_text.set_value
+          metadata: {}
+          target:
+            entity_id: input_text.ee_solar_envoy_tariff_parameters
+          data:
+            value: "{{ tariff }}"
+        - action: input_text.set_value
+          metadata: {}
+          target:
+            entity_id: input_text.ee_solar_envoy_tariff_name
+          data:
+            value: "{{ tariff.name }}"
+        - action: input_text.set_value
+          metadata: {}
+          target:
+            entity_id: input_text.ee_solar_envoy_tariff_time
+          data:
+            value: "{{ tariff.time }}"
+        - action: notify.persistent_notification
+          metadata: {}
+          data:
+            message: |-
+              {{ idx }} - Tariff {{ tariff.name }} @ {{ now().strftime("%y-%m-%d %H:%M:%S") }}
+  mode: single
+
+- alias: EE Build Solar Forecast Timetable
+  id: ee_build_solar_forecast_timetable
+  description: "Constructs timetable for the solar day from Open Mateo and solar irradiance formuala"
+  triggers:
+    - trigger: sun
+      event: sunrise
+      offset: "00:45:00"
+  conditions: []
+  actions:
+    - action: script.ee_build_solar_forecsat_timetable
+      metadata: {}
+      data: {}
+    - action: automation.trigger
+      metadata: {}
+      target:
+        entity_id: automation.ee_forecast_solar_generation
+      data:
+        skip_condition: true
+  mode: single
+

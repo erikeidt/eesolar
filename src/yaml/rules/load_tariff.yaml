@@ -1,0 +1,29 @@
+- alias: EE Solar Load New Tariff
+  id: ee_solar_load_new_tariff
+  description: "Load Tariff into Envoy, if it isn't the one we want"
+  triggers:
+    - trigger: template
+      value_template: |-
+        {{ 
+          states('input_text.ee_solar_envoy_tariff_time') !=
+              states('input_text.ee_solar_observed_tariff_time')
+            and
+          states('input_boolean.ee_utilities_booted') == 'on'
+        }}
+      for:
+        seconds: 4
+  conditions: []
+  actions:
+    - action: rest_command.send_envoy_param_tariff
+      continue_on_error: true
+      metadata: {}
+      data: "{{ states('input_text.ee_solar_envoy_tariff_parameters') }}"
+      response_variable: response
+    - action: script.ee_decode_tariff
+      metadata: {}
+      data:
+        response: "{{ response }}"
+    - delay:
+        minutes: 1
+  mode: single
+
