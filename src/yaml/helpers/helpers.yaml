@@ -6,12 +6,6 @@ input_boolean:
   ee_solar_is_tou_workday_tomorrow:
     name: "EE Solar is TOU Workday Tomorrow"
     initial: off
-  ee_solar_is_off_season:
-    name: "EE Solar is Off Season"
-    initial: off
-  ee_solar_is_off_season_tomorrow:
-    name: "EE Solar is Off Season Tomorrow"
-    initial: off
   ee_solar_is_summer_season:
     name: "EE Solar is Summer Season"
     initial: off

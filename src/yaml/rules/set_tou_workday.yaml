@@ -87,17 +87,7 @@
       data: {}
       target:
         entity_id: input_boolean.ee_solar_is_summer_season
-    - action: input_boolean.turn_off
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_off_season
     else:
-    - action: input_boolean.turn_on
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_off_season
     - action: input_boolean.turn_off
       metadata: {}
       data: {}
@@ -112,17 +102,7 @@
       data: {}
       target:
         entity_id: input_boolean.ee_solar_is_summer_season_tomorrow
-    - action: input_boolean.turn_off
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_off_season_tomorrow
     else:
-    - action: input_boolean.turn_on
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_off_season_tomorrow
     - action: input_boolean.turn_off
       metadata: {}
       data: {}
