@@ -5,7 +5,7 @@
     - trigger: time
       at: "23:45:00"
     - trigger: time
-      at: "04:00:00"
+      at: "00:46:00"
     - trigger: state
       entity_id:
         - input_boolean.ee_utilities_booted
@@ -30,6 +30,10 @@
               - automation.ee_read_envoy_xml_info
           data:
             stop_actions: true
+        - action: rest_command.envoy_disable_livedata_stream
+          metadata: {}
+          data: {}
+          response_variable: response
       else:
         - action: automation.turn_on
           metadata: {}
@@ -41,4 +45,3 @@
               - automation.ee_read_envoy_relay
               - automation.ee_read_envoy_xml_info
   mode: single
-

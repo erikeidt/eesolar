@@ -80,7 +80,7 @@
           sequence:
             - variables:
                 tariff:
-                  time: "{{ now().timestamp() | int }}"
+                  time: "{{ timestamp }}"
                   name: "{{ ZN80_M_8 }}"
                   peak_rule: ZN
                   peak_start: |-
@@ -114,10 +114,9 @@
                   time: "{{ timestamp }}"
                   name: "{{ ZN96_M_5 }}"
                   peak_rule: ZN
-                  peak_start:
-                    "[object Object]": null
-                  peak_end: 1020
-                  reserve: 96
+                  peak_start: 480
+                  peak_end: 930
+                  reserve: 80
                 doit: true
         - conditions:
             - condition: template

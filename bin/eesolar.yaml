@@ -797,7 +797,7 @@ automation:
     - trigger: time
       at: "23:45:00"
     - trigger: time
-      at: "04:00:00"
+      at: "00:46:00"
     - trigger: state
       entity_id:
         - input_boolean.ee_utilities_booted
@@ -822,6 +822,10 @@ automation:
               - automation.ee_read_envoy_xml_info
           data:
             stop_actions: true
+        - action: rest_command.envoy_disable_livedata_stream
+          metadata: {}
+          data: {}
+          response_variable: response
       else:
         - action: automation.turn_on
           metadata: {}
@@ -833,7 +837,6 @@ automation:
               - automation.ee_read_envoy_relay
               - automation.ee_read_envoy_xml_info
   mode: single
-
 - alias: EE Forecast Solar Generation
   id: ee_forecast_solar_generation
   description: "Predict Whrs of solar for the rest of the day"
@@ -1119,7 +1122,7 @@ automation:
           sequence:
             - variables:
                 tariff:
-                  time: "{{ now().timestamp() | int }}"
+                  time: "{{ timestamp }}"
                   name: "{{ ZN80_M_8 }}"
                   peak_rule: ZN
                   peak_start: |-
@@ -1153,10 +1156,9 @@ automation:
                   time: "{{ timestamp }}"
                   name: "{{ ZN96_M_5 }}"
                   peak_rule: ZN
-                  peak_start:
-                    "[object Object]": null
-                  peak_end: 1020
-                  reserve: 96
+                  peak_start: 480
+                  peak_end: 930
+                  reserve: 80
                 doit: true
         - conditions:
             - condition: template
