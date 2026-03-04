@@ -117,6 +117,10 @@ input_number:
     name: Solar Generation Forecast
     unit_of_measurement: "Wh"
     initial: 0
+  ee_solar_state_controller_counter:
+    min: 0
+    max: 100
+    name: Controller State Counter
     
 input_text:
   ee_observed_tariff:
@@ -347,7 +351,7 @@ template:
         {% set longitude_correction_radians = ((360/364)*(jdoy-81)) * (pi/180) -%}
         {% set declination_radians = 23.45 * sin( (360/365.25) * (jdoy - 81) * (pi/180) ) * (pi/180) -%}
         {% set watts = panel_info.r * (1 + panel_info.d/100) ** (time_tuple.tm_year - panel_info.y) -%}
-        {% set local_meridan = ((time_now | as_datetime | as_local).strftime("%z") |int / 100) | int * 15 -%}
+        {% set local_meridan = ((time_now | as_datetime | as_local).strftime("%z") | int / 100) | int * 15 -%}
         {% set equation_of_time =
           (9.87*sin(2*longitude_correction_radians)) - 
           (7.53*cos(longitude_correction_radians)) - 
@@ -945,6 +949,7 @@ automation:
     response_variable: agenda
   - variables:
       yetz: "{{ now() }}"
+      this_day: "{{ (yetz|as_datetime).day }}"
       morgan: "{{ yetz|as_datetime + timedelta(days=1) }}"
       response: "{{ agenda['calendar.utility_tou_holidays'] }}"
       events: "{{ response.events }}"
@@ -1039,6 +1044,12 @@ automation:
       value: 0
     target:
       entity_id: input_number.ee_observed_solar_production_max
+  - action: input_number.set_value
+    metadata: {}
+    data:
+      value: 0 
+    target:
+      entity_id: input_number.ee_solar_state_controller_counter
   mode: single
 - alias: EE Solar Controller
   id: ee_solar_controller

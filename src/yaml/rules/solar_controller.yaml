@@ -1,6 +1,6 @@
 - alias: EE Solar Controller
   id: ee_solar_controller
-  description: "Change Envoy Tariff for best battery usage"
+  description: "Change Envoy Tariff for desired battery usage"
   trigger_variables:
     ZN80_M_8: ZN80/M-8
     ZN80_5p_8: ZN80/5p-8
@@ -9,6 +9,7 @@
   triggers:
     - alias: Go ZN Workday
       trigger: template
+      id: Go ZN Workday
       value_template: |-
         {{ 
           states('input_boolean.ee_solar_is_tou_workday') == 'on' 
@@ -18,7 +19,7 @@
           states('input_number.ee_solar_generation_forecast') | int > 
               states('sensor.ee_envoy_battery_charge_needed') | int 
             and
-          states('input_number.ee_hour_of_day') | int < 12 
+          states('input_number.ee_solar_state_controller_counter') | int == 0 
             and
           states('input_text.ee_solar_envoy_tariff_name') != ZN80_M_8 
             and
@@ -27,7 +28,8 @@
       for:
         seconds: 4
     - trigger: template
-      alias: Stop ZN
+      alias: Stop ZN Workday
+      id: Stop ZN Workday
       value_template: |-
         {{
           states('input_boolean.ee_solar_is_tou_workday') == 'on' 
@@ -35,7 +37,7 @@
           states('input_number.ee_solar_generation_forecast') | int < 
               states('sensor.ee_envoy_battery_charge_needed') | int
             and
-          11 < states('input_number.ee_hour_of_day') | int < 16
+          8 <= states('input_number.ee_hour_of_day') | int <= 15
             and
           states('input_text.ee_solar_envoy_tariff_name') == ZN80_M_8 
             and
@@ -47,18 +49,51 @@
         minutes: 30
     - trigger: template
       alias: Go ZN Weekend/Holiday
+      id: Go ZN Weekend
       value_template: |-
-        {{
-          states('input_boolean.ee_solar_is_tou_workday') == 'off'
+        {{ 
+          states('input_boolean.ee_solar_is_tou_workday') == 'off' 
             and
-          states('input_text.ee_solar_envoy_tariff_name') != ZN96_M_5
+          states('input_number.ee_observed_solar_production') | int >= 850000
+            and
+          states('input_number.ee_solar_generation_forecast') | int > 
+              states('sensor.ee_envoy_battery_charge_needed') | int 
+            and
+          states('input_number.ee_solar_state_controller_counter') | int == 0 
+            and
+          states('input_text.ee_solar_envoy_tariff_name') != ZN96_M_5 
             and
           states('input_boolean.ee_utilities_booted') == 'on'
         }}
+      for:
+        seconds: 4
+    - trigger: template
+      alias: Stop ZN Weekend/Holiday
+      id: Stop ZN Weekend
+      value_template: |-
+        {{
+          states('input_boolean.ee_solar_is_tou_workday') == 'off' 
+            and
+          states('input_number.ee_solar_generation_forecast') | int < 
+              states('sensor.ee_envoy_battery_charge_needed') | int
+            and
+          8 <= states('input_number.ee_hour_of_day') | int <= 15
+            and
+          states('input_text.ee_solar_envoy_tariff_name') == ZN96_M_5 
+            and
+          states('input_number.ee_observed_charge') | int <= 97 
+            and
+          states('input_boolean.ee_utilities_booted') == 'on'
+        }}
+      for:
+        minutes: 30
     - trigger: time
       alias: Go DL?
+      id: Go DL?
       at: "16:45:00"
     - trigger: state
+      alias: Booted
+      id: Booted
       entity_id:
         - input_boolean.ee_utilities_booted
       to:
@@ -66,7 +101,6 @@
   conditions: []
   actions:
     - variables:
-        idx: "{{ trigger.idx | int }}"
         time_now: "{{ now() }}"
         timestamp: "{{ (time_now | as_datetime).timestamp() | int }}"
         summer: "{{ states('input_boolean.ee_solar_is_summer_season') == 'on' }}"
@@ -75,8 +109,8 @@
         doit: false
     - choose:
         - conditions:
-            - condition: template
-              value_template: "{{ idx == 0 }}"
+            - condition: trigger
+              id: Go ZN Workday
           sequence:
             - variables:
                 tariff:
@@ -87,14 +121,19 @@
                     {{ 
                       (time_now | as_datetime).hour * 60 + (time_now | as_datetime).minute
                     }}
-                  peak_end: 960
+                  peak_end: 961
                   second_start: 1021
                   second_end: 1201
-                  reserve: 80
+                  reserve: 78
                 doit: true
+            - action: input_number.increment
+              metadata: {}
+              target:
+                entity_id: input_number.ee_solar_state_controller_counter
+              data: {}
         - conditions:
-            - condition: template
-              value_template: "{{ idx == 1 }}"
+            - condition: trigger
+              id: Stop ZN Workday
           sequence:
             - variables:
                 tariff:
@@ -103,24 +142,47 @@
                   peak_rule: "{{ 'DL' if summer else 'ZN' }}"
                   peak_start: 1021
                   peak_end: 1201
-                  reserve: "{{ 65 if summer else 80 }}"
+                  reserve: "{{ 65 if summer else 78 }}"
                 doit: true
         - conditions:
-            - condition: template
-              value_template: "{{ idx == 2 }}"
+            - condition: trigger
+              id: Go ZN Weekend
           sequence:
             - variables:
                 tariff:
                   time: "{{ timestamp }}"
                   name: "{{ ZN96_M_5 }}"
                   peak_rule: ZN
-                  peak_start: 480
+                  peak_start: |-
+                    {{ 
+                      (time_now | as_datetime).hour * 60 + (time_now | as_datetime).minute
+                    }}
                   peak_end: 930
-                  reserve: 80
+                  reserve: 82
+                doit: true
+            - action: input_number.increment
+              metadata: {}
+              target:
+                entity_id: input_number.ee_solar_state_controller_counter
+              data: {}
+        - conditions:
+            - condition: trigger
+              id: Stop ZN Weekend
+          sequence:
+            - variables:
+                tariff:
+                  time: "{{ timestamp }}"
+                  name: CPCP
+                  peak_rule: ZN
+                  peak_start: 660
+                  peak_end: 665
+                  reserve: 96
                 doit: true
         - conditions:
-            - condition: template
-              value_template: "{{ idx == 3 or idx == 4 }}"
+            - condition: trigger
+              id:
+                - Go DL?
+                - Booted
           sequence:
             - if:
                 - condition: and
@@ -130,14 +192,19 @@
                     - condition: or
                       conditions:
                         - condition: template
-                          value_template: "{{ idx == 3 }}"
+                          value_template: "{{ trigger.id == 'Go DL?' }}"
                         - condition: time
                           after: "16:40:00"
                           before: "20:00:00"
               then:
                 - if:
                     - condition: template
-                      value_template: "{{ summer and current_tariff != DL65_5p_8 }}"
+                      value_template: |-
+                        {{ 
+                          summer 
+                            and
+                          current_tariff != DL65_5p_8
+                        }}
                   then:
                     - variables:
                         tariff:
@@ -150,9 +217,14 @@
                         doit: true
                 - if:
                     - condition: template
-                      value_template: >-
-                        {{ not summer and current_tariff != ZN80_5p_8 and
-                        current_tariff != ZN80_M_8 }}
+                      value_template: |-
+                        {{ 
+                          not summer
+                            and 
+                          current_tariff != ZN80_5p_8
+                            and
+                          current_tariff != ZN80_M_8
+                        }}
                   then:
                     - variables:
                         tariff:
@@ -189,6 +261,7 @@
           metadata: {}
           data:
             message: |-
-              {{ idx }} - Tariff {{ tariff.name }} @ {{ now().strftime("%y-%m-%d %H:%M:%S") }}
+              {{ trigger.id }}
+              {{ tariff.name }}
+              {{ now().strftime("%y-%m-%d %H:%M:%S") }}
   mode: single
-

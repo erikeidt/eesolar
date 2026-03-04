@@ -62,7 +62,7 @@ template:
         {% set longitude_correction_radians = ((360/364)*(jdoy-81)) * (pi/180) -%}
         {% set declination_radians = 23.45 * sin( (360/365.25) * (jdoy - 81) * (pi/180) ) * (pi/180) -%}
         {% set watts = panel_info.r * (1 + panel_info.d/100) ** (time_tuple.tm_year - panel_info.y) -%}
-        {% set local_meridan = ((time_now | as_datetime | as_local).strftime("%z") |int / 100) | int * 15 -%}
+        {% set local_meridan = ((time_now | as_datetime | as_local).strftime("%z") | int / 100) | int * 15 -%}
         {% set equation_of_time =
           (9.87*sin(2*longitude_correction_radians)) - 
           (7.53*cos(longitude_correction_radians)) - 

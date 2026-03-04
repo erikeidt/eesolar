@@ -1,7 +1,7 @@
 script:
   ee_forecast_solar_production:
     alias: "EE Forecast Solar Production"
-    description: ""
+    description: "Forecast Based on Cloudiness"
     sequence:
       - action: todo.get_items
         metadata: {}
@@ -34,13 +34,12 @@ script:
         then:
           - variables:
               brightness_raw: "{{ states('sensor.ee_solar_obs_vs_calc_pct_avg_thrt') | float(0) }}"
-              brightness_now: "{{ max(min(brightness_raw,100),1) }}"
-              skyview_now: "{{ 100 - desc.cloud_cover [index] | float(0) }}"
-              skyview_now_shrunk: "{{ skyview_now / 2 + 50 }}"
+              brightness_now: "{{ max(min(brightness_raw,100),0) }}"
+              skyview_raw: "{{ 100 - desc.cloud_cover [index] | float(0) }}"
+              skyview_now: "{{ max(min(skyview_raw,100),0) }}"
           - variables:
-              b2v_ratio: "{{ brightness_now / skyview_now_shrunk }}"
-          - variables:
-              b2v_increment: "{{ (100 - skyview_now_shrunk) / (100 * b2v_ratio - 100) }}"
+              ratio_under: "{{ brightness_now / skyview_now if skyview_now != 0 else 0 }}"
+              ratio_over:  "{{ (100-brightness_now) / (100-skyview_now) if skyview_now != 100 else 0 }}"
           - variables:
               calc: |-
                 {#
@@ -51,53 +50,55 @@ script:
                   {% set last = desc.ghi | count -%}
                   {% set count = last - index -%}
                   {% set tm_year = now().year %}
-              
+
                   {{ start_time }} -- {{ diff }} -- {{ index }} -- {{ last }} -- {{ count }}
-              
+
                   {% set brightness_raw = states('sensor.ee_solar_obs_vs_calc_pct_avg_thrt') | float(0) -%}
-                  { # % set brightness_raw = 47.5 -% # }
-                  {% set brightness_now = max(min(brightness_raw,100),1) -%}
-                  {% set skyview_now = 100 - desc.cloud_cover [index] | float(0) -%}
-                  {% set skyview_now_shrunk = skyview_now / 2 + 50 -%}              
-                  {% set b2v_ratio = brightness_now / skyview_now_shrunk -%}
-                  {% set b2v_increment = (100 - skyview_now_shrunk) / (100 * b2v_ratio - 100) -%}
+                  {% set brightness_raw = 29 -%}
+                  {% set brightness_now = max(min(brightness_raw,100),0) -%}
+              
+                  {% set skyview_raw = 100 - desc.cloud_cover [index] | float(0) -%}
+                  {% set skyview_now = max(min(skyview_raw,100),0) -%}
 
+                  {% set ratio_under = brightness_now / skyview_now if skyview_now != 0 else 0 -%}
+                  {% set ratio_over = (100-brightness_now) / (100-skyview_now) if skyview_now != 100 else 0 -%}
+              
                   br:  {{ brightness_raw }} -- {{ brightness_now }}
-                  sk: {{ skyview_now }} -- {{ skyview_now_shrunk }}
-                  ra: {{ b2v_ratio }} -- {{ b2v_increment }}
-                -#}
-
+                  sk: {{ skyview_raw }} -- {{ skyview_now }}
+                  ra: {{ ratio_under }} -- {{ ratio_over }}
+                #}
+            
                   {% set solar_array_info = states('input_text.solar_array_info') | from_json -%}
                   {% set panel_info = solar_array_info[0] -%}
                   {% set panel_clip_mw = panel_info.x * 1000 -%}                  
                   {% set home_load_small = panel_info.h -%}
                   {% set ns = namespace(mwhwc=0,mwhnc=0) -%}
                   {% set watts = panel_info.r * (1 + panel_info.d/100) ** (tm_year | int - panel_info.y) -%}                     
-              
+
                   {% for i in range(index,last) -%}
                     {% set irradiance_on_panel_ghi = desc.ghi [i] | float -%}
                     {% set air_temp_c = desc.temperature_2m [i] -%}
                     {% set panel_temp_c = air_temp_c + 15 -%}
                     {% set temp_factor = 1 if panel_temp_c <= 25 else 1+(panel_info.c*(panel_temp_c-25))/100 -%}
                     {% set aqi = states('sensor.pa_air_quality') | float(50) -%}
-                    {% set aqi_factor = (1-(aqi / (400/0.12))) -%}
-                    {% set skyview_forecast = 100 - desc.cloud_cover [i] | float(0) -%}
-                    {% set skyview_forecast_shrunk = skyview_forecast / 2 + 50 -%}
-                    {% set scaled_brightness = skyview_forecast_shrunk * b2v_ratio -%}
-                    {% set factor1 =
-                      scaled_brightness
-                        if brightness_now == 100 or b2v_increment == 0 else
-                      scaled_brightness - (skyview_forecast_shrunk - skyview_now_shrunk) / b2v_increment
+                    {% set aqi_factor = (1-(aqi / (400/0.12))) -%}                
+                    {% set skyview_forecast_raw = 100 - desc.cloud_cover [i] | float(0) -%}
+                    {% set skyview_forecast = max(min(skyview_forecast_raw,100),0) -%}
+                    {#{ skyview_forecast * ratio_under }} xx {{ skyview_forecast * ratio_over }#}
+                    {% set brightness_forecast = 
+                      skyview_forecast * ratio_under if skyview_forecast < skyview_now
+                        else
+                      (skyview_forecast - skyview_now) * ratio_over + brightness_now if skyview_forecast > skyview_now
+                        else
+                      brightness_now
                     -%}
-                    {% set factor2 = factor1 if factor1 > 0 else 0 -%}
-                    {% set alt_factor = min(max(factor2,1),100) / 100 -%}
+
                     {% set mwatts_nc = irradiance_on_panel_ghi * temp_factor * aqi_factor * watts -%}
-                    {% set mwatts_wc = mwatts_nc * alt_factor -%}
+                    {% set mwatts_wc = mwatts_nc * brightness_forecast / 100 -%}
+                
                     {#
-                      f1: {{ factor1 }} -- {{ factor2 }}
-                      fc: {{ skyview_forecast }} -- {{ skyview_forecast_shrunk }}
-                      sb: {{ scaled_brightness }} -- {{ (skyview_forecast_shrunk - skyview_shrunk_now) / b2v_increment }}
-                      af: {{ alt_factor }}
+                      fc: {{ skyview_forecast_raw }} -- {{ skyview_forecast }}
+                      bn: {{ brightness_forecast }}
                       mw: {{ mwatts_nc }} -- {{ mwatts_wc }}
                     -#}
                     {% set mwatts_nc = mwatts_nc if mwatts_nc < panel_clip_mw else panel_clip_mw -%}
@@ -126,5 +127,7 @@ script:
                 }}
       - stop: ""
         response_variable: calc
+    alias: EE Forecast Solar Production
+    description: ""
     mode: single
 

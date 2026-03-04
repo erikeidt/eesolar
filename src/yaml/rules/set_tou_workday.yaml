@@ -20,6 +20,7 @@
     response_variable: agenda
   - variables:
       yetz: "{{ now() }}"
+      this_day: "{{ (yetz|as_datetime).day }}"
       morgan: "{{ yetz|as_datetime + timedelta(days=1) }}"
       response: "{{ agenda['calendar.utility_tou_holidays'] }}"
       events: "{{ response.events }}"
@@ -114,4 +115,10 @@
       value: 0
     target:
       entity_id: input_number.ee_observed_solar_production_max
+  - action: input_number.set_value
+    metadata: {}
+    data:
+      value: 0 
+    target:
+      entity_id: input_number.ee_solar_state_controller_counter
   mode: single

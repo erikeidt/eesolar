@@ -117,6 +117,10 @@ input_number:
     name: Solar Generation Forecast
     unit_of_measurement: "Wh"
     initial: 0
+  ee_solar_state_controller_counter:
+    min: 0
+    max: 100
+    name: Controller State Counter
     
 input_text:
   ee_observed_tariff:
