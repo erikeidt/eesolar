@@ -1,126 +1,131 @@
 - alias: EE Set is TOU Workday
+  description: Determine todays rates as to workday or holiday
   id: ee_set_is_tou_workday
-  description: 'Determine todays rates as to workday or holiday'
+  mode: single
   triggers:
-  - trigger: time
-    at: 00:15:00
-  - trigger: homeassistant
-    event: start
-  - trigger: template
-    value_template: "{{ states(this.entity_id) == 'on' }}" 
+    - trigger: time
+      at: "00:15:00"
+      id: Midnight
+    - trigger: homeassistant
+      event: start
   conditions: []
   actions:
-  - action: calendar.get_events
-    metadata: {}
-    data:
-      duration:
-        hours: 36
-    target:
-      entity_id: 'calendar.utility_tou_holidays'
-    response_variable: agenda
-  - variables:
-      yetz: "{{ now() }}"
-      this_day: "{{ (yetz|as_datetime).day }}"
-      morgan: "{{ yetz|as_datetime + timedelta(days=1) }}"
-      response: "{{ agenda['calendar.utility_tou_holidays'] }}"
-      events: "{{ response.events }}"
-      theday: "{{ (yetz|as_datetime).strftime('%Y-%m-%d') }}"
-      tou_today: "{{ events|length >= 1 and events[0].start <= theday }}"
-      tou_tomorrow: |-
-        {{ 
-          events|length == 2 or 
-          (events|length == 1 and events[0].start > theday) 
-        }}
-  - if:
-    - condition: and
-      conditions:
-      - condition: time
-        weekday:
-        - mon
-        - tue
-        - wed
-        - thu
-        - fri
-      - condition: template
-        value_template: "{{ not tou_today }}"
-    then:
-    - action: input_boolean.turn_on
+    - action: calendar.get_events
       metadata: {}
-      data: {}
+      data:
+        duration:
+          hours: 36
       target:
-        entity_id: input_boolean.ee_solar_is_tou_workday
-    else:
-    - action: input_boolean.turn_off
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_tou_workday
-  - if:
-    - condition: and
-      conditions:
-      - condition: time
-        weekday:
-        - sun
-        - mon
-        - tue
-        - wed
-        - thu
-      - condition: template
-        value_template: "{{ not tou_tomorrow }}"
-    then:
-    - action: input_boolean.turn_on
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_tou_workday_tomorrow
-    else:
-    - action: input_boolean.turn_off
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_tou_workday_tomorrow
-  - if:
-      - condition: template
-        value_template: "{{ 5 < (yetz|as_datetime).month < 10 }}"
-    then:
-    - action: input_boolean.turn_on
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_summer_season
-    else:
-    - action: input_boolean.turn_off
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_summer_season
-  - if:
-      - condition: template
-        value_template: "{{ 5 < (morgan|as_datetime).month < 10 }}"
-    then:
-    - action: input_boolean.turn_on
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_summer_season_tomorrow
-    else:
-    - action: input_boolean.turn_off
-      metadata: {}
-      data: {}
-      target:
-        entity_id: input_boolean.ee_solar_is_summer_season_tomorrow
-  - action: input_number.set_value
-    metadata: {}
-    data:
-      value: 0
-    target:
-      entity_id: 
-        - input_number.ee_observed_solar_production_max
-        - input_number.ee_observed_solar_whrs_predicted_max
-  - action: input_number.set_value
-    metadata: {}
-    data:
-      value: 0 
-    target:
-      entity_id: input_number.ee_solar_state_controller_counter
-  mode: single
+        entity_id: calendar.utility_tou_holidays
+      response_variable: agenda
+    - variables:
+        yetz: "{{ now() }}"
+        this_day: "{{ (yetz|as_datetime).day }}"
+        morgan: "{{ yetz|as_datetime + timedelta(days=1) }}"
+        response: "{{ agenda['calendar.utility_tou_holidays'] }}"
+        events: "{{ response.events }}"
+        theday: "{{ (yetz|as_datetime).strftime('%Y-%m-%d') }}"
+        tou_today: "{{ events|length >= 1 and events[0].start <= theday }}"
+        tou_tomorrow: |-
+          {{ 
+            events|length == 2 or 
+            (events|length == 1 and events[0].start > theday) 
+          }}
+    - if:
+        - condition: and
+          conditions:
+            - condition: time
+              weekday:
+                - mon
+                - tue
+                - wed
+                - thu
+                - fri
+            - condition: template
+              value_template: "{{ not tou_today }}"
+      then:
+        - action: input_boolean.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: input_boolean.ee_solar_is_tou_workday
+      else:
+        - action: input_boolean.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: input_boolean.ee_solar_is_tou_workday
+    - if:
+        - condition: and
+          conditions:
+            - condition: time
+              weekday:
+                - sun
+                - mon
+                - tue
+                - wed
+                - thu
+            - condition: template
+              value_template: "{{ not tou_tomorrow }}"
+      then:
+        - action: input_boolean.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: input_boolean.ee_solar_is_tou_workday_tomorrow
+      else:
+        - action: input_boolean.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: input_boolean.ee_solar_is_tou_workday_tomorrow
+    - if:
+        - condition: template
+          value_template: "{{ 5 < (yetz|as_datetime).month < 10 }}"
+      then:
+        - action: input_boolean.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: input_boolean.ee_solar_is_summer_season
+      else:
+        - action: input_boolean.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: input_boolean.ee_solar_is_summer_season
+    - if:
+        - condition: template
+          value_template: "{{ 5 < (morgan|as_datetime).month < 10 }}"
+      then:
+        - action: input_boolean.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: input_boolean.ee_solar_is_summer_season_tomorrow
+      else:
+        - action: input_boolean.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: input_boolean.ee_solar_is_summer_season_tomorrow
+    - if:
+        - condition: trigger
+          id:
+            - Midnight
+      then:
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: 0
+          target:
+            entity_id:
+              - input_number.ee_observed_solar_production_max
+              - input_number.ee_observed_solar_whrs_predicted_max
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: 0
+          target:
+            entity_id: input_number.ee_solar_state_controller_counter
+
