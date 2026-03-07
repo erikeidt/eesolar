@@ -184,6 +184,10 @@
                   "name": "Summer",
                   "vertical": false,
                   "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_solar_whrs_predicted_max"
                 }
               ],
               "column_span": 2
@@ -322,6 +326,10 @@
                     },
                     {
                       "entity": "input_text.ee_solar_envoy_tariff_parameters",
+                      "type": "simple-entity"
+                    },
+                    {
+                      "entity": "input_number.ee_solar_state_controller_counter",
                       "type": "simple-entity"
                     }
                   ]

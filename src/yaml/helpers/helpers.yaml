@@ -37,7 +37,6 @@ input_number:
     step: 1.0
     unit_of_measurement: "mW"
     name: "Solar Production Max"
-    initial: 0
   ee_observed_net_consumption:
     min: -10000000000.0
     max: 10000000000.0
@@ -121,6 +120,13 @@ input_number:
     min: 0
     max: 100
     name: Controller State Counter
+  ee_observed_solar_whrs_predicted_max:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "Wh"
+    name: "Solar Whrs Predicted Max"
     
 input_text:
   ee_observed_tariff:

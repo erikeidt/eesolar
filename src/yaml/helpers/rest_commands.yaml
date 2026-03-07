@@ -1,6 +1,4 @@
 rest_command:
-  read_pa_sensor:
-    url: "http://192.168.68.107/json?live=true"
   read_envoy_xml_info:
 #   url: "https://envoy.local/info.xml"
     url: "https://192.168.68.102/info.xml"

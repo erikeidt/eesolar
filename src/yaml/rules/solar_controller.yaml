@@ -14,12 +14,12 @@
         {{ 
           states('input_boolean.ee_solar_is_tou_workday') == 'on' 
             and
-          states('input_number.ee_observed_solar_production') | int >= 850000
+          states('input_number.ee_observed_solar_production') | int(0) >= 925000
             and
-          states('input_number.ee_solar_generation_forecast') | int > 
-              states('sensor.ee_envoy_battery_charge_needed') | int 
+          states('input_number.ee_solar_generation_forecast') | int(0) > 
+              states('sensor.ee_envoy_battery_charge_needed') | int(0) 
             and
-          states('input_number.ee_solar_state_controller_counter') | int == 0 
+          states('input_number.ee_solar_state_controller_counter') | int(0) == 0 
             and
           states('input_text.ee_solar_envoy_tariff_name') != ZN80_M_8 
             and
@@ -34,14 +34,14 @@
         {{
           states('input_boolean.ee_solar_is_tou_workday') == 'on' 
             and
-          states('input_number.ee_solar_generation_forecast') | int < 
-              states('sensor.ee_envoy_battery_charge_needed') | int
+          states('input_number.ee_solar_generation_forecast') | int(0) < 
+              states('sensor.ee_envoy_battery_charge_needed') | int(-1)
             and
-          8 <= states('input_number.ee_hour_of_day') | int <= 15
+          8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
           states('input_text.ee_solar_envoy_tariff_name') == ZN80_M_8 
             and
-          states('input_number.ee_observed_charge') | int <= 97 
+          states('input_number.ee_observed_charge') | int(0) <= 97 
             and
           states('input_boolean.ee_utilities_booted') == 'on'
         }}
@@ -54,12 +54,12 @@
         {{ 
           states('input_boolean.ee_solar_is_tou_workday') == 'off' 
             and
-          states('input_number.ee_observed_solar_production') | int >= 850000
+          states('input_number.ee_observed_solar_production') | int(0) >= 925000
             and
-          states('input_number.ee_solar_generation_forecast') | int > 
-              states('sensor.ee_envoy_battery_charge_needed') | int 
+          states('input_number.ee_solar_generation_forecast') | int(0) > 
+              states('sensor.ee_envoy_battery_charge_needed') | int(0) 
             and
-          states('input_number.ee_solar_state_controller_counter') | int == 0 
+          states('input_number.ee_solar_state_controller_counter') | int(0) == 0 
             and
           states('input_text.ee_solar_envoy_tariff_name') != ZN96_M_5 
             and
@@ -74,14 +74,14 @@
         {{
           states('input_boolean.ee_solar_is_tou_workday') == 'off' 
             and
-          states('input_number.ee_solar_generation_forecast') | int < 
-              states('sensor.ee_envoy_battery_charge_needed') | int
+          states('input_number.ee_solar_generation_forecast') | int(0) < 
+              states('sensor.ee_envoy_battery_charge_needed') | int(-1)
             and
-          8 <= states('input_number.ee_hour_of_day') | int <= 15
+          8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
           states('input_text.ee_solar_envoy_tariff_name') == ZN96_M_5 
             and
-          states('input_number.ee_observed_charge') | int <= 97 
+          states('input_number.ee_observed_charge') | int(0) <= 97 
             and
           states('input_boolean.ee_utilities_booted') == 'on'
         }}
@@ -102,7 +102,7 @@
   actions:
     - variables:
         time_now: "{{ now() }}"
-        timestamp: "{{ (time_now | as_datetime).timestamp() | int }}"
+        timestamp: "{{ (time_now | as_datetime).timestamp() | int(0) }}"
         summer: "{{ states('input_boolean.ee_solar_is_summer_season') == 'on' }}"
         workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
         current_tariff: "{{ states('input_text.ee_solar_envoy_tariff_name') }}"

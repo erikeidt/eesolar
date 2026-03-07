@@ -37,7 +37,6 @@ input_number:
     step: 1.0
     unit_of_measurement: "mW"
     name: "Solar Production Max"
-    initial: 0
   ee_observed_net_consumption:
     min: -10000000000.0
     max: 10000000000.0
@@ -121,6 +120,13 @@ input_number:
     min: 0
     max: 100
     name: Controller State Counter
+  ee_observed_solar_whrs_predicted_max:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "Wh"
+    name: "Solar Whrs Predicted Max"
     
 input_text:
   ee_observed_tariff:
@@ -173,8 +179,6 @@ input_datetime:
     initial: 00:00
 
 rest_command:
-  read_pa_sensor:
-    url: "http://192.168.68.107/json?live=true"
   read_envoy_xml_info:
 #   url: "https://envoy.local/info.xml"
     url: "https://192.168.68.102/info.xml"
@@ -866,18 +870,30 @@ automation:
             forecast:
               whrs_with_clouds_no_load: 0
               whrs_with_clouds_small_load: 0
+    - variables:
+        whrs_with_clouds_no_load: "{{ max(forecast.whrs_with_clouds_no_load,0) }}"
     - action: input_number.set_value
       metadata: {}
       target:
         entity_id: input_number.ee_solar_generation_forecast_just_clouds
       data:
-        value: "{{ max(forecast.whrs_with_clouds_no_load,0) }}"
+        value: "{{ whrs_with_clouds_no_load }}"
     - action: input_number.set_value
       metadata: {}
       target:
         entity_id: input_number.ee_solar_generation_forecast
       data:
         value: "{{ max(forecast.whrs_with_clouds_small_load,0) }}"
+    - if:
+      - condition: template
+        value_template: "{{ whrs_with_clouds_no_load > states('input_number.ee_observed_solar_whrs_predicted_max') | int(0) }}"
+      then: 
+      - action: input_number.set_value
+        metadata: {}
+        target:
+          entity_id: input_number.ee_observed_solar_whrs_predicted_max
+        data:
+          value: "{{ whrs_with_clouds_no_load }}"
   mode: single
 
 - alias: EE Solar Load New Tariff
@@ -1043,7 +1059,9 @@ automation:
     data:
       value: 0
     target:
-      entity_id: input_number.ee_observed_solar_production_max
+      entity_id: 
+        - input_number.ee_observed_solar_production_max
+        - input_number.ee_observed_solar_whrs_predicted_max
   - action: input_number.set_value
     metadata: {}
     data:
@@ -1067,12 +1085,12 @@ automation:
         {{ 
           states('input_boolean.ee_solar_is_tou_workday') == 'on' 
             and
-          states('input_number.ee_observed_solar_production') | int >= 850000
+          states('input_number.ee_observed_solar_production') | int(0) >= 925000
             and
-          states('input_number.ee_solar_generation_forecast') | int > 
-              states('sensor.ee_envoy_battery_charge_needed') | int 
+          states('input_number.ee_solar_generation_forecast') | int(0) > 
+              states('sensor.ee_envoy_battery_charge_needed') | int(0) 
             and
-          states('input_number.ee_solar_state_controller_counter') | int == 0 
+          states('input_number.ee_solar_state_controller_counter') | int(0) == 0 
             and
           states('input_text.ee_solar_envoy_tariff_name') != ZN80_M_8 
             and
@@ -1087,14 +1105,14 @@ automation:
         {{
           states('input_boolean.ee_solar_is_tou_workday') == 'on' 
             and
-          states('input_number.ee_solar_generation_forecast') | int < 
-              states('sensor.ee_envoy_battery_charge_needed') | int
+          states('input_number.ee_solar_generation_forecast') | int(0) < 
+              states('sensor.ee_envoy_battery_charge_needed') | int(-1)
             and
-          8 <= states('input_number.ee_hour_of_day') | int <= 15
+          8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
           states('input_text.ee_solar_envoy_tariff_name') == ZN80_M_8 
             and
-          states('input_number.ee_observed_charge') | int <= 97 
+          states('input_number.ee_observed_charge') | int(0) <= 97 
             and
           states('input_boolean.ee_utilities_booted') == 'on'
         }}
@@ -1107,12 +1125,12 @@ automation:
         {{ 
           states('input_boolean.ee_solar_is_tou_workday') == 'off' 
             and
-          states('input_number.ee_observed_solar_production') | int >= 850000
+          states('input_number.ee_observed_solar_production') | int(0) >= 925000
             and
-          states('input_number.ee_solar_generation_forecast') | int > 
-              states('sensor.ee_envoy_battery_charge_needed') | int 
+          states('input_number.ee_solar_generation_forecast') | int(0) > 
+              states('sensor.ee_envoy_battery_charge_needed') | int(0) 
             and
-          states('input_number.ee_solar_state_controller_counter') | int == 0 
+          states('input_number.ee_solar_state_controller_counter') | int(0) == 0 
             and
           states('input_text.ee_solar_envoy_tariff_name') != ZN96_M_5 
             and
@@ -1127,14 +1145,14 @@ automation:
         {{
           states('input_boolean.ee_solar_is_tou_workday') == 'off' 
             and
-          states('input_number.ee_solar_generation_forecast') | int < 
-              states('sensor.ee_envoy_battery_charge_needed') | int
+          states('input_number.ee_solar_generation_forecast') | int(0) < 
+              states('sensor.ee_envoy_battery_charge_needed') | int(-1)
             and
-          8 <= states('input_number.ee_hour_of_day') | int <= 15
+          8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
           states('input_text.ee_solar_envoy_tariff_name') == ZN96_M_5 
             and
-          states('input_number.ee_observed_charge') | int <= 97 
+          states('input_number.ee_observed_charge') | int(0) <= 97 
             and
           states('input_boolean.ee_utilities_booted') == 'on'
         }}
@@ -1155,7 +1173,7 @@ automation:
   actions:
     - variables:
         time_now: "{{ now() }}"
-        timestamp: "{{ (time_now | as_datetime).timestamp() | int }}"
+        timestamp: "{{ (time_now | as_datetime).timestamp() | int(0) }}"
         summer: "{{ states('input_boolean.ee_solar_is_summer_season') == 'on' }}"
         workday: "{{ states('input_boolean.ee_solar_is_tou_workday') == 'on' }}"
         current_tariff: "{{ states('input_text.ee_solar_envoy_tariff_name') }}"

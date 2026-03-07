@@ -23,17 +23,29 @@
             forecast:
               whrs_with_clouds_no_load: 0
               whrs_with_clouds_small_load: 0
+    - variables:
+        whrs_with_clouds_no_load: "{{ max(forecast.whrs_with_clouds_no_load,0) }}"
     - action: input_number.set_value
       metadata: {}
       target:
         entity_id: input_number.ee_solar_generation_forecast_just_clouds
       data:
-        value: "{{ max(forecast.whrs_with_clouds_no_load,0) }}"
+        value: "{{ whrs_with_clouds_no_load }}"
     - action: input_number.set_value
       metadata: {}
       target:
         entity_id: input_number.ee_solar_generation_forecast
       data:
         value: "{{ max(forecast.whrs_with_clouds_small_load,0) }}"
+    - if:
+      - condition: template
+        value_template: "{{ whrs_with_clouds_no_load > states('input_number.ee_observed_solar_whrs_predicted_max') | int(0) }}"
+      then: 
+      - action: input_number.set_value
+        metadata: {}
+        target:
+          entity_id: input_number.ee_observed_solar_whrs_predicted_max
+        data:
+          value: "{{ whrs_with_clouds_no_load }}"
   mode: single
 

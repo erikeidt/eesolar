@@ -127,7 +127,5 @@ script:
                 }}
       - stop: ""
         response_variable: calc
-    alias: EE Forecast Solar Production
-    description: ""
     mode: single
 
