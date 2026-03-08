@@ -69,7 +69,7 @@ template:
           (1.5*sin(longitude_correction_radians))
         -%}
         {% set local_noon = 
-          ((12*60) - 4 * (longitude_degrees - local_meridan) - equation_of_time)/60 + time_tuple.tm_isdst 
+          ((12*60) - 4 * (longitude_degrees - local_meridan) - equation_of_time)/60 - time_tuple.tm_isdst 
         -%}
         {% set sky_factor100 = sin((360/365)*(jdoy-100)*(pi/180)) -%}
         {% set sky_factor275 = sin((360/365)*(jdoy-275)*(pi/180)) -%}
