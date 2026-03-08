@@ -36,7 +36,7 @@ script:
               {% set longitude_correction_radians = ((360/364)*(jdoy-81)) * (pi/180) -%}
               {% set declination_radians = 23.45 * sin( (360/365.25) * (jdoy - 81) * (pi/180) ) * (pi/180) -%}
               {% set local_meridan =
-                ((time_now | as_datetime | as_local).strftime("%z") | int / 100) | int * 15
+                (((time_now | as_datetime | as_local).strftime("%z") | int / 100) - time_tuple.tm_isdst)| int * 15
               -%}
               {% set equation_of_time =
                   (9.87*sin(2*longitude_correction_radians)) -
@@ -44,8 +44,7 @@ script:
                   (1.5*sin(longitude_correction_radians))
               -%}
               {% set local_noon =
-                ((12*60) - 4 * (longitude_degrees - local_meridan) -
-                equation_of_time)/60 + time_tuple.tm_isdst
+                ((12*60) - 4 * (longitude_degrees - local_meridan) - equation_of_time)/60 + time_tuple.tm_isdst 
               -%}
               {% set sky_factor100 = sin((360/365)*(jdoy-100)*(pi/180)) -%}
               {% set sky_factor275 = sin((360/365)*(jdoy-275)*(pi/180)) -%}

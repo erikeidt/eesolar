@@ -1,5 +1,5 @@
 script:
-  ee_build_solar_forecsat_timetable:                                                  
+  ee_build_solar_forecast_timetable:                                                  
     alias: EE Build Solar Forecast Timetable
     description: ""
     sequence:
