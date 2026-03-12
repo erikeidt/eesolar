@@ -122,7 +122,7 @@
                       (time_now | as_datetime).hour * 60 + (time_now | as_datetime).minute
                     }}
                   peak_end: 961
-                  second_start: 1021
+                  second_start: 1018
                   second_end: 1201
                   reserve: 78
                 doit: true
@@ -140,7 +140,7 @@
                   time: "{{ timestamp }}"
                   name: "{{ DL65_5p_8 if summer else ZN80_5p_8 }}"
                   peak_rule: "{{ 'DL' if summer else 'ZN' }}"
-                  peak_start: 1021
+                  peak_start: "{{ 1021 if summer else 1018 }}"
                   peak_end: 1201
                   reserve: "{{ 65 if summer else 78 }}"
                 doit: true
@@ -231,9 +231,9 @@
                           time: "{{ timestamp }}"
                           name: "{{ ZN80_5p_8 }}"
                           peak_rule: ZN
-                          peak_start: 1021
+                          peak_start: 1018
                           peak_end: 1201
-                          reserve: 65
+                          reserve: 78
                         doit: true
     - if:
         - condition: template

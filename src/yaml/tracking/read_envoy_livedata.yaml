@@ -43,7 +43,7 @@
         - action: notify.persistent_notification
           metadata: {}
           data:
-            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Livedata -- {{ response.status | default(response) }} -- {{ latency }} ms'
+            message: '{{ now().strftime("%m-%d %H:%M:%S") }} -- Livedata -- {{ response.status | default(response) }} -- {{ latency }} ms'
         - stop: Rest command failed
           error: true
           enabled: false
@@ -69,8 +69,7 @@
             metadata: {}
             data:
               message: |-
-                {{ now().strftime("%m/%d %H:%M:%S") }}
-                Enabling Stream 
+                {{ now().strftime("%m-%d %H:%M:%S") }} Enabling Stream 
           - delay:
               hours: 0
               minutes: 0

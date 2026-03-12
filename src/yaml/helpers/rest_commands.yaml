@@ -74,6 +74,14 @@ rest_command:
     timeout: 400 
     headers:
       Authorization: !secret enjt
+  envoy_soft_reboot:
+#   url: "https://envoy.local/api/v1/reboot"
+    url: "https://192.168.68.102/api/v1/reboot"
+    method: post
+    verify_ssl: false
+    timeout: 400 
+    headers:
+      Authorization: !secret enjt
   send_envoy_param_tariff:
 #   url: "https://envoy.local/admin/lib/tariff.json"
     url: "https://192.168.68.102/admin/lib/tariff.json"

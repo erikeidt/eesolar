@@ -254,6 +254,14 @@ rest_command:
     timeout: 400 
     headers:
       Authorization: !secret enjt
+  envoy_soft_reboot:
+#   url: "https://envoy.local/api/v1/reboot"
+    url: "https://192.168.68.102/api/v1/reboot"
+    method: post
+    verify_ssl: false
+    timeout: 400 
+    headers:
+      Authorization: !secret enjt
   send_envoy_param_tariff:
 #   url: "https://envoy.local/admin/lib/tariff.json"
     url: "https://192.168.68.102/admin/lib/tariff.json"
@@ -478,7 +486,7 @@ automation:
         - action: notify.persistent_notification
           metadata: {}
           data:
-            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Battery -- {{ response.status | default(response) }} -- {{ latency }} ms'
+            message: '{{ now().strftime("%m-%d %H:%M:%S") }} -- Battery -- {{ response.status | default(response) }} -- {{ latency }} ms'
         - stop: Rest command failure
           error: true
           enabled: false
@@ -598,7 +606,7 @@ automation:
         - action: notify.persistent_notification
           metadata: {}
           data:
-            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Livedata -- {{ response.status | default(response) }} -- {{ latency }} ms'
+            message: '{{ now().strftime("%m-%d %H:%M:%S") }} -- Livedata -- {{ response.status | default(response) }} -- {{ latency }} ms'
         - stop: Rest command failed
           error: true
           enabled: false
@@ -624,8 +632,7 @@ automation:
             metadata: {}
             data:
               message: |-
-                {{ now().strftime("%m/%d %H:%M:%S") }}
-                Enabling Stream 
+                {{ now().strftime("%m-%d %H:%M:%S") }} Enabling Stream 
           - delay:
               hours: 0
               minutes: 0
@@ -1200,7 +1207,7 @@ automation:
                       (time_now | as_datetime).hour * 60 + (time_now | as_datetime).minute
                     }}
                   peak_end: 961
-                  second_start: 1021
+                  second_start: 1018
                   second_end: 1201
                   reserve: 78
                 doit: true
@@ -1218,7 +1225,7 @@ automation:
                   time: "{{ timestamp }}"
                   name: "{{ DL65_5p_8 if summer else ZN80_5p_8 }}"
                   peak_rule: "{{ 'DL' if summer else 'ZN' }}"
-                  peak_start: 1021
+                  peak_start: "{{ 1021 if summer else 1018 }}"
                   peak_end: 1201
                   reserve: "{{ 65 if summer else 78 }}"
                 doit: true
@@ -1309,9 +1316,9 @@ automation:
                           time: "{{ timestamp }}"
                           name: "{{ ZN80_5p_8 }}"
                           peak_rule: ZN
-                          peak_start: 1021
+                          peak_start: 1018
                           peak_end: 1201
-                          reserve: 65
+                          reserve: 78
                         doit: true
     - if:
         - condition: template
@@ -1374,13 +1381,15 @@ automation:
             and
           17 <= states('input_number.ee_hour_of_day') | int <= 19
             and
-          states('input_number.ee_observed_battery_flow') | int == 0
+          states('input_number.ee_observed_battery_flow') | int >= 0
+            and
+          states('input_number.ee_observed_net_consumption') | int > 50000 
             and
           states('input_number.ee_observed_charge') | int - 2 >=
               states('input_number.ee_observed_tariff_battery_reserve') | int
         }}
       for:
-        minutes: 1
+        minutes: 5
   conditions: []
   actions:
     - variables:

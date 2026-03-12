@@ -43,7 +43,7 @@
         - action: notify.persistent_notification
           metadata: {}
           data:
-            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Battery -- {{ response.status | default(response) }} -- {{ latency }} ms'
+            message: '{{ now().strftime("%m-%d %H:%M:%S") }} -- Battery -- {{ response.status | default(response) }} -- {{ latency }} ms'
         - stop: Rest command failure
           error: true
           enabled: false

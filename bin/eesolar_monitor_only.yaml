@@ -254,6 +254,14 @@ rest_command:
     timeout: 400 
     headers:
       Authorization: !secret enjt
+  envoy_soft_reboot:
+#   url: "https://envoy.local/api/v1/reboot"
+    url: "https://192.168.68.102/api/v1/reboot"
+    method: post
+    verify_ssl: false
+    timeout: 400 
+    headers:
+      Authorization: !secret enjt
   send_envoy_param_tariff:
 #   url: "https://envoy.local/admin/lib/tariff.json"
     url: "https://192.168.68.102/admin/lib/tariff.json"
@@ -478,7 +486,7 @@ automation:
         - action: notify.persistent_notification
           metadata: {}
           data:
-            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Battery -- {{ response.status | default(response) }} -- {{ latency }} ms'
+            message: '{{ now().strftime("%m-%d %H:%M:%S") }} -- Battery -- {{ response.status | default(response) }} -- {{ latency }} ms'
         - stop: Rest command failure
           error: true
           enabled: false
@@ -598,7 +606,7 @@ automation:
         - action: notify.persistent_notification
           metadata: {}
           data:
-            message: '{{ now().strftime("%m/%d %H:%M:%S") }} -- Livedata -- {{ response.status | default(response) }} -- {{ latency }} ms'
+            message: '{{ now().strftime("%m-%d %H:%M:%S") }} -- Livedata -- {{ response.status | default(response) }} -- {{ latency }} ms'
         - stop: Rest command failed
           error: true
           enabled: false
@@ -624,8 +632,7 @@ automation:
             metadata: {}
             data:
               message: |-
-                {{ now().strftime("%m/%d %H:%M:%S") }}
-                Enabling Stream 
+                {{ now().strftime("%m-%d %H:%M:%S") }} Enabling Stream 
           - delay:
               hours: 0
               minutes: 0

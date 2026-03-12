@@ -9,13 +9,15 @@
             and
           17 <= states('input_number.ee_hour_of_day') | int <= 19
             and
-          states('input_number.ee_observed_battery_flow') | int == 0
+          states('input_number.ee_observed_battery_flow') | int >= 0
+            and
+          states('input_number.ee_observed_net_consumption') | int > 50000 
             and
           states('input_number.ee_observed_charge') | int - 2 >=
               states('input_number.ee_observed_tariff_battery_reserve') | int
         }}
       for:
-        minutes: 1
+        minutes: 5
   conditions: []
   actions:
     - variables:
