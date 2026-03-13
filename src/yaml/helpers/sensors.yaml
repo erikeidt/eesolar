@@ -112,7 +112,7 @@ template:
         {% set air_temp_f = states('sensor.pa_air_temp') | float(77) -%}
         {% set air_temp_c = (air_temp_f - 32) * 5 / 9 -%}
         {% set panel_temp_c = air_temp_c + 15 -%}
-        {% set temp_factor = 1 if panel_temp_c <= 35 else 1+(panel_info.c*(panel_temp_c-25))/100 -%}
+        {% set temp_factor = 1 if panel_temp_c <= 25 else 1+(panel_info.c*(panel_temp_c-25))/100 -%}
         {% set aqi = states('sensor.pa_air_quality') | float(50) %}
         {% set aqi_factor = (1-(aqi / (400/0.12))) -%}
         {% set irradiance = irradiance_on_panel_ghi * watts * temp_factor * aqi_factor -%} 
