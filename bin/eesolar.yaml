@@ -12,6 +12,8 @@ input_boolean:
   ee_solar_is_summer_season_tomorrow:
     name: "EE Solar is Summer Season Tomorrow"
     initial: off
+  ee_solar_running:
+    name: "EE Solar Running"
 
 input_number:
   ee_observed_battery_flow:
@@ -127,6 +129,22 @@ input_number:
     step: 1.0
     unit_of_measurement: "Wh"
     name: "Solar Whrs Predicted Max"
+  ee_observed_solar_whrs_today:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "Wh"
+    name: "Solar Whrs Today"
+  ee_observed_home_load_whrs_today:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "Wh"
+    name: "Home Load Whrs Today"
+
+   
     
 input_text:
   ee_observed_tariff:
@@ -152,7 +170,7 @@ input_text:
   solar_array_info:
     name: "Solar Array Info"
     max: 255
-    initial: '[ { "e": 26, "a": 180, "r": 6660, "c": -0.38, "x": 5310, "b": 20.16, "h": 1100, "y": 2021, "d": -0.3 } ]'
+    initial: '[ { "e": 26, "a": 180, "r": 6660, "c": -0.38, "x": 5310, "b": 20.16, "h": 1100, "y": 2021, "d": -0.4 } ]'
   ee_solar_envoy_tariff_name:
     max: 255
     name: "Tariff Name"
@@ -196,7 +214,7 @@ rest_command:
     timeout: 400 
     headers:
       Authorization: !secret enjt
-  read_enovy_basic:
+  read_envoy_basic:
 #   url: "https://envoy.local/production.json"
     url: "https://192.168.68.102/production.json"
     method: get
@@ -447,12 +465,6 @@ automation:
   triggers:
   - trigger: homeassistant
     event: start
-  - trigger: template
-    value_template: '{{ states(this .entity_id) == "on" }}'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 1
   conditions: []
   actions:
   - repeat:
@@ -567,12 +579,6 @@ automation:
   triggers:
   - trigger: homeassistant
     event: start
-  - trigger: template
-    value_template: '{{ states(this.entity_id ) == "on" }}'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 1
   conditions: []
   actions:
   - repeat:
@@ -764,12 +770,6 @@ automation:
   triggers:
   - trigger: homeassistant
     event: start
-  - trigger: template
-    value_template: '{{ states( this.entity_id) == "on" }}'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 15 
   - trigger: time_pattern
     hours: /12
   conditions: []
@@ -853,6 +853,17 @@ automation:
               - automation.ee_read_envoy_tariff
               - automation.ee_read_envoy_relay
               - automation.ee_read_envoy_xml_info
+        - action: automation.trigger
+          metadata: {}
+          target:
+            entity_id:
+              - automation.ee_read_envoy_battery
+              - automation.ee_read_envoy_livedata
+              - automation.ee_read_envoy_tariff
+              - automation.ee_read_envoy_relay
+              - automation.ee_read_envoy_xml_info
+          data:
+            skip_condition: true
   mode: single
 - alias: EE Forecast Solar Generation
   id: ee_forecast_solar_generation

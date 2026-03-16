@@ -22,15 +22,15 @@ script:
             {# Solar Formula -#}
               {# https://pubs.nmsu.edu/_circulars/CR674/index.html -#}
               {# https://pubs.nmsu.edu/_circulars/CR674/CR674.xlsm -#}
-              {% set time_now = start_time | as_datetime | as_local -%}
-              {% set solar_array_info = states('input_text.solar_array_info') | from_json -%}
-              {% set panel_info = solar_array_info[0] -%}
-              {% set panel_elevation_radians = panel_info.e * (pi/180) -%}
-              {% set panel_azimuth_radians = panel_info.a * (pi/180) -%}
               {% set latitude_degrees = state_attr('zone.home', 'latitude') | float -%}
               {% set longitude_degrees = state_attr('zone.home', 'longitude') | float -%}
               {% set latitude_radians = latitude_degrees * (pi/180) -%} 
               {# {% set longitude_radians = longitude_degrees * (pi/180) -%} -#}
+              {% set solar_array_info = states('input_text.solar_array_info') | from_json -%}
+              {% set panel_info = solar_array_info[0] -%}
+              {% set panel_elevation_radians = panel_info.e * (pi/180) -%}
+              {% set panel_azimuth_radians = panel_info.a * (pi/180) -%}
+              {% set time_now = start_time | as_datetime | as_local -%}
               {% set time_tuple = time_now.timetuple() -%}
               {% set jdoy = time_tuple.tm_yday -%}
               {% set longitude_correction_radians = ((360/364)*(jdoy-81)) * (pi/180) -%}

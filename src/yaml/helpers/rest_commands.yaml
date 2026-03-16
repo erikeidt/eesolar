@@ -16,7 +16,7 @@ rest_command:
     timeout: 400 
     headers:
       Authorization: !secret enjt
-  read_enovy_basic:
+  read_envoy_basic:
 #   url: "https://envoy.local/production.json"
     url: "https://192.168.68.102/production.json"
     method: get

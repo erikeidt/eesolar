@@ -36,7 +36,7 @@ script:
               brightness_raw: "{{ states('sensor.ee_solar_obs_vs_calc_pct_avg_thrt') | float(0) }}"
               brightness_now: "{{ max(min(brightness_raw,100),0) }}"
               skyview_raw: "{{ 100 - desc.cloud_cover [index] | float(0) }}"
-              skyview_now: "{{ max(min(skyview_raw,100),0) }}"
+              skyview_now: "{{ max(min(skyview_raw,100),0)/100*50+50 }}"
           - variables:
               ratio_under: "{{ brightness_now / skyview_now if skyview_now != 0 else 0 }}"
               ratio_over:  "{{ (100-brightness_now) / (100-skyview_now) if skyview_now != 100 else 0 }}"
@@ -54,11 +54,10 @@ script:
                   {{ start_time }} -- {{ diff }} -- {{ index }} -- {{ last }} -- {{ count }}
 
                   {% set brightness_raw = states('sensor.ee_solar_obs_vs_calc_pct_avg_thrt') | float(0) -%}
-                  {% set brightness_raw = 29 -%}
                   {% set brightness_now = max(min(brightness_raw,100),0) -%}
               
                   {% set skyview_raw = 100 - desc.cloud_cover [index] | float(0) -%}
-                  {% set skyview_now = max(min(skyview_raw,100),0) -%}
+                  {% set skyview_now = max(min(skyview_raw,100),0)/100*50+50 -%}
 
                   {% set ratio_under = brightness_now / skyview_now if skyview_now != 0 else 0 -%}
                   {% set ratio_over = (100-brightness_now) / (100-skyview_now) if skyview_now != 100 else 0 -%}
@@ -83,7 +82,7 @@ script:
                     {% set aqi = states('sensor.pa_air_quality') | float(50) -%}
                     {% set aqi_factor = (1-(aqi / (400/0.12))) -%}                
                     {% set skyview_forecast_raw = 100 - desc.cloud_cover [i] | float(0) -%}
-                    {% set skyview_forecast = max(min(skyview_forecast_raw,100),0) -%}
+                    {% set skyview_forecast = max(min(skyview_forecast_raw,100),0)/100*50+50 -%}
                     {#{ skyview_forecast * ratio_under }} xx {{ skyview_forecast * ratio_over }#}
                     {% set brightness_forecast = 
                       skyview_forecast * ratio_under if skyview_forecast < skyview_now

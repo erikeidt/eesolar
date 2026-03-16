@@ -4,12 +4,6 @@
   triggers:
   - trigger: homeassistant
     event: start
-  - trigger: template
-    value_template: '{{ states( this.entity_id) == "on" }}'
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 15 
   - trigger: time_pattern
     hours: /12
   conditions: []
