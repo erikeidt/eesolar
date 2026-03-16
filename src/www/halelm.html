@@ -13,7 +13,7 @@
         var homeLoad = 0;
         var chargeDischarge = 0;
         var stateOfCharge = 0;
-	var maxCalcProd = 0;
+        var maxCalcProd = 0;
 
         var pcXhr = null;
         var pcto = null;
@@ -36,8 +36,8 @@
 
         var cnt1,cnt2,cnt3;
         var lat2, lat3;
-	var e1s, e2s, b1w;
-	var cnt4,txt4,max4,maxTableChart;
+        var e1s, e2s, b1w;
+        var cnt4,txt4,max4,maxTableChart;
         var cnt5,txt5,min5,minTableCharg;
         var maxsp = 0, minsp = 0;
 
@@ -107,9 +107,9 @@
                 //cnt3 = document.getElementById("cnt3");
                 lat2 = document.getElementById("lat2"); 
                 lat3 = document.getElementById("lat3"); 
-		e1s = document.getElementById("e1.solar");
-		e2s = document.getElementById("e2.solar");
-		b1w = document.getElementById("b1.wh");
+                e1s = document.getElementById("e1.solar");
+                e2s = document.getElementById("e2.solar");
+                b1w = document.getElementById("b1.wh");
 
                 cnt4 = document.getElementById("cnt4");
                 txt4 = document.getElementById("txt4");
@@ -185,9 +185,6 @@
             stopMonitoring();
             initVars();
             startProductionConsumptionMonitoring();
-        //    startBatteryMonitoring();
-        //    startTariffMonitoring();
-        //    startGridMonitoring();
         }
 
         function startProductionConsumptionMonitoring() {
@@ -233,177 +230,180 @@
                     return;
                 }
 
-                //var state = json_resp.attributes;
-                //var dataObj = JSON.parse(state);
-                var dataObj = json_resp.attributes;
-                if (!dataObj) {
-                  pcto = setTimeout(startProductionConsumptionMonitoring, 1250);
-                  return;
-                }
-
-                //cnt1.innerHTML = "&nbsp;" + new Date().toLocaleTimeString("en-GB") + "&nbsp;";
-                //cnt2.innerHTML = "&nbsp;" + dataObj.pc + "&nbsp;";
-                //cnt3.innerHTML = "&nbsp;" + dataObj.bt + "&nbsp;";
-                lat2.innerHTML = dataObj.pl.toLocaleString().padStart(6, '!').replaceAll('!', '&nbsp;');
-                lat3.innerHTML = dataObj.bl.toLocaleString().padStart(6, '!').replaceAll('!', '&nbsp;');
-                e1s.innerHTML = dataObj.e1.toLocaleString().padStart(6, '!').replaceAll('!', '&nbsp;');
-                e2s.innerHTML = dataObj.e2.toLocaleString().padStart(6, '!').replaceAll('!', '&nbsp;');
-
-                var grid = dataObj.gs;
-                if (grid === "closed") { 
-                    grid = "On Grid";
-                    gridStatusElem.style.color = "seagreen";
-                } 
-                else {
-                    gridStatusElem.style.color = "red";
-                    if (grid == "open") { grid = "Off Grid"; }
-                }
-                gridStatusElem.innerHTML = "&nbsp;" + grid + "&nbsp;";
-
-                envoyVersElem.innerHTML = "&nbsp;" + dataObj.vs + "&nbsp;";
-
-                totalProduction = parseFloat(dataObj.sp);
-
-                if (totalProduction > maxsp) {
-                    maxsp = totalProduction;
-                    cnt4.innerHTML = "&nbsp;" + (maxsp/1000).toFixed(3) + "&nbsp;";
-                    txt4.innerHTML = "&nbsp;" + new Date().toLocaleTimeString("en-GB") + "&nbsp;";
-                }
-
-                /*
-		if (totalProduction > 0 && (minsp == 0 || totalProduction < minsp)) {
-                    minsp = totalProduction;
-                    cnt5.innerHTML = "&nbsp;" + (minsp/1000).toFixed(3) + "&nbsp;";
-                    txt5.innerHTML = "&nbsp;" + new Date().toLocaleTimeString("en-GB") + "&nbsp;";
-                }
-                */
-
-                netConsumption = parseFloat(dataObj.nc);
-                totalConsumption = parseFloat(dataObj.tc);
-                homeLoad = parseFloat(dataObj.hl);
-
-                maxCalcProd = parseFloat(dataObj.sm);
-
-                var sstr = (totalProduction/1000).toFixed(0);
-                setSvgSignedNumericField(sstr, v_solar, 0);
-
-                var gridValue = netConsumption < 0 ? -netConsumption : netConsumption;
-                var gstr = (gridValue/1000).toFixed(0);
-                setSvgSignedNumericField(gstr, v_grid, netConsumption);
-
-                chargeDischarge = - parseFloat(dataObj.bf);
-                stateOfCharge = parseFloat(dataObj.bc);
-
-                var bchrg = chargeDischarge < 0 ? -chargeDischarge : chargeDischarge;
-                var bstr = (bchrg/1000).toFixed(0);
-                setSvgSignedNumericField(bstr, v_batt, chargeDischarge);
-
-                // Batteries Detail
-                var batteries = dataObj.ba;
-                if (batteries) {
-                    var r = batteryChartElem.tBodies[0].rows;
-                    while (r.length >= 3) 
-                        batteryChartElem.deleteRow(2);
-
-                    var count = batteries.length;
-                    for (var i = 0; i < count; i++) {
-                        var soc = batteries[i];
-                        var r2 = batteryChartElem.insertRow();
-                        var socCol = r2.insertCell();
-                        socCol.innerHTML = padNbsp(batteries[i++] + "%", 4);
-                        var stateCol = r2.insertCell();
-                        var flow = Math.trunc(batteries[i]/1000);
-                        stateCol.innerHTML = padNbsp((flow > 0 ? "+" : "") + flow.toFixed(0), 5);
+                try {
+                    //var state = json_resp.attributes;
+                    //var dataObj = JSON.parse(state);
+                    var dataObj = json_resp.attributes;
+                    if (!dataObj) {
+                        pcto = setTimeout(startProductionConsumptionMonitoring, 1250);
+                        return;
                     }
-                }
 
-                if (stateOfCharge == 100) {
-                    v_soch.innerHTML = "100%";
-                } else {
-                    var ttt = stateOfCharge.toFixed(2).padStart(3, ' ');
-                    v_soch.innerHTML = ttt + "%";
-                }
-                b1w.innerHTML = dataObj.bn.toLocaleString().padStart(6, '!').replaceAll('!', '&nbsp;');
-                
-		//m_solar.innerHTML = " " + ((totalProduction/maxCalcProd-1)*100).toFixed(2) + "% " + (maxCalcProd/1000).toFixed(0).padStart(3, ' ');
-                if ( maxCalcProd != 0 )
-		    m_solar_pct.innerHTML = " " + ((totalProduction/maxCalcProd)*100).toFixed(2) + "%";
-                else
-		    m_solar_pct.innerHTML = "";
-		m_solar_val.innerHTML = Math.round((maxCalcProd/1000)).toLocaleString().padStart(5, '!').replaceAll('!', '&nbsp;');
+                    //cnt1.innerHTML = "&nbsp;" + new Date().toLocaleTimeString("en-GB") + "&nbsp;";
+                    //cnt2.innerHTML = "&nbsp;" + dataObj.pc + "&nbsp;";
+                    //cnt3.innerHTML = "&nbsp;" + dataObj.bt + "&nbsp;";
+                    lat2.innerHTML = dataObj.pl.toLocaleString().padStart(6, '!').replaceAll('!', '&nbsp;');
+                    lat3.innerHTML = dataObj.bl.toLocaleString().padStart(6, '!').replaceAll('!', '&nbsp;');
+                    e1s.innerHTML = dataObj.e1.toLocaleString().padStart(6, '!').replaceAll('!', '&nbsp;');
+                    e2s.innerHTML = dataObj.e2.toLocaleString().padStart(6, '!').replaceAll('!', '&nbsp;');
 
-                // Tariff
-                var schedule = dataObj.sc;
-                var mode = schedule.mode;
-                if (mode == "economy") mode = "&nbsp;Savings&nbsp;";
-                else if (mode == "self-consumption") mode = "&nbsp;Self Consumption&nbsp;";
-                else if (mode == "backup") mode = "&nbsp;Full Backup&nbsp;";
-                else mode = "Unknown(" + mode + ")";
-
-                modeElem.innerHTML = mode;
-                var reserveLevel = schedule.reserve.toFixed(1) + "%";
-                reserveElem.innerHTML = reserveLevel;
-                shutoffElem.innerHTML = schedule.shutoff.toFixed(1) + "%";
-
-                // Envoy Generated Schedule
-                var nowItem = new Date();
-
-                var setting = schedule.schedule; 
-                var nowMinutes = nowItem.getMinutes();
-                var nowTimeMinutes = nowItem.getHours() * 60 + nowMinutes;
-                var nowSet = "";
-
-                var r = tariffChartElem.tBodies[0].rows;
-                while (r.length > 1)
-                    tariffChartElem.deleteRow(1);
-
-                if (nowTimeMinutes < 10 && maxsp > 0) {
-                    maxsp = 0;
-                    minsp = 0;
-
-                    var mt = maxTableChart.insertRow();
-                    mt.outerHTML = max4.outerHTML;
-
-                    //mt = minTableChart.insertRow();
-                    //mt.outerHTML = min5.innerHTML;
-
-                    //mt.style = max4.style; 
-                    //mt.innerHTML = max4.innerHTML;
-
-                    // var c1 = mt.insertCell();
-                    // c1.innerHTML = txt4.innerHTML;
-                    // var c2 = mt.insertCell();
-                    // c2.innerHTML = cnt4.innerHTML;
-
-                    //r = modeKeyChartElem.tBodies[0].rows
-                    //while (r.length > 1)
-                    //    modeKeyChartElem.deleteRow(1);
-                }
-
-                for (var i = 0; i < setting.length; i++) {
-                    var oneSet = setting[i];
-                    var timeMinutes = oneSet[0];
-
-                    var currentPeriod = false;
-                    if (nowTimeMinutes >= timeMinutes && nowTimeMinutes < timeMinutes + oneSet[1]) {
-                        nowSet = oneSet[3];
-                        currentPeriod = true;
+                    var grid = dataObj.gs;
+                    if (grid === "closed") {
+                        grid = "On Grid";
+                        gridStatusElem.style.color = "seagreen";
                     }
-                    var r2 = tariffChartElem.insertRow();
-                    var startTimeCol = r2.insertCell();
-                    startTimeCol.innerHTML = "&nbsp;" + makeTimeStringFromTimeMinutes(timeMinutes) + "&nbsp;";
+                    else {
+                        gridStatusElem.style.color = "red";
+                        if (grid == "open") { grid = "Off Grid"; }
+                    }
+                    gridStatusElem.innerHTML = "&nbsp;" + grid + "&nbsp;";
 
-                    var endTimeCol = r2.insertCell();
-                    endTimeCol.innerHTML = "&nbsp;" + makeTimeStringFromTimeMinutes(timeMinutes + oneSet[1] - 1) + "&nbsp;";
+                    envoyVersElem.innerHTML = "&nbsp;" + dataObj.vs + "&nbsp;";
 
-                    var modekey = r2.insertCell();
-                    modekey.innerHTML = "&nbsp;" + oneSet[2] + "&nbsp;";
+                    totalProduction = parseFloat(dataObj.sp);
 
-                    var nnooww = r2.insertCell();
-                    nnooww.innerHTML = currentPeriod ? "&nbsp;&#x2714;&nbsp;" : "";
+                    if (totalProduction > maxsp) {
+                        maxsp = totalProduction;
+                        cnt4.innerHTML = "&nbsp;" + (maxsp / 1000).toFixed(3) + "&nbsp;";
+                        txt4.innerHTML = "&nbsp;" + new Date().toLocaleTimeString("en-GB") + "&nbsp;";
+                    }
+
+                    /*
+                    if (totalProduction > 0 && (minsp == 0 || totalProduction < minsp)) {
+                        minsp = totalProduction;
+                        cnt5.innerHTML = "&nbsp;" + (minsp/1000).toFixed(3) + "&nbsp;";
+                        txt5.innerHTML = "&nbsp;" + new Date().toLocaleTimeString("en-GB") + "&nbsp;";
+                    }
+                    */
+
+                    netConsumption = parseFloat(dataObj.nc);
+                    totalConsumption = parseFloat(dataObj.tc);
+                    homeLoad = parseFloat(dataObj.hl);
+
+                    maxCalcProd = parseFloat(dataObj.sm);
+
+                    var sstr = (totalProduction / 1000).toFixed(0);
+                    setSvgSignedNumericField(sstr, v_solar, 0);
+
+                    var gridValue = netConsumption < 0 ? -netConsumption : netConsumption;
+                    var gstr = (gridValue / 1000).toFixed(0);
+                    setSvgSignedNumericField(gstr, v_grid, netConsumption);
+
+                    chargeDischarge = - parseFloat(dataObj.bf);
+                    stateOfCharge = parseFloat(dataObj.bc);
+
+                    var bchrg = chargeDischarge < 0 ? -chargeDischarge : chargeDischarge;
+                    var bstr = (bchrg / 1000).toFixed(0);
+                    setSvgSignedNumericField(bstr, v_batt, chargeDischarge);
+
+                    // Batteries Detail
+                    var batteries = dataObj.ba;
+                    if (batteries) {
+                        var r = batteryChartElem.tBodies[0].rows;
+                        while (r.length >= 3)
+                            batteryChartElem.deleteRow(2);
+
+                        var count = batteries.length;
+                        for (var i = 0; i < count; i++) {
+                            var soc = batteries[i];
+                            var r2 = batteryChartElem.insertRow();
+                            var socCol = r2.insertCell();
+                            socCol.innerHTML = padNbsp(batteries[i++] + "%", 4);
+                            var stateCol = r2.insertCell();
+                            var flow = Math.trunc(batteries[i] / 1000);
+                            stateCol.innerHTML = padNbsp((flow > 0 ? "+" : "") + flow.toFixed(0), 5);
+                        }
+                    }
+
+                    if (stateOfCharge == 100) {
+                        v_soch.innerHTML = "100%";
+                    } else {
+                        var ttt = stateOfCharge.toFixed(2).padStart(3, ' ');
+                        v_soch.innerHTML = ttt + "%";
+                    }
+                    b1w.innerHTML = dataObj.bn.toLocaleString().padStart(6, '!').replaceAll('!', '&nbsp;');
+
+                    //m_solar.innerHTML = " " + ((totalProduction/maxCalcProd-1)*100).toFixed(2) + "% " + (maxCalcProd/1000).toFixed(0).padStart(3, ' ');
+                    if (maxCalcProd != 0)
+                        m_solar_pct.innerHTML = " " + ((totalProduction / maxCalcProd) * 100).toFixed(2) + "%";
+                    else
+                        m_solar_pct.innerHTML = "";
+                    m_solar_val.innerHTML = Math.round((maxCalcProd / 1000)).toLocaleString().padStart(5, '!').replaceAll('!', '&nbsp;');
+
+                    // Tariff
+                    var schedule = dataObj.sc;
+                    var mode = schedule.mode;
+                    if (mode == "economy") mode = "&nbsp;Savings&nbsp;";
+                    else if (mode == "self-consumption") mode = "&nbsp;Self Consumption&nbsp;";
+                    else if (mode == "backup") mode = "&nbsp;Full Backup&nbsp;";
+                    else mode = "Unknown(" + mode + ")";
+
+                    modeElem.innerHTML = mode;
+                    var reserveLevel = schedule.reserve.toFixed(1) + "%";
+                    reserveElem.innerHTML = reserveLevel;
+                    shutoffElem.innerHTML = schedule.shutoff.toFixed(1) + "%";
+
+                    // Envoy Generated Schedule
+                    var nowItem = new Date();
+
+                    var setting = schedule.schedule;
+                    var nowMinutes = nowItem.getMinutes();
+                    var nowTimeMinutes = nowItem.getHours() * 60 + nowMinutes;
+                    var nowSet = "";
+
+                    var r = tariffChartElem.tBodies[0].rows;
+                    while (r.length > 1)
+                        tariffChartElem.deleteRow(1);
+
+                    if (nowTimeMinutes < 10 && maxsp > 0) {
+                        maxsp = 0;
+                        minsp = 0;
+
+                        var mt = maxTableChart.insertRow();
+                        mt.outerHTML = max4.outerHTML;
+
+                        //mt = minTableChart.insertRow();
+                        //mt.outerHTML = min5.innerHTML;
+
+                        //mt.style = max4.style; 
+                        //mt.innerHTML = max4.innerHTML;
+
+                        // var c1 = mt.insertCell();
+                        // c1.innerHTML = txt4.innerHTML;
+                        // var c2 = mt.insertCell();
+                        // c2.innerHTML = cnt4.innerHTML;
+
+                        //r = modeKeyChartElem.tBodies[0].rows
+                        //while (r.length > 1)
+                        //    modeKeyChartElem.deleteRow(1);
+                    }
+
+                    for (var i = 0; i < setting.length; i++) {
+                        var oneSet = setting[i];
+                        var timeMinutes = oneSet[0];
+
+                        var currentPeriod = false;
+                        if (nowTimeMinutes >= timeMinutes && nowTimeMinutes < timeMinutes + oneSet[1]) {
+                            nowSet = oneSet[3];
+                            currentPeriod = true;
+                        }
+                        var r2 = tariffChartElem.insertRow();
+                        var startTimeCol = r2.insertCell();
+                        startTimeCol.innerHTML = "&nbsp;" + makeTimeStringFromTimeMinutes(timeMinutes) + "&nbsp;";
+
+                        var endTimeCol = r2.insertCell();
+                        endTimeCol.innerHTML = "&nbsp;" + makeTimeStringFromTimeMinutes(timeMinutes + oneSet[1] - 1) + "&nbsp;";
+
+                        var modekey = r2.insertCell();
+                        modekey.innerHTML = "&nbsp;" + oneSet[2] + "&nbsp;";
+
+                        var nnooww = r2.insertCell();
+                        nnooww.innerHTML = currentPeriod ? "&nbsp;&#x2714;&nbsp;" : "";
+                    }
+
+                    computeHome();
                 }
-
-                computeHome();
+                catch (err) { }
 
                 pcto = setTimeout(startProductionConsumptionMonitoring, 1000);
             }
@@ -781,6 +781,7 @@
             <text id="v.chrg" x="176" y="292" stroke="#2B506E">+</text>-->
 
         </svg>
+
     <div style="display: flex">
         <div style="padding-left: 15px; padding-top: 5px">
             <table border="1" cellpadding="2"
