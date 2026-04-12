@@ -9,7 +9,7 @@
     to:
       - "on"
     for:
-      milliseconds: 200
+      milliseconds: 250
   - trigger: state
     alias: Booted
     id: Booted
