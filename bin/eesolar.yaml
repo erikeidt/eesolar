@@ -101,7 +101,6 @@ input_number:
     mode: "box"
     step: 1.0
     name: "Hour of Day"
-    initial: 0
   ee_solar_generation_forecast_just_clouds:
     min: -1000000
     max:  10000000.0
@@ -170,7 +169,7 @@ input_text:
   solar_array_info:
     name: "Solar Array Info"
     max: 255
-    initial: '[ { "e": 26, "a": 180, "r": 6660, "c": -0.38, "x": 5310, "b": 20.16, "h": 1100, "y": 2021, "d": -0.4 } ]'
+    initial: '[ { "e": 26, "a": 180, "r": 6660, "c": -0.58, "x": 5310, "b": 20.16, "h": 1100, "y": 2021, "d": -0.5 } ]'
   ee_solar_envoy_tariff_name:
     max: 255
     name: "Tariff Name"
@@ -462,9 +461,22 @@ automation:
 - alias: EE Read Envoy Battery
   id: ee_read_envoy_battery
   description: ''
+  mode: single
   triggers:
-  - trigger: homeassistant
-    event: start
+  - trigger: state
+    entity_id:
+      - automation.ee_read_envoy_battery
+    to:
+      - "on"
+    for:
+      milliseconds: 200
+  - trigger: state
+    alias: Booted
+    id: Booted
+    entity_id:
+      - input_boolean.ee_utilities_booted
+    to:
+      - "on"
   conditions: []
   actions:
   - repeat:
@@ -563,22 +575,34 @@ automation:
       count: 60
   - action: automation.turn_off
     metadata: {}
+    target:
+      entity_id: "{{ this.entity_id }}"
     data:
       stop_actions: false
-    target:
-      entity_id: '{{ this.entity_id }}'
   - action: automation.turn_on
     metadata: {}
-    data: {}
     target:
-      entity_id: '{{ this.entity_id }}'
-  mode: single
+      entity_id: "{{ this.entity_id }}"
+    data: {}
 - alias: EE Read Envoy Livedata
   id: ee_read_envoy_livedata
   description: ''
+  mode: single
   triggers:
-  - trigger: homeassistant
-    event: start
+  - trigger: state
+    entity_id:
+      - automation.ee_read_envoy_livedata
+    to:
+      - "on"
+    for:
+      milliseconds: 200
+  - trigger: state
+    alias: Booted
+    id: Booted
+    entity_id:
+      - input_boolean.ee_utilities_booted
+    to:
+      - "on"
   conditions: []
   actions:
   - repeat:
@@ -715,16 +739,16 @@ automation:
       count: 60
   - action: automation.turn_off
     metadata: {}
+    target:
+      entity_id: "{{ this.entity_id }}"
     data:
       stop_actions: false
-    target:
-      entity_id: '{{ this.entity_id }}'
   - action: automation.turn_on
     metadata: {}
-    data: {}
     target:
-      entity_id: '{{ this.entity_id }}'
-  mode: single
+      entity_id: "{{ this.entity_id }}"
+    data: {}
+
 - alias: EE Read Envoy Relay
   id: ee_read_envoy_relay
   description: ''

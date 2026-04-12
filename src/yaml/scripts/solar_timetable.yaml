@@ -29,10 +29,10 @@ script:
                 {# generate report -#}
                   {% set time_now = now () -%}
                   {% set cc = 
-                    (1-states('input_number.ee_observed_solar_production') /
-                    states('sensor.calculated_potential_solar_power')) * 100
+                    (1-states('input_number.ee_observed_solar_production') | int(0) /
+                    states('sensor.calculated_potential_solar_power') | int(0)) * 100
                   -%}
-                  {% set tm = (states('sensor.pa_air_temp') - 32) * 5 / 9 -%}
+                  {% set tm = (states('sensor.pa_air_temp') | int(70) - 32) * 5 / 9 -%}
                   {% set ns=namespace(ti=[],cc=[],tm=[]) -%}
                   {% for i in range(0,quarter_hours_count) -%}
                     {% set ns.ti = ns.ti + [(time_now + timedelta(minutes=i*15)) | string] -%}

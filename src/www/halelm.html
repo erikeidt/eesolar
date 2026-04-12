@@ -208,29 +208,25 @@
                 // don't know why abort happens on this one but must have sthg to do with streaming
                 if (pcXhr.readyState == 4)
                     return;
-                console.log("stream/meter aborted", ev, pcXhr);
-                txt.innerHTML += "p: aborted<br/>";
+                //console.log("stream/meter aborted", ev, pcXhr);
+                //txt.innerHTML += "p: aborted<br/>";
             }
 
             pcXhr.onerror = function (ev) {
-                console.log("stream/meter errored", ev, pcXhr);
-                txt.innerHTML += "p: errored<br/>";
-                pcXhr.abort();
-                pcXhr = null;
-                if (pcto != null)
-                    pcto = null;
-                pcto = setTimeout(startProductionConsumptionMonitoring, 2000);
+                //console.log("stream/meter errored", ev, pcXhr);
+                //txt.innerHTML += "p: errored<br/>";
+                //pcXhr.abort();
+                //pcXhr = null;
+                //if (pcto != null)
+                //   pcto = null;
+                pcto = setTimeout(startProductionConsumptionMonitoring, 5000);
             }
 
             pcXhr.onprogress = function () {
-                var resp = pcXhr.response;
                 try {
+                    var resp = pcXhr.response;
                     var json_resp = JSON.parse(resp);
-                } catch (err) {
-                    return;
-                }
 
-                try {
                     //var state = json_resp.attributes;
                     //var dataObj = JSON.parse(state);
                     var dataObj = json_resp.attributes;

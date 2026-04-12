@@ -1,9 +1,22 @@
 - alias: EE Read Envoy Battery
   id: ee_read_envoy_battery
   description: ''
+  mode: single
   triggers:
-  - trigger: homeassistant
-    event: start
+  - trigger: state
+    entity_id:
+      - automation.ee_read_envoy_battery
+    to:
+      - "on"
+    for:
+      milliseconds: 200
+  - trigger: state
+    alias: Booted
+    id: Booted
+    entity_id:
+      - input_boolean.ee_utilities_booted
+    to:
+      - "on"
   conditions: []
   actions:
   - repeat:
@@ -102,13 +115,12 @@
       count: 60
   - action: automation.turn_off
     metadata: {}
+    target:
+      entity_id: "{{ this.entity_id }}"
     data:
       stop_actions: false
-    target:
-      entity_id: '{{ this.entity_id }}'
   - action: automation.turn_on
     metadata: {}
-    data: {}
     target:
-      entity_id: '{{ this.entity_id }}'
-  mode: single
+      entity_id: "{{ this.entity_id }}"
+    data: {}

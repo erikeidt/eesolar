@@ -101,7 +101,6 @@ input_number:
     mode: "box"
     step: 1.0
     name: "Hour of Day"
-    initial: 0
   ee_solar_generation_forecast_just_clouds:
     min: -1000000
     max:  10000000.0
@@ -170,7 +169,7 @@ input_text:
   solar_array_info:
     name: "Solar Array Info"
     max: 255
-    initial: '[ { "e": 26, "a": 180, "r": 6660, "c": -0.38, "x": 5310, "b": 20.16, "h": 1100, "y": 2021, "d": -0.4 } ]'
+    initial: '[ { "e": 26, "a": 180, "r": 6660, "c": -0.58, "x": 5310, "b": 20.16, "h": 1100, "y": 2021, "d": -0.5 } ]'
   ee_solar_envoy_tariff_name:
     max: 255
     name: "Tariff Name"

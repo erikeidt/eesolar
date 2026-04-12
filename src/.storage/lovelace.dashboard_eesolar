@@ -164,6 +164,32 @@
               "cards": [
                 {
                   "type": "heading",
+                  "heading": "Yesterday",
+                  "grid_options": {
+                    "columns": 6,
+                    "rows": 1
+                  },
+                  "heading_style": "title"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_solar_whrs_today",
+                  "name": "Solar",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_home_load_whrs_today"
+                }
+              ],
+              "column_span": 3
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "heading",
                   "heading": "Today",
                   "heading_style": "title",
                   "grid_options": {
@@ -187,10 +213,20 @@
                 },
                 {
                   "type": "tile",
-                  "entity": "input_number.ee_observed_solar_whrs_predicted_max"
+                  "entity": "sensor.ee_calculated_solar_output",
+                  "name": "Solar Calculated",
+                  "vertical": false,
+                  "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_observed_solar_whrs_predicted_max",
+                  "name": "Solar Prediction",
+                  "vertical": false,
+                  "features_position": "bottom"
                 }
               ],
-              "column_span": 2
+              "column_span": 3
             },
             {
               "type": "grid",
@@ -219,7 +255,7 @@
                   "features_position": "bottom"
                 }
               ],
-              "column_span": 2
+              "column_span": 3
             },
             {
               "type": "grid",
@@ -335,6 +371,28 @@
                   ]
                 }
               ]
+            },
+            {
+              "type": "grid",
+              "cards": [
+                {
+                  "type": "history-graph",
+                  "entities": [
+                    {
+                      "entity": "sensor.ee_calculated_solar_output"
+                    },
+                    {
+                      "entity": "input_number.ee_observed_solar_production"
+                    }
+                  ],
+                  "grid_options": {
+                    "columns": 36,
+                    "rows": "auto"
+                  },
+                  "hours_to_show": 28
+                }
+              ],
+              "column_span": 3
             },
             {
               "type": "grid",
