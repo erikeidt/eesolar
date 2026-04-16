@@ -14,7 +14,7 @@
         {{ 
           states('input_boolean.ee_solar_is_tou_workday') == 'on' 
             and
-          states('input_number.ee_observed_solar_production') | int(0) >= 925000
+          states('input_number.ee_observed_solar_production') | int(0) > states('input_number.ee_solar_zn_crossover') | int(0)
             and
           states('input_number.ee_solar_generation_forecast') | int(0) > 
               states('sensor.ee_envoy_battery_charge_needed') | int(0) 
@@ -54,7 +54,7 @@
         {{ 
           states('input_boolean.ee_solar_is_tou_workday') == 'off' 
             and
-          states('input_number.ee_observed_solar_production') | int(0) >= 925000
+          states('input_number.ee_observed_solar_production') | int(0) > states('input_number.ee_solar_zn_crossover') | int(0)
             and
           states('input_number.ee_solar_generation_forecast') | int(0) > 
               states('sensor.ee_envoy_battery_charge_needed') | int(0) 

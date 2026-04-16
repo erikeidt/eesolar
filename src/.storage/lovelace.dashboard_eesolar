@@ -224,6 +224,10 @@
                   "name": "Solar Prediction",
                   "vertical": false,
                   "features_position": "bottom"
+                },
+                {
+                  "type": "tile",
+                  "entity": "input_number.ee_solar_zn_crossover"
                 }
               ],
               "column_span": 3

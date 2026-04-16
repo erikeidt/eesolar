@@ -48,8 +48,8 @@
           metadata: {}
           target:
             entity_id:
-              - automation.ee_read_envoy_battery
-              - automation.ee_read_envoy_livedata
+#             - automation.ee_read_envoy_battery
+#             - automation.ee_read_envoy_livedata
               - automation.ee_read_envoy_tariff
               - automation.ee_read_envoy_relay
               - automation.ee_read_envoy_xml_info

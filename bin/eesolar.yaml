@@ -142,8 +142,13 @@ input_number:
     step: 1.0
     unit_of_measurement: "Wh"
     name: "Home Load Whrs Today"
-
-   
+  ee_solar_zn_crossover:
+    min: 0
+    max: 10000000000.0
+    mode: box
+    step: 100000
+    unit_of_measurement: "Wh"
+    name: "ZN Crossover"
     
 input_text:
   ee_observed_tariff:
@@ -469,7 +474,7 @@ automation:
     to:
       - "on"
     for:
-      milliseconds: 200
+      milliseconds: 250
   - trigger: state
     alias: Booted
     id: Booted
@@ -595,7 +600,7 @@ automation:
     to:
       - "on"
     for:
-      milliseconds: 200
+      milliseconds: 250
   - trigger: state
     alias: Booted
     id: Booted
@@ -881,8 +886,8 @@ automation:
           metadata: {}
           target:
             entity_id:
-              - automation.ee_read_envoy_battery
-              - automation.ee_read_envoy_livedata
+#             - automation.ee_read_envoy_battery
+#             - automation.ee_read_envoy_livedata
               - automation.ee_read_envoy_tariff
               - automation.ee_read_envoy_relay
               - automation.ee_read_envoy_xml_info
@@ -999,6 +1004,16 @@ automation:
       event: start
   conditions: []
   actions:
+    - if:
+        - condition: template
+          value_template: "{{ states('input_number.ee_solar_zn_crossover') | int(0) == 0 }}"
+      then:
+        - action: input_number.set_value
+          metadata: {}
+          target:
+            entity_id: input_number.ee_solar_zn_crossover
+          data:
+            value: 1500000
     - action: calendar.get_events
       metadata: {}
       data:
@@ -1134,7 +1149,7 @@ automation:
         {{ 
           states('input_boolean.ee_solar_is_tou_workday') == 'on' 
             and
-          states('input_number.ee_observed_solar_production') | int(0) >= 925000
+          states('input_number.ee_observed_solar_production') | int(0) > states('input_number.ee_solar_zn_crossover') | int(0)
             and
           states('input_number.ee_solar_generation_forecast') | int(0) > 
               states('sensor.ee_envoy_battery_charge_needed') | int(0) 
@@ -1174,7 +1189,7 @@ automation:
         {{ 
           states('input_boolean.ee_solar_is_tou_workday') == 'off' 
             and
-          states('input_number.ee_observed_solar_production') | int(0) >= 925000
+          states('input_number.ee_observed_solar_production') | int(0) > states('input_number.ee_solar_zn_crossover') | int(0)
             and
           states('input_number.ee_solar_generation_forecast') | int(0) > 
               states('sensor.ee_envoy_battery_charge_needed') | int(0) 

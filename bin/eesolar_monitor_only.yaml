@@ -142,8 +142,13 @@ input_number:
     step: 1.0
     unit_of_measurement: "Wh"
     name: "Home Load Whrs Today"
-
-   
+  ee_solar_zn_crossover:
+    min: 0
+    max: 10000000000.0
+    mode: box
+    step: 100000
+    unit_of_measurement: "Wh"
+    name: "ZN Crossover"
     
 input_text:
   ee_observed_tariff:
@@ -469,7 +474,7 @@ automation:
     to:
       - "on"
     for:
-      milliseconds: 200
+      milliseconds: 250
   - trigger: state
     alias: Booted
     id: Booted
@@ -595,7 +600,7 @@ automation:
     to:
       - "on"
     for:
-      milliseconds: 200
+      milliseconds: 250
   - trigger: state
     alias: Booted
     id: Booted
