@@ -147,7 +147,7 @@ input_number:
     max: 10000000000.0
     mode: box
     step: 100000
-    unit_of_measurement: "Wh"
+    unit_of_measurement: "mW"
     name: "ZN Crossover"
     
 input_text:
@@ -237,6 +237,7 @@ rest_command:
   envoy_enable_livedata_stream:
 #   url: "https://envoy.local/ivp/livedata/stream"
     url: "https://192.168.68.102/ivp/livedata/stream"
+#   url: {{ "https://" + !secrets evip + "/ivp/livedata/stream" }}
     method: post 
     verify_ssl: false
     timeout: 400
@@ -1174,7 +1175,8 @@ automation:
             and
           8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
-          states('input_text.ee_solar_envoy_tariff_name') == ZN80_M_8 
+          (states('input_text.ee_solar_envoy_tariff_name') == ZN80_M_8 or
+           states('input_text.ee_solar_envoy_tariff_name') == ZN96_M_5) 
             and
           states('input_number.ee_observed_charge') | int(0) <= 97 
             and
@@ -1214,7 +1216,8 @@ automation:
             and
           8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
-          states('input_text.ee_solar_envoy_tariff_name') == ZN96_M_5 
+          (states('input_text.ee_solar_envoy_tariff_name') == ZN96_M_5 or
+           states('input_text.ee_solar_envoy_tariff_name') == ZN80_M_8)
             and
           states('input_number.ee_observed_charge') | int(0) <= 97 
             and
@@ -1309,8 +1312,8 @@ automation:
                   time: "{{ timestamp }}"
                   name: CPCP
                   peak_rule: ZN
-                  peak_start: 660
-                  peak_end: 665
+                  peak_start: 450
+                  peak_end: 930
                   reserve: 96
                 doit: true
         - conditions:

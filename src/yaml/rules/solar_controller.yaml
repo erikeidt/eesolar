@@ -39,7 +39,8 @@
             and
           8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
-          states('input_text.ee_solar_envoy_tariff_name') == ZN80_M_8 
+          (states('input_text.ee_solar_envoy_tariff_name') == ZN80_M_8 or
+           states('input_text.ee_solar_envoy_tariff_name') == ZN96_M_5) 
             and
           states('input_number.ee_observed_charge') | int(0) <= 97 
             and
@@ -79,7 +80,8 @@
             and
           8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
-          states('input_text.ee_solar_envoy_tariff_name') == ZN96_M_5 
+          (states('input_text.ee_solar_envoy_tariff_name') == ZN96_M_5 or
+           states('input_text.ee_solar_envoy_tariff_name') == ZN80_M_8)
             and
           states('input_number.ee_observed_charge') | int(0) <= 97 
             and
@@ -174,8 +176,8 @@
                   time: "{{ timestamp }}"
                   name: CPCP
                   peak_rule: ZN
-                  peak_start: 660
-                  peak_end: 665
+                  peak_start: 450
+                  peak_end: 930
                   reserve: 96
                 doit: true
         - conditions:

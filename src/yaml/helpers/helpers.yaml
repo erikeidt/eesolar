@@ -147,7 +147,7 @@ input_number:
     max: 10000000000.0
     mode: box
     step: 100000
-    unit_of_measurement: "Wh"
+    unit_of_measurement: "mW"
     name: "ZN Crossover"
     
 input_text:

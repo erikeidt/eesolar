@@ -35,6 +35,7 @@ rest_command:
   envoy_enable_livedata_stream:
 #   url: "https://envoy.local/ivp/livedata/stream"
     url: "https://192.168.68.102/ivp/livedata/stream"
+#   url: {{ "https://" + !secrets evip + "/ivp/livedata/stream" }}
     method: post 
     verify_ssl: false
     timeout: 400

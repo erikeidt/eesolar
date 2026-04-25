@@ -147,7 +147,7 @@ input_number:
     max: 10000000000.0
     mode: box
     step: 100000
-    unit_of_measurement: "Wh"
+    unit_of_measurement: "mW"
     name: "ZN Crossover"
     
 input_text:
@@ -237,6 +237,7 @@ rest_command:
   envoy_enable_livedata_stream:
 #   url: "https://envoy.local/ivp/livedata/stream"
     url: "https://192.168.68.102/ivp/livedata/stream"
+#   url: {{ "https://" + !secrets evip + "/ivp/livedata/stream" }}
     method: post 
     verify_ssl: false
     timeout: 400
