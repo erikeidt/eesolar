@@ -24,6 +24,14 @@ input_number:
     unit_of_measurement: "mW"
     name: "Battery Flow"
     initial: 0
+  ee_observed_batteries_flow_sum:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "Batteries Flow Sum"
+    initial: 0
   ee_observed_solar_production:
     min: -10000000000.0
     max: 10000000000.0
@@ -336,6 +344,7 @@ template:
         nc: "{{ states('input_number.ee_observed_net_consumption') | float(0) }}"
         bl: "{{ states('input_number.ee_observed_envoy_read_battery_latency') }}"
         bf: "{{ states('input_number.ee_observed_battery_flow') | float(0) }}"
+        bb: "{{ states('input_number.ee_observed_batteries_flow_sum') | float(0) }}"
         bc: "{{ states('input_number.ee_observed_charge') | float(0) | round(2) }}"
         ba: "{{ states('input_text.ee_observed_batteries') }}"
         sc: "{{ states('input_text.ee_observed_tariff_schedule') }}"
@@ -552,6 +561,12 @@ automation:
             soc: '{{ pwr_soc.soc }}'
             socpct: '{{ soc / pwr_soc.num }}'
             batts: '{{ pwr_soc.batts }}'
+        - action: input_number.set_value
+          metadata: {}
+          data:
+            value: '{{ flow }}'
+          target:
+            entity_id: input_number.ee_observed_batteries_flow_sum
         - action: input_number.set_value
           metadata: {}
           data:

@@ -24,6 +24,14 @@ input_number:
     unit_of_measurement: "mW"
     name: "Battery Flow"
     initial: 0
+  ee_observed_batteries_flow_sum:
+    min: -10000000000.0
+    max: 10000000000.0
+    mode: "box"
+    step: 1.0
+    unit_of_measurement: "mW"
+    name: "Batteries Flow Sum"
+    initial: 0
   ee_observed_solar_production:
     min: -10000000000.0
     max: 10000000000.0

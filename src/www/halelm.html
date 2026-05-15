@@ -47,7 +47,7 @@
         var v_batt;
         var m_solar_pct, m_solar_val;
 
-        var v_soch;
+        var v_soch, v_inv;
         var txt;
 
         var g_h, g_b;
@@ -128,6 +128,7 @@
                 v_home = document.getElementById("v.home");
                 v_batt = document.getElementById("v.batt");
 
+                v_inv = document.getElementById("v.inv");
                 v_soch = document.getElementById("v.soc");
 
                 v_g_h = document.getElementById("v.g.h");
@@ -286,11 +287,12 @@
                     setSvgSignedNumericField(gstr, v_grid, netConsumption);
 
                     chargeDischarge = - parseFloat(dataObj.bf);
+                    actualBatt = - parseFloat(dataObj.bb);
                     stateOfCharge = parseFloat(dataObj.bc);
 
-                    var bchrg = chargeDischarge < 0 ? -chargeDischarge : chargeDischarge;
+                    var bchrg = actualBatt < 0 ? -actualBatt : actualBatt;
                     var bstr = (bchrg / 1000).toFixed(0);
-                    setSvgSignedNumericField(bstr, v_batt, chargeDischarge);
+                    setSvgSignedNumericField(bstr, v_batt, actualBatt);
 
                     // Batteries Detail
                     var batteries = dataObj.ba;
@@ -309,6 +311,16 @@
                             var flow = Math.trunc(batteries[i] / 1000);
                             stateCol.innerHTML = padNbsp((flow > 0 ? "+" : "") + flow.toFixed(0), 5);
                         }
+                        var inverters = Math.trunc((actualBatt - chargeDischarge) / 1000);
+                        /*
+                        var r3 = batteryChartElem.insertRow();
+                        var socCol3 = r3.insertCell();
+                        socCol3.innerHTML = padNbsp("Inv", 4);
+                        var stateCol3 = r3.insertCell();
+                        stateCol3.innerHTML = padNbsp(inverters.toFixed(0), 5);
+                        */
+                        if (inverters < 0) inverters = 0;
+                        v_inv.innerHTML = padNbsp(inverters.toFixed(0), 3);
                     }
 
                     if (stateOfCharge == 100) {
@@ -751,6 +763,7 @@
             <text           x="112" y="338" stroke="#2B506E" font-size="x-small">Wh</text>
             <text id="b1.wh" x="60" y="338" stroke="#2B506E" font-size="small">00,000</text>
 
+            <text id="v.inv" x="224" y="288" stroke="#2B506E" font-size="small">000</text>
             <text id="v.soc" x="224" y="338" stroke="#2B506E">100%</text>
 
             <!-- consumers & producers-->

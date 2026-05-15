@@ -12,6 +12,7 @@ template:
         nc: "{{ states('input_number.ee_observed_net_consumption') | float(0) }}"
         bl: "{{ states('input_number.ee_observed_envoy_read_battery_latency') }}"
         bf: "{{ states('input_number.ee_observed_battery_flow') | float(0) }}"
+        bb: "{{ states('input_number.ee_observed_batteries_flow_sum') | float(0) }}"
         bc: "{{ states('input_number.ee_observed_charge') | float(0) | round(2) }}"
         ba: "{{ states('input_text.ee_observed_batteries') }}"
         sc: "{{ states('input_text.ee_observed_tariff_schedule') }}"

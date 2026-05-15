@@ -89,6 +89,12 @@
         - action: input_number.set_value
           metadata: {}
           data:
+            value: '{{ flow }}'
+          target:
+            entity_id: input_number.ee_observed_batteries_flow_sum
+        - action: input_number.set_value
+          metadata: {}
+          data:
             value: '{{ socpct | round(2) }}'
           target:
             entity_id: input_number.ee_observed_charge
