@@ -16,6 +16,7 @@ rest_command:
     timeout: 400 
     headers:
       Authorization: !secret enjt
+# very slow response times; don't recommend
   read_envoy_basic:
 #   url: "https://envoy.local/production.json"
     url: "https://192.168.68.102/production.json"
@@ -24,6 +25,7 @@ rest_command:
     timeout: 400
     headers:
       Authorization: !secret enjt
+# primary battery information; provides per-battery flow sans inverters
   read_envoy_batteries:
 #   url: "https://envoy.local/ivp/ensemble/power"
     url: "https://192.168.68.102/ivp/ensemble/power"
@@ -42,6 +44,7 @@ rest_command:
     headers:
       Authorization: !secret enjt
     payload: '{"enable":1}'
+# provides pv, grid, home, battery flows; battery flow here now includes inverters
   envoy_disable_livedata_stream:
 #   url: "https://envoy.local/ivp/livedata/stream"
     url: "https://192.168.68.102/ivp/livedata/stream"
