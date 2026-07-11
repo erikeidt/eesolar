@@ -15,7 +15,7 @@ script:
             {{ 
               (
                 todo_items['todo.gallipot']['items']
-                | selectattr('summary', 'search', 'Cloud Cover')
+                | selectattr('summary', 'eq', 'Cloud Cover')
                 | list
               )
               [0].description

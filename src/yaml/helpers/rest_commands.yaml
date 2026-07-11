@@ -1,7 +1,7 @@
 rest_command:
   read_envoy_xml_info:
 #   url: "https://envoy.local/info.xml"
-    url: "https://192.168.68.102/info.xml"
+    url: "https://192.168.68.154/info.xml"
     method: get
     verify_ssl: false
     timeout: 400 
@@ -10,7 +10,7 @@ rest_command:
       Accept: "application/xml"
   read_envoy_relay:
 #   url: "https://envoy.local/ivp/ensemble/relay"
-    url: "https://192.168.68.102/ivp/ensemble/relay"
+    url: "https://192.168.68.154/ivp/ensemble/relay"
     method: get
     verify_ssl: false
     timeout: 400 
@@ -19,7 +19,7 @@ rest_command:
 # very slow response times; don't recommend
   read_envoy_basic:
 #   url: "https://envoy.local/production.json"
-    url: "https://192.168.68.102/production.json"
+    url: "https://192.168.68.154/production.json"
     method: get
     verify_ssl: false
     timeout: 400
@@ -28,7 +28,7 @@ rest_command:
 # primary battery information; provides per-battery flow sans inverters
   read_envoy_batteries:
 #   url: "https://envoy.local/ivp/ensemble/power"
-    url: "https://192.168.68.102/ivp/ensemble/power"
+    url: "https://192.168.68.154/ivp/ensemble/power"
     method: get
     verify_ssl: false
     timeout: 400
@@ -36,7 +36,7 @@ rest_command:
       Authorization: !secret enjt
   envoy_enable_livedata_stream:
 #   url: "https://envoy.local/ivp/livedata/stream"
-    url: "https://192.168.68.102/ivp/livedata/stream"
+    url: "https://192.168.68.154/ivp/livedata/stream"
 #   url: {{ "https://" + !secrets evip + "/ivp/livedata/stream" }}
     method: post 
     verify_ssl: false
@@ -47,7 +47,7 @@ rest_command:
 # provides pv, grid, home, battery flows; battery flow here now includes inverters
   envoy_disable_livedata_stream:
 #   url: "https://envoy.local/ivp/livedata/stream"
-    url: "https://192.168.68.102/ivp/livedata/stream"
+    url: "https://192.168.68.154/ivp/livedata/stream"
     method: post 
     verify_ssl: false
     timeout: 400
@@ -56,7 +56,7 @@ rest_command:
     payload: '{"enable":0}'
   read_envoy_livedata_status:
 #   url: "https://envoy.local/ivp/livedata/status"
-    url: "https://192.168.68.102/ivp/livedata/status"
+    url: "https://192.168.68.154/ivp/livedata/status"
     method: get
     verify_ssl: false
     timeout: 400
@@ -64,7 +64,7 @@ rest_command:
       Authorization: !secret enjt
   read_envoy_stream:
 #   url: "https://envoy.local/stream/meter"
-    url: "https://192.168.68.102/stream/meter"
+    url: "https://192.168.68.154/stream/meter"
     method: get
     verify_ssl: false
     timeout: 6 
@@ -72,7 +72,7 @@ rest_command:
       Authorization: !secret enjt
   read_envoy_tariff:
 #   url: "https://envoy.local/admin/lib/tariff.json"
-    url: "https://192.168.68.102/admin/lib/tariff.json"
+    url: "https://192.168.68.154/admin/lib/tariff.json"
     method: get
     verify_ssl: false
     timeout: 400 
@@ -80,7 +80,7 @@ rest_command:
       Authorization: !secret enjt
   envoy_soft_reboot:
 #   url: "https://envoy.local/api/v1/reboot"
-    url: "https://192.168.68.102/api/v1/reboot"
+    url: "https://192.168.68.154/api/v1/reboot"
     method: post
     verify_ssl: false
     timeout: 400 
@@ -88,7 +88,7 @@ rest_command:
       Authorization: !secret enjt
   send_envoy_param_tariff:
 #   url: "https://envoy.local/admin/lib/tariff.json"
-    url: "https://192.168.68.102/admin/lib/tariff.json"
+    url: "https://192.168.68.154/admin/lib/tariff.json"
 #   url: "https://echo.free.beeceptor.com/"
     method: post
     verify_ssl: false

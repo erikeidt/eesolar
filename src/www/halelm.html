@@ -291,8 +291,6 @@
                     stateOfCharge = parseFloat(dataObj.bc);
 
                     var bchrg = actualBatt < 0 ? -actualBatt : actualBatt;
-                    var bstr = (bchrg / 1000).toFixed(0);
-                    setSvgSignedNumericField(bstr, v_batt, actualBatt);
 
                     // Batteries Detail
                     var batteries = dataObj.ba;
@@ -311,17 +309,24 @@
                             var flow = Math.trunc(batteries[i] / 1000);
                             stateCol.innerHTML = padNbsp((flow > 0 ? "+" : "") + flow.toFixed(0), 5);
                         }
-                        var inverters = Math.trunc((actualBatt - chargeDischarge) / 1000);
+                        var inverters = actualBatt - chargeDischarge;
                         /*
+                        var inverters = Math.trunc((actualBatt - chargeDischarge) / 1000);
                         var r3 = batteryChartElem.insertRow();
                         var socCol3 = r3.insertCell();
                         socCol3.innerHTML = padNbsp("Inv", 4);
                         var stateCol3 = r3.insertCell();
                         stateCol3.innerHTML = padNbsp(inverters.toFixed(0), 5);
                         */
-                        if (inverters < 0) inverters = 0;
-                        v_inv.innerHTML = padNbsp(inverters.toFixed(0), 3);
+                        if (inverters < 0) { 
+                            inverters = -inverters;
+                            bchrg += inverters + inverters;
+                        }
+                        v_inv.innerHTML = padNbsp((inverters/1000).toFixed(0), 3);
                     }
+
+                    var bstr = (bchrg / 1000).toFixed(0);
+                    setSvgSignedNumericField(bstr, v_batt, actualBatt);
 
                     if (stateOfCharge == 100) {
                         v_soch.innerHTML = "100%";

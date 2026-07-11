@@ -211,7 +211,7 @@ input_datetime:
 rest_command:
   read_envoy_xml_info:
 #   url: "https://envoy.local/info.xml"
-    url: "https://192.168.68.102/info.xml"
+    url: "https://192.168.68.154/info.xml"
     method: get
     verify_ssl: false
     timeout: 400 
@@ -220,23 +220,25 @@ rest_command:
       Accept: "application/xml"
   read_envoy_relay:
 #   url: "https://envoy.local/ivp/ensemble/relay"
-    url: "https://192.168.68.102/ivp/ensemble/relay"
+    url: "https://192.168.68.154/ivp/ensemble/relay"
     method: get
     verify_ssl: false
     timeout: 400 
     headers:
       Authorization: !secret enjt
+# very slow response times; don't recommend
   read_envoy_basic:
 #   url: "https://envoy.local/production.json"
-    url: "https://192.168.68.102/production.json"
+    url: "https://192.168.68.154/production.json"
     method: get
     verify_ssl: false
     timeout: 400
     headers:
       Authorization: !secret enjt
+# primary battery information; provides per-battery flow sans inverters
   read_envoy_batteries:
 #   url: "https://envoy.local/ivp/ensemble/power"
-    url: "https://192.168.68.102/ivp/ensemble/power"
+    url: "https://192.168.68.154/ivp/ensemble/power"
     method: get
     verify_ssl: false
     timeout: 400
@@ -244,7 +246,7 @@ rest_command:
       Authorization: !secret enjt
   envoy_enable_livedata_stream:
 #   url: "https://envoy.local/ivp/livedata/stream"
-    url: "https://192.168.68.102/ivp/livedata/stream"
+    url: "https://192.168.68.154/ivp/livedata/stream"
 #   url: {{ "https://" + !secrets evip + "/ivp/livedata/stream" }}
     method: post 
     verify_ssl: false
@@ -252,9 +254,10 @@ rest_command:
     headers:
       Authorization: !secret enjt
     payload: '{"enable":1}'
+# provides pv, grid, home, battery flows; battery flow here now includes inverters
   envoy_disable_livedata_stream:
 #   url: "https://envoy.local/ivp/livedata/stream"
-    url: "https://192.168.68.102/ivp/livedata/stream"
+    url: "https://192.168.68.154/ivp/livedata/stream"
     method: post 
     verify_ssl: false
     timeout: 400
@@ -263,7 +266,7 @@ rest_command:
     payload: '{"enable":0}'
   read_envoy_livedata_status:
 #   url: "https://envoy.local/ivp/livedata/status"
-    url: "https://192.168.68.102/ivp/livedata/status"
+    url: "https://192.168.68.154/ivp/livedata/status"
     method: get
     verify_ssl: false
     timeout: 400
@@ -271,7 +274,7 @@ rest_command:
       Authorization: !secret enjt
   read_envoy_stream:
 #   url: "https://envoy.local/stream/meter"
-    url: "https://192.168.68.102/stream/meter"
+    url: "https://192.168.68.154/stream/meter"
     method: get
     verify_ssl: false
     timeout: 6 
@@ -279,7 +282,7 @@ rest_command:
       Authorization: !secret enjt
   read_envoy_tariff:
 #   url: "https://envoy.local/admin/lib/tariff.json"
-    url: "https://192.168.68.102/admin/lib/tariff.json"
+    url: "https://192.168.68.154/admin/lib/tariff.json"
     method: get
     verify_ssl: false
     timeout: 400 
@@ -287,7 +290,7 @@ rest_command:
       Authorization: !secret enjt
   envoy_soft_reboot:
 #   url: "https://envoy.local/api/v1/reboot"
-    url: "https://192.168.68.102/api/v1/reboot"
+    url: "https://192.168.68.154/api/v1/reboot"
     method: post
     verify_ssl: false
     timeout: 400 
@@ -295,7 +298,7 @@ rest_command:
       Authorization: !secret enjt
   send_envoy_param_tariff:
 #   url: "https://envoy.local/admin/lib/tariff.json"
-    url: "https://192.168.68.102/admin/lib/tariff.json"
+    url: "https://192.168.68.154/admin/lib/tariff.json"
 #   url: "https://echo.free.beeceptor.com/"
     method: post
     verify_ssl: false
@@ -1174,6 +1177,8 @@ automation:
             and
           states('input_text.ee_solar_envoy_tariff_name') != ZN80_M_8 
             and
+          8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
+            and
           states('input_boolean.ee_utilities_booted') == 'on'
         }}
       for:
@@ -1214,6 +1219,8 @@ automation:
           states('input_number.ee_solar_state_controller_counter') | int(0) == 0 
             and
           states('input_text.ee_solar_envoy_tariff_name') != ZN96_M_5 
+            and
+          8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
           states('input_boolean.ee_utilities_booted') == 'on'
         }}
@@ -1274,10 +1281,10 @@ automation:
                     {{ 
                       (time_now | as_datetime).hour * 60 + (time_now | as_datetime).minute
                     }}
-                  peak_end: 961
+                  peak_end: "{{ 995 if summer else 961 }}"
                   second_start: 1018
                   second_end: 1201
-                  reserve: 78
+                  reserve: "{{ 74 if summer else 78 }}"
                 doit: true
             - action: input_number.increment
               metadata: {}
@@ -1310,8 +1317,8 @@ automation:
                     {{ 
                       (time_now | as_datetime).hour * 60 + (time_now | as_datetime).minute
                     }}
-                  peak_end: 930
-                  reserve: 82
+                  peak_end: "{{ 960 if summer else 930 }}"
+                  reserve: "{{ 75 if summer else 82 }}"
                 doit: true
             - action: input_number.increment
               metadata: {}

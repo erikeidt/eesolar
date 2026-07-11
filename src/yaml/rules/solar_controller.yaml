@@ -23,6 +23,8 @@
             and
           states('input_text.ee_solar_envoy_tariff_name') != ZN80_M_8 
             and
+          8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
+            and
           states('input_boolean.ee_utilities_booted') == 'on'
         }}
       for:
@@ -63,6 +65,8 @@
           states('input_number.ee_solar_state_controller_counter') | int(0) == 0 
             and
           states('input_text.ee_solar_envoy_tariff_name') != ZN96_M_5 
+            and
+          8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
           states('input_boolean.ee_utilities_booted') == 'on'
         }}
@@ -123,10 +127,10 @@
                     {{ 
                       (time_now | as_datetime).hour * 60 + (time_now | as_datetime).minute
                     }}
-                  peak_end: 961
+                  peak_end: "{{ 995 if summer else 961 }}"
                   second_start: 1018
                   second_end: 1201
-                  reserve: 78
+                  reserve: "{{ 74 if summer else 78 }}"
                 doit: true
             - action: input_number.increment
               metadata: {}
@@ -159,8 +163,8 @@
                     {{ 
                       (time_now | as_datetime).hour * 60 + (time_now | as_datetime).minute
                     }}
-                  peak_end: 930
-                  reserve: 82
+                  peak_end: "{{ 960 if summer else 930 }}"
+                  reserve: "{{ 75 if summer else 82 }}"
                 doit: true
             - action: input_number.increment
               metadata: {}
