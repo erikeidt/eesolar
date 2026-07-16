@@ -76,7 +76,6 @@
         var altTariffTimeElem;
         var instalTimeElem;
         var batteryChartElem;
-        var modeKeyChartElem;
 
         var gridStatusElem;
         var envoyTimeElem;
@@ -90,6 +89,11 @@
         var afterHoursElem;
         var peakRuleElem;
 
+        var cloudsourcedrow;
+        var moderow;
+        var reserverow;
+        var shutoffrow;
+
         function initVars() {
             if (v_solar == null || v_solar == undefined) {
                 var shb = document.getElementById("showhidebearer");
@@ -97,7 +101,11 @@
 
                 tariffChartElem = document.getElementById("tarifftab");
                 batteryChartElem = document.getElementById("batterytab");
-                modeKeyChartElem = document.getElementById("modekeys");
+
+                cloudsourcedrow = document.getElementById("cloudsourcedrow");
+                moderow = document.getElementById("moderow");
+                reserverow = document.getElementById("reserverow");
+                shutoffrow = document.getElementById("shutoffrow");
 
                 txt = document.getElementById("txt");
                 //txt.innerHTML += bearer;
@@ -345,6 +353,25 @@
 
                     // Tariff
                     var schedule = dataObj.sc;
+                    var setting = schedule.schedule;
+                    if (setting.length < 4) {
+                        if (cloudsourcedrow.style.display != "") {
+                            moderow.style.display = "none";
+                            reserverow.style.display = "none";
+                            shutoffrow.style.display = "none";
+                            tariffChartElem.style.display = "none";
+                            cloudsourcedrow.style.display = "";
+                        }
+                        computeHome();
+                    }
+                    else {
+                        if (cloudsourcedrow.style.display == "") {
+                            cloudsourcedrow.style.display = "none";
+                            moderow.style.display = "";
+                            reserverow.style.display = "";
+                            shutoffrow.style.display = "";
+                            tariffChartElem.style.display = "";
+                        } 
                     var mode = schedule.mode;
                     if (mode == "economy") mode = "&nbsp;Savings&nbsp;";
                     else if (mode == "self-consumption") mode = "&nbsp;Self Consumption&nbsp;";
@@ -359,7 +386,6 @@
                     // Envoy Generated Schedule
                     var nowItem = new Date();
 
-                    var setting = schedule.schedule;
                     var nowMinutes = nowItem.getMinutes();
                     var nowTimeMinutes = nowItem.getHours() * 60 + nowMinutes;
                     var nowSet = "";
@@ -415,6 +441,7 @@
                     }
 
                     computeHome();
+                }
                 }
                 catch (err) { }
 
@@ -807,14 +834,15 @@
 
             <div style="font-size: xx-small">&nbsp;</div>
 
-            <table border="1" cellpadding="2"
+            <table border="1" cellpadding="2" 
                    style="padding-left: 20px; border-collapse: collapse; text-align: center; font-size: small;
                     font-family: Courier New, Courier, monospace; font-weight: bold;
                     padding-left: 5px; padding-right: 5px">
                 <tr><th colspan="2">&nbsp;Tariff&nbsp;</th></tr>
-                <tr><th style="color: #998200">&nbsp;Mode&nbsp;</th><td id="mode"></td></tr>
-                <tr><th style="color: #2B506E">&nbsp;Reserve&nbsp;</th><td id="reserve"></td></tr>
-                <tr><th style="color: #8C0D26">&nbsp;Shutoff&nbsp;</th><td id="shutoff"></td></tr>
+                <tr id=cloudsourcedrow style="display: none"><th colspan="2">&nbsp;Cloud-Sourced&nbsp;</th></tr>
+                <tr id=moderow><th style="color: #998200">&nbsp;Mode&nbsp;</th><td id="mode"></td></tr>
+                <tr id=reserverow><th style="color: #2B506E">&nbsp;Reserve&nbsp;</th><td id="reserve"></td></tr>
+                <tr id=shutoffrow><th style="color: #8C0D26">&nbsp;Shutoff&nbsp;</th><td id="shutoff"></td></tr>
 
                 <!--<tr><th style="color: #8C0D26" rowspan="5">Charge</th><th>By Import</th><td id="gridcharge">false</td></tr>
                 <tr><th style="color: #8C0D26">Allow Export</th><td id="griddischarge">false</td></tr>

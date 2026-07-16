@@ -6,6 +6,7 @@
     ZN80_5p_8: ZN80/5p-8
     ZN96_M_5: ZN96/M-4p
     DL65_5p_8: DL65/5p-8
+    CloudSourced: ??
   triggers:
     - alias: Go ZN Workday
       trigger: template
@@ -21,7 +22,11 @@
             and
           states('input_number.ee_solar_state_controller_counter') | int(0) == 0 
             and
-          states('input_text.ee_solar_envoy_tariff_name') != ZN80_M_8 
+          (
+            states('input_text.ee_solar_envoy_tariff_name') != ZN80_M_8 
+              or
+            states('input_text.ee_observed_tariff') == CloudSourced 
+          )
             and
           8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
@@ -64,7 +69,11 @@
             and
           states('input_number.ee_solar_state_controller_counter') | int(0) == 0 
             and
-          states('input_text.ee_solar_envoy_tariff_name') != ZN96_M_5 
+          (
+            states('input_text.ee_solar_envoy_tariff_name') != ZN96_M_5 
+              or
+            states('input_text.ee_observed_tariff') == CloudSourced 
+          )
             and
           8 <= states('input_number.ee_hour_of_day') | int(0) <= 15
             and
