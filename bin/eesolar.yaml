@@ -1290,7 +1290,7 @@ automation:
                     {{ 
                       (time_now | as_datetime).hour * 60 + (time_now | as_datetime).minute
                     }}
-                  peak_end: "{{ 995 if summer else 961 }}"
+                  peak_end: "{{ 989 if summer else 961 }}"
                   second_start: 1018
                   second_end: 1201
                   reserve: "{{ 74 if summer else 78 }}"

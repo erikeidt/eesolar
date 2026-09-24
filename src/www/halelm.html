@@ -354,7 +354,7 @@
                     // Tariff
                     var schedule = dataObj.sc;
                     var setting = schedule.schedule;
-                    if (setting.length < 4) {
+                    if (setting === "\"\"") {
                         if (cloudsourcedrow.style.display != "") {
                             moderow.style.display = "none";
                             reserverow.style.display = "none";
