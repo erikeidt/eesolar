@@ -81,3 +81,14 @@ Two secret tokens are needed:
 
 (Note that the dashboard and calendar are best imported into a new empty dashboard or a new empty calendar (respectively) rather than copied as files,
 since that doesn't seem to create the proper entities.)
+
+---
+
+Here's my local live monitor; it runs as window in browser that talks to my HA, as the HA is collection this information anyway.
+
+<img src="https://github.com/erikeidt/eesolar/blob/main/Typical.png"></img>
+
+This one shows what some of the fields are:
+
+<img src="https://github.com/erikeidt/eesolar/blob/main/Explained.jpg"></img>
+
