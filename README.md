@@ -84,7 +84,7 @@ since that doesn't seem to create the proper entities.)
 
 ---
 
-Here's my local live monitor; it runs as window in browser that talks to my HA, as the HA is collection this information anyway.
+Here's my local live monitor; it runs as window in browser that talks to my HA, as the HA is collecting this information anyway.
 
 <img src="https://github.com/erikeidt/eesolar/blob/main/Typical.png"></img>
 
